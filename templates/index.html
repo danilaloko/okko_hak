@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Movie Swiper - Найдите свой идеальный фильм</title>
+    <title>Okko Discovery - Персонализированные рекомендации</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
@@ -12,64 +12,142 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 </head>
 <body>
+    <!-- Главный контейнер -->
     <div class="app-container">
-        <!-- Заголовок -->
-        <header class="header">
-            <h1 class="app-title">
-                <i class="fas fa-film"></i>
-                Movie Swiper
-            </h1>
-            <p class="app-subtitle">Свайпайте фильмы как в Tinder</p>
-        </header>
-
-        <!-- Основная область с карточками -->
-        <main class="main-content">
-            <div class="cards-container" id="cardsContainer">
-                <!-- Карточки фильмов будут добавлены динамически -->
+        <!-- Навигационная панель -->
+        <nav class="nav-bar">
+            <div class="nav-brand">
+                <div class="okko-logo">
+                    <span class="logo-text">ökko</span>
+                </div>
             </div>
+            <div class="nav-actions">
+                <button class="nav-btn search-btn">
+                    <i class="fas fa-search"></i>
+                </button>
+                <button class="nav-btn profile-btn">
+                    <i class="fas fa-user"></i>
+                </button>
+            </div>
+        </nav>
 
-            <!-- Сообщение когда фильмы закончились -->
-            <div class="no-more-movies" id="noMoreMovies" style="display: none;">
-                <div class="no-movies-content">
-                    <h2>Отлично!</h2>
-                    <p>Вы просмотрели все фильмы</p>
-                    <button class="reset-btn" onclick="resetMovies()">
-                        <i class="fas fa-refresh"></i>
+        <!-- Основной контент -->
+        <main class="main-content">
+            <!-- Приветственная секция -->
+            <section class="welcome-section">
+                <div class="welcome-content">
+                    <h1 class="welcome-title">Откройте для себя</h1>
+                    <p class="welcome-subtitle">Персонализированные рекомендации на основе ваших предпочтений</p>
+                </div>
+            </section>
+
+            <!-- Категории контента -->
+            <section class="categories-section">
+                <div class="section-header">
+                    <h2 class="section-title">Категории</h2>
+                </div>
+                <div class="categories-grid" id="categoriesGrid">
+                    <!-- Категории будут добавлены динамически -->
+                </div>
+            </section>
+
+            <!-- Рекомендации -->
+            <section class="recommendations-section">
+                <div class="section-header">
+                    <h2 class="section-title">Рекомендуем вам</h2>
+                    <button class="refresh-btn" id="refreshBtn">
+                        <i class="fas fa-sync-alt"></i>
+                    </button>
+                </div>
+                <div class="content-carousel" id="contentCarousel">
+                    <!-- Контент будет добавлен динамически -->
+                </div>
+            </section>
+
+            <!-- Интерактивные карточки -->
+            <section class="interactive-section">
+                <div class="section-header">
+                    <h2 class="section-title">Интерактивный выбор</h2>
+                    <p class="section-subtitle">Свайпайте, чтобы мы лучше поняли ваши предпочтения</p>
+                </div>
+                <div class="cards-container" id="cardsContainer">
+                    <!-- Интерактивные карточки -->
+                </div>
+                <div class="interaction-controls">
+                    <button class="control-btn dislike-btn" id="dislikeBtn">
+                        <i class="fas fa-times"></i>
+                    </button>
+                    <button class="control-btn like-btn" id="likeBtn">
+                        <i class="fas fa-heart"></i>
+                    </button>
+                </div>
+            </section>
+
+            <!-- Статистика и прогресс -->
+            <section class="stats-section">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-heart"></i>
+                        </div>
+                        <div class="stat-content">
+                            <span class="stat-number" id="likedCount">0</span>
+                            <span class="stat-label">Понравилось</span>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-times"></i>
+                        </div>
+                        <div class="stat-content">
+                            <span class="stat-number" id="dislikedCount">0</span>
+                            <span class="stat-label">Не понравилось</span>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-chart-line"></i>
+                        </div>
+                        <div class="stat-content">
+                            <span class="stat-number" id="accuracyScore">0%</span>
+                            <span class="stat-label">Точность</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- Завершающий экран -->
+        <div class="completion-screen" id="completionScreen" style="display: none;">
+            <div class="completion-content">
+                <div class="completion-icon">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <h2 class="completion-title">Анализ завершен!</h2>
+                <p class="completion-text">Мы изучили ваши предпочтения и готовы предложить персонализированный контент</p>
+                <div class="completion-actions">
+                    <button class="action-btn primary-btn" id="viewRecommendations">
+                        <i class="fas fa-star"></i>
+                        Посмотреть рекомендации
+                    </button>
+                    <button class="action-btn secondary-btn" id="restartAnalysis">
+                        <i class="fas fa-redo"></i>
                         Начать заново
                     </button>
                 </div>
-            </div>
-        </main>
-
-        <!-- Кнопки действий -->
-        <div class="action-buttons" id="actionButtons">
-            <button class="action-btn dislike-btn" onclick="swipeMovie('dislike')">
-                <i class="fas fa-times"></i>
-            </button>
-            <button class="action-btn like-btn" onclick="swipeMovie('like')">
-                <i class="fas fa-heart"></i>
-            </button>
-        </div>
-
-        <!-- Статистика -->
-        <div class="stats" id="stats">
-            <div class="stat-item">
-                <span class="stat-number" id="likedCount">0</span>
-                <span class="stat-label">Понравилось</span>
-            </div>
-            <div class="stat-item">
-                <span class="stat-number" id="dislikedCount">0</span>
-                <span class="stat-label">Не понравилось</span>
             </div>
         </div>
     </div>
 
     <!-- Загрузочный экран -->
     <div class="loading-screen" id="loadingScreen">
-        <div class="loading-spinner">
-            <i class="fas fa-film"></i>
+        <div class="loading-content">
+            <div class="loading-spinner">
+                <div class="spinner-ring"></div>
+            </div>
+            <h3 class="loading-title">Анализируем ваши предпочтения</h3>
+            <p class="loading-text">Это займет всего несколько секунд...</p>
         </div>
-        <p>Загружаем фильмы...</p>
     </div>
 
     <script src="{{ url_for('static', filename='js/script.js') }}"></script>

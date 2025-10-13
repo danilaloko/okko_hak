@@ -1,99 +1,265 @@
+/* ==============================
+   Okko Discovery - Новая концепция
+   Интерактивная платформа рекомендаций
+   ============================== */
+
 // Глобальные переменные
-let currentMovie = null;
+let currentContent = null;
 let likedCount = 0;
 let dislikedCount = 0;
 let isAnimating = false;
+let userPreferences = {
+    categories: [],
+    genres: [],
+    ratings: []
+};
+
+// Данные для демонстрации
+const categories = [
+    { id: 'movies', title: 'Фильмы', icon: 'fas fa-film', description: 'Художественные фильмы' },
+    { id: 'series', title: 'Сериалы', icon: 'fas fa-tv', description: 'Многосерийные проекты' },
+    { id: 'documentaries', title: 'Документальные', icon: 'fas fa-book', description: 'Познавательный контент' },
+    { id: 'cartoons', title: 'Мультфильмы', icon: 'fas fa-magic', description: 'Анимационные фильмы' }
+];
+
+const sampleContent = [
+    {
+        id: 1,
+        title: 'Интерстеллар',
+        description: 'Эпическая космическая драма о путешествии через червоточину',
+        poster: 'https://images.unsplash.com/photo-1440404653325-ab127d49abc1?w=400&h=600&fit=crop',
+        rating: 8.6,
+        year: 2014,
+        genre: 'Фантастика'
+    },
+    {
+        id: 2,
+        title: 'Дюна',
+        description: 'Эпическая фантастическая сага о пустынной планете Арракис',
+        poster: 'https://images.unsplash.com/photo-1518709268805-4e9042af2176?w=400&h=600&fit=crop',
+        rating: 8.0,
+        year: 2021,
+        genre: 'Фантастика'
+    },
+    {
+        id: 3,
+        title: 'Топ Ган: Мэверик',
+        description: 'Продолжение культового фильма о пилотах-истребителях',
+        poster: 'https://images.unsplash.com/photo-1556075798-4825dfaaf498?w=400&h=600&fit=crop',
+        rating: 8.3,
+        year: 2022,
+        genre: 'Боевик'
+    },
+    {
+        id: 4,
+        title: 'Оппенгеймер',
+        description: 'Биографическая драма о создателе атомной бомбы',
+        poster: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=600&fit=crop',
+        rating: 8.5,
+        year: 2023,
+        genre: 'Драма'
+    },
+    {
+        id: 5,
+        title: 'Барби',
+        description: 'Комедийная фантазия о кукле Барби в реальном мире',
+        poster: 'https://images.unsplash.com/photo-1594736797933-d0c4a4a0b8a0?w=400&h=600&fit=crop',
+        rating: 7.0,
+        year: 2023,
+        genre: 'Комедия'
+    }
+];
 
 // Инициализация приложения
 document.addEventListener('DOMContentLoaded', function() {
-    hideLoadingScreen();
-    loadCurrentMovie();
-    setupTouchEvents();
+    initializeApp();
 });
+
+// Основная инициализация
+async function initializeApp() {
+    hideLoadingScreen();
+    setupEventListeners();
+    loadCategories();
+    loadRecommendations();
+    loadInteractiveContent();
+    updateStats();
+}
 
 // Скрытие загрузочного экрана
 function hideLoadingScreen() {
     setTimeout(() => {
         const loadingScreen = document.getElementById('loadingScreen');
         loadingScreen.classList.add('hidden');
-    }, 1000);
+    }, 1500);
 }
 
-// Загрузка текущего фильма
-async function loadCurrentMovie() {
-    try {
-        const response = await fetch('/api/current-movie');
-        if (response.ok) {
-            currentMovie = await response.json();
-            displayMovie(currentMovie);
-        } else {
-            showNoMoreMovies();
-        }
-    } catch (error) {
-        console.error('Ошибка загрузки фильма:', error);
-        showNoMoreMovies();
+// Настройка обработчиков событий
+function setupEventListeners() {
+    // Кнопки управления
+    document.getElementById('likeBtn').addEventListener('click', () => handleInteraction('like'));
+    document.getElementById('dislikeBtn').addEventListener('click', () => handleInteraction('dislike'));
+    
+    // Кнопка обновления
+    document.getElementById('refreshBtn').addEventListener('click', loadRecommendations);
+    
+    // Кнопки завершения
+    document.getElementById('viewRecommendations').addEventListener('click', showRecommendations);
+    document.getElementById('restartAnalysis').addEventListener('click', restartAnalysis);
+    
+    // Touch события для карточек
+    setupTouchEvents();
+}
+
+// Загрузка категорий
+function loadCategories() {
+    const categoriesGrid = document.getElementById('categoriesGrid');
+    categoriesGrid.innerHTML = '';
+    
+    categories.forEach(category => {
+        const categoryCard = createCategoryCard(category);
+        categoriesGrid.appendChild(categoryCard);
+    });
+}
+
+// Создание карточки категории
+function createCategoryCard(category) {
+    const card = document.createElement('div');
+    card.className = 'category-card';
+    card.dataset.categoryId = category.id;
+    
+    card.innerHTML = `
+        <div class="category-icon">
+            <i class="${category.icon}"></i>
+        </div>
+        <div class="category-title">${category.title}</div>
+        <div class="category-description">${category.description}</div>
+    `;
+    
+    card.addEventListener('click', () => selectCategory(category.id));
+    
+    return card;
+}
+
+// Выбор категории
+function selectCategory(categoryId) {
+    const card = document.querySelector(`[data-category-id="${categoryId}"]`);
+    card.style.borderColor = 'var(--okko-accent)';
+    card.style.background = 'var(--okko-accent-light)';
+    
+    if (!userPreferences.categories.includes(categoryId)) {
+        userPreferences.categories.push(categoryId);
+    }
+    
+    // Анимация выбора
+    card.style.transform = 'scale(0.95)';
+    setTimeout(() => {
+        card.style.transform = 'scale(1)';
+    }, 150);
+}
+
+// Загрузка рекомендаций
+function loadRecommendations() {
+    const carousel = document.getElementById('contentCarousel');
+    carousel.innerHTML = '';
+    
+    // Показываем случайные рекомендации
+    const shuffled = [...sampleContent].sort(() => 0.5 - Math.random());
+    const recommendations = shuffled.slice(0, 5);
+    
+    recommendations.forEach(content => {
+        const contentCard = createContentCard(content);
+        carousel.appendChild(contentCard);
+    });
+}
+
+// Создание карточки контента
+function createContentCard(content) {
+    const card = document.createElement('div');
+    card.className = 'content-card';
+    
+    card.innerHTML = `
+        <div class="content-poster" style="background-image: url('${content.poster}')"></div>
+        <div class="content-info">
+            <div class="content-title">${content.title}</div>
+            <div class="content-meta">
+                <span class="content-rating">${content.rating}</span>
+                <span>${content.year}</span>
+                <span>${content.genre}</span>
+            </div>
+        </div>
+    `;
+    
+    card.addEventListener('click', () => showContentDetails(content));
+    
+    return card;
+}
+
+// Показать детали контента
+function showContentDetails(content) {
+    // Здесь можно добавить модальное окно с деталями
+    console.log('Показать детали:', content);
+}
+
+// Загрузка интерактивного контента
+function loadInteractiveContent() {
+    const container = document.getElementById('cardsContainer');
+    container.innerHTML = '';
+    
+    if (sampleContent.length > 0) {
+        currentContent = sampleContent[0];
+        const card = createInteractiveCard(currentContent);
+        container.appendChild(card);
+        
+        // Анимация появления
+        setTimeout(() => {
+            card.classList.add('enter');
+        }, 100);
     }
 }
 
-// Отображение фильма
-function displayMovie(movie) {
-    const cardsContainer = document.getElementById('cardsContainer');
-    cardsContainer.innerHTML = '';
-
-    const card = createMovieCard(movie);
-    cardsContainer.appendChild(card);
-
-    // Анимация появления
-    setTimeout(() => {
-        card.classList.add('enter');
-    }, 100);
-}
-
-// Создание карточки фильма
-function createMovieCard(movie) {
+// Создание интерактивной карточки
+function createInteractiveCard(content) {
     const card = document.createElement('div');
-    card.className = 'movie-card';
-    card.dataset.movieId = movie.id;
-
+    card.className = 'interactive-card';
+    card.dataset.contentId = content.id;
+    
     card.innerHTML = `
-        <div class="movie-poster" style="background-image: url('${movie.poster}')"></div>
-        <div class="movie-info">
-            <h2 class="movie-title">${movie.title}</h2>
-            <div class="movie-year">${movie.year}</div>
-            <div class="movie-genre">${movie.genre}</div>
-            <div class="movie-description">${movie.description}</div>
-            <div class="movie-rating">
+        <div class="card-poster" style="background-image: url('${content.poster}')"></div>
+        <div class="card-info">
+            <div class="card-title">${content.title}</div>
+            <div class="card-description">${content.description}</div>
+            <div class="card-rating">
                 <i class="fas fa-star"></i>
-                <span>${movie.rating}/10</span>
+                <span>${content.rating}</span>
             </div>
         </div>
         <div class="swipe-indicator like">НРАВИТСЯ</div>
         <div class="swipe-indicator dislike">НЕ НРАВИТСЯ</div>
     `;
-
+    
     return card;
 }
 
 // Настройка touch событий
 function setupTouchEvents() {
-    const cardsContainer = document.getElementById('cardsContainer');
+    const container = document.getElementById('cardsContainer');
     
     let startX = 0;
     let startY = 0;
     let currentX = 0;
     let currentY = 0;
     let isDragging = false;
-
+    
     // Touch события
-    cardsContainer.addEventListener('touchstart', handleTouchStart, { passive: false });
-    cardsContainer.addEventListener('touchmove', handleTouchMove, { passive: false });
-    cardsContainer.addEventListener('touchend', handleTouchEnd, { passive: false });
-
-    // Mouse события для десктопа
-    cardsContainer.addEventListener('mousedown', handleMouseDown);
-    cardsContainer.addEventListener('mousemove', handleMouseMove);
-    cardsContainer.addEventListener('mouseup', handleMouseUp);
-
+    container.addEventListener('touchstart', handleTouchStart, { passive: false });
+    container.addEventListener('touchmove', handleTouchMove, { passive: false });
+    container.addEventListener('touchend', handleTouchEnd, { passive: false });
+    
+    // Mouse события
+    container.addEventListener('mousedown', handleMouseDown);
+    container.addEventListener('mousemove', handleMouseMove);
+    container.addEventListener('mouseup', handleMouseUp);
+    
     function handleTouchStart(e) {
         if (isAnimating) return;
         
@@ -107,7 +273,7 @@ function setupTouchEvents() {
             card.classList.add('swiping');
         }
     }
-
+    
     function handleTouchMove(e) {
         if (!isDragging || isAnimating) return;
         
@@ -122,7 +288,7 @@ function setupTouchEvents() {
         updateCardPosition(deltaX, deltaY);
         updateSwipeIndicators(deltaX);
     }
-
+    
     function handleTouchEnd(e) {
         if (!isDragging || isAnimating) return;
         
@@ -131,12 +297,12 @@ function setupTouchEvents() {
         
         if (Math.abs(deltaX) > 100) {
             const action = deltaX > 0 ? 'like' : 'dislike';
-            swipeMovie(action);
+            handleInteraction(action);
         } else {
             resetCardPosition();
         }
     }
-
+    
     function handleMouseDown(e) {
         if (isAnimating) return;
         
@@ -151,7 +317,7 @@ function setupTouchEvents() {
         
         e.preventDefault();
     }
-
+    
     function handleMouseMove(e) {
         if (!isDragging || isAnimating) return;
         
@@ -164,7 +330,7 @@ function setupTouchEvents() {
         updateCardPosition(deltaX, deltaY);
         updateSwipeIndicators(deltaX);
     }
-
+    
     function handleMouseUp(e) {
         if (!isDragging || isAnimating) return;
         
@@ -173,7 +339,7 @@ function setupTouchEvents() {
         
         if (Math.abs(deltaX) > 100) {
             const action = deltaX > 0 ? 'like' : 'dislike';
-            swipeMovie(action);
+            handleInteraction(action);
         } else {
             resetCardPosition();
         }
@@ -182,7 +348,7 @@ function setupTouchEvents() {
 
 // Получение текущей карточки
 function getCurrentCard() {
-    return document.querySelector('.movie-card');
+    return document.querySelector('.interactive-card');
 }
 
 // Обновление позиции карточки
@@ -223,15 +389,14 @@ function resetCardPosition() {
     card.style.opacity = '';
     card.classList.remove('swiping');
     
-    // Скрыть индикаторы
     document.querySelectorAll('.swipe-indicator').forEach(indicator => {
         indicator.classList.remove('show');
     });
 }
 
-// Свайп фильма
-async function swipeMovie(action) {
-    if (isAnimating || !currentMovie) return;
+// Обработка взаимодействия
+async function handleInteraction(action) {
+    if (isAnimating || !currentContent) return;
     
     isAnimating = true;
     const card = getCurrentCard();
@@ -243,153 +408,106 @@ async function swipeMovie(action) {
         // Обновление статистики
         if (action === 'like') {
             likedCount++;
-            document.getElementById('likedCount').textContent = likedCount;
+            userPreferences.genres.push(currentContent.genre);
+            userPreferences.ratings.push(currentContent.rating);
         } else {
             dislikedCount++;
-            document.getElementById('dislikedCount').textContent = dislikedCount;
         }
         
-        // Отправка на сервер
-        try {
-            const response = await fetch('/api/swipe', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ action: action })
-            });
-            
-            if (response.ok) {
-                const result = await response.json();
-                if (result.next_available) {
-                    // Загрузка следующего фильма
-                    setTimeout(() => {
-                        loadCurrentMovie();
-                        isAnimating = false;
-                    }, 300);
-                } else {
-                    // Показать сообщение о завершении
-                    setTimeout(() => {
-                        showNoMoreMovies();
-                        isAnimating = false;
-                    }, 300);
-                }
-            }
-        } catch (error) {
-            console.error('Ошибка отправки свайпа:', error);
+        updateStats();
+        
+        // Haptic feedback
+        if ('vibrate' in navigator) {
+            navigator.vibrate(50);
+        }
+        
+        // Загрузка следующего контента
+        setTimeout(() => {
+            loadNextContent();
             isAnimating = false;
-        }
+        }, 300);
     }
 }
 
-// Показать сообщение о завершении
-function showNoMoreMovies() {
-    document.getElementById('cardsContainer').style.display = 'none';
-    document.getElementById('actionButtons').style.display = 'none';
-    document.getElementById('noMoreMovies').style.display = 'block';
-}
-
-// Сброс фильмов
-async function resetMovies() {
-    try {
-        const response = await fetch('/api/reset');
-        if (response.ok) {
-            // Сброс статистики
-            likedCount = 0;
-            dislikedCount = 0;
-            document.getElementById('likedCount').textContent = '0';
-            document.getElementById('dislikedCount').textContent = '0';
-            
-            // Показать контейнер карточек
-            document.getElementById('cardsContainer').style.display = 'block';
-            document.getElementById('actionButtons').style.display = 'flex';
-            document.getElementById('noMoreMovies').style.display = 'none';
-            
-            // Загрузить первый фильм
-            loadCurrentMovie();
-        }
-    } catch (error) {
-        console.error('Ошибка сброса:', error);
-    }
-}
-
-// Добавление haptic feedback для мобильных устройств
-function addHapticFeedback(type = 'light') {
-    if ('vibrate' in navigator) {
-        const patterns = {
-            light: [50],
-            medium: [100],
-            heavy: [200],
-            success: [50, 50, 100]
-        };
-        navigator.vibrate(patterns[type] || patterns.light);
-    }
-}
-
-// Добавление визуальных эффектов
-function addVisualEffect(type, element) {
-    const effects = {
-        sparkle: () => createSparkleEffect(element),
-        pulse: () => element.style.animation = 'pulse 0.3s ease-out',
-        shake: () => element.style.animation = 'shake 0.5s ease-out'
-    };
+// Загрузка следующего контента
+function loadNextContent() {
+    const container = document.getElementById('cardsContainer');
+    container.innerHTML = '';
     
-    if (effects[type]) {
-        effects[type]();
-    }
-}
-
-// Создание эффекта искр
-function createSparkleEffect(element) {
-    const sparkles = 5;
-    for (let i = 0; i < sparkles; i++) {
-        const sparkle = document.createElement('div');
-        sparkle.className = 'sparkle';
-        sparkle.style.cssText = `
-            position: absolute;
-            width: 4px;
-            height: 4px;
-            background: radial-gradient(circle, #ffd700, transparent);
-            border-radius: 50%;
-            pointer-events: none;
-            z-index: 1000;
-            animation: sparkleAnimation 1s ease-out forwards;
-        `;
-        
-        const rect = element.getBoundingClientRect();
-        sparkle.style.left = (rect.left + Math.random() * rect.width) + 'px';
-        sparkle.style.top = (rect.top + Math.random() * rect.height) + 'px';
-        
-        document.body.appendChild(sparkle);
-        
-        setTimeout(() => sparkle.remove(), 1000);
-    }
-}
-
-// Улучшенная обработка свайпов с эффектами
-const originalSwipeMovie = swipeMovie;
-swipeMovie = function(action) {
-    addHapticFeedback(action === 'like' ? 'success' : 'medium');
+    // Находим следующий контент
+    const currentIndex = sampleContent.findIndex(item => item.id === currentContent.id);
+    const nextIndex = (currentIndex + 1) % sampleContent.length;
     
-    const card = getCurrentCard();
-    if (card) {
-        addVisualEffect('sparkle', card);
+    if (nextIndex === 0) {
+        // Показать экран завершения
+        showCompletionScreen();
+        return;
     }
     
-    return originalSwipeMovie(action);
-};
-
-// Предотвращение случайных свайпов
-let swipeStartTime = 0;
-document.addEventListener('touchstart', function() {
-    swipeStartTime = Date.now();
-});
-
-// Добавление минимального времени для свайпа
-const originalHandleTouchEnd = handleTouchEnd;
-function handleTouchEnd(e) {
-    const swipeDuration = Date.now() - swipeStartTime;
-    if (swipeDuration < 100) return; // Минимум 100мс для свайпа
+    currentContent = sampleContent[nextIndex];
+    const card = createInteractiveCard(currentContent);
+    container.appendChild(card);
     
-    return originalHandleTouchEnd(e);
+    setTimeout(() => {
+        card.classList.add('enter');
+    }, 100);
 }
+
+// Обновление статистики
+function updateStats() {
+    document.getElementById('likedCount').textContent = likedCount;
+    document.getElementById('dislikedCount').textContent = dislikedCount;
+    
+    // Расчет точности (простая формула)
+    const total = likedCount + dislikedCount;
+    const accuracy = total > 0 ? Math.round((likedCount / total) * 100) : 0;
+    document.getElementById('accuracyScore').textContent = accuracy + '%';
+}
+
+// Показать экран завершения
+function showCompletionScreen() {
+    document.getElementById('completionScreen').style.display = 'flex';
+}
+
+// Показать рекомендации
+function showRecommendations() {
+    document.getElementById('completionScreen').style.display = 'none';
+    loadRecommendations();
+}
+
+// Перезапуск анализа
+function restartAnalysis() {
+    document.getElementById('completionScreen').style.display = 'none';
+    
+    // Сброс данных
+    likedCount = 0;
+    dislikedCount = 0;
+    userPreferences = { categories: [], genres: [], ratings: [] };
+    
+    updateStats();
+    loadInteractiveContent();
+}
+
+// Анимация появления элементов
+function animateOnScroll() {
+    const elements = document.querySelectorAll('.category-card, .content-card, .stat-card');
+    
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.style.opacity = '1';
+                entry.target.style.transform = 'translateY(0)';
+            }
+        });
+    });
+    
+    elements.forEach(element => {
+        element.style.opacity = '0';
+        element.style.transform = 'translateY(20px)';
+        element.style.transition = 'all 0.6s ease';
+        observer.observe(element);
+    });
+}
+
+// Инициализация анимаций
+setTimeout(animateOnScroll, 500);

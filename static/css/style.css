@@ -1,30 +1,62 @@
 /* ==============================
-  Okko-inspired Movie Swiper
-  Dark theme with purple accents
-  ============================== */
+   Okko Discovery - Новая концепция
+   Айдентика Okko с современным UX
+   ============================== */
 
-/* CSS Variables for Okko theme */
+/* CSS Variables - Okko Identity */
 :root {
+    /* Основные цвета Okko */
     --okko-bg: #000000;
     --okko-surface: #0f0f17;
     --okko-surface-2: #1a1a1f;
+    --okko-surface-3: #25252a;
+    
+    /* Границы и разделители */
     --okko-border: rgba(255, 255, 255, 0.08);
     --okko-border-2: rgba(255, 255, 255, 0.12);
+    --okko-border-3: rgba(255, 255, 255, 0.16);
+    
+    /* Текст */
     --okko-text: #ffffff;
     --okko-text-muted: #a0a0a0;
     --okko-text-muted-2: #666666;
+    --okko-text-disabled: #404040;
+    
+    /* Акцентные цвета */
     --okko-accent: #7b61ff;
     --okko-accent-hover: #8b71ff;
-    --okko-green: #22c55e;
+    --okko-accent-light: rgba(123, 97, 255, 0.1);
+    --okko-accent-medium: rgba(123, 97, 255, 0.2);
+    --okko-accent-dark: rgba(123, 97, 255, 0.3);
+    
+    /* Статусные цвета */
+    --okko-success: #22c55e;
     --okko-danger: #ef4444;
     --okko-warning: #f59e0b;
-    --okko-purple: #7b61ff;
-    --okko-purple-light: rgba(123, 97, 255, 0.1);
-    --okko-purple-medium: rgba(123, 97, 255, 0.2);
-    --okko-purple-dark: rgba(123, 97, 255, 0.3);
+    --okko-info: #3b82f6;
+    
+    /* Тени */
+    --okko-shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.1);
+    --okko-shadow-md: 0 4px 8px rgba(0, 0, 0, 0.15);
+    --okko-shadow-lg: 0 8px 16px rgba(0, 0, 0, 0.2);
+    --okko-shadow-xl: 0 16px 32px rgba(0, 0, 0, 0.25);
+    
+    /* Радиусы */
+    --okko-radius-sm: 8px;
+    --okko-radius-md: 12px;
+    --okko-radius-lg: 16px;
+    --okko-radius-xl: 20px;
+    
+    /* Отступы */
+    --okko-spacing-xs: 4px;
+    --okko-spacing-sm: 8px;
+    --okko-spacing-md: 16px;
+    --okko-spacing-lg: 24px;
+    --okko-spacing-xl: 32px;
+    --okko-spacing-2xl: 48px;
 }
 
-/* Reset and base styles */
+/* Reset и базовые стили */
 * {
     margin: 0;
     padding: 0;
@@ -34,134 +66,355 @@
 body {
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     background: var(--okko-bg);
-    min-height: 100vh;
-    overflow-x: hidden;
     color: var(--okko-text);
-    position: relative;
+    line-height: 1.6;
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
 }
 
-/* Main app container */
+/* Главный контейнер */
 .app-container {
     max-width: 420px;
     margin: 0 auto;
     min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    position: relative;
     background: var(--okko-surface);
-    border-radius: 20px;
-    margin: 15px auto;
-    box-shadow: 
-        0 20px 40px rgba(0, 0, 0, 0.4),
-        0 0 0 1px var(--okko-border);
+    position: relative;
     overflow: hidden;
 }
 
-/* Header */
-.header {
-    text-align: center;
-    padding: 30px 20px 20px;
-    background: linear-gradient(135deg, var(--okko-surface-2) 0%, var(--okko-surface) 100%);
-    border-radius: 20px 20px 0 0;
-    position: relative;
+/* Навигационная панель */
+.nav-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--okko-spacing-md) var(--okko-spacing-lg);
+    background: var(--okko-surface);
+    border-bottom: 1px solid var(--okko-border);
+    position: sticky;
+    top: 0;
+    z-index: 100;
 }
 
-.header::after {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    left: 20px;
-    right: 20px;
-    height: 1px;
-    background: var(--okko-border);
+.nav-brand {
+    display: flex;
+    align-items: center;
 }
 
-.app-title {
-    font-size: 2.5rem;
+.okko-logo {
+    display: flex;
+    align-items: center;
+}
+
+.logo-text {
+    font-size: 1.5rem;
     font-weight: 800;
     color: var(--okko-text);
-    margin-bottom: 8px;
     letter-spacing: -0.02em;
 }
 
-.app-title i {
-    margin-right: 10px;
-    color: var(--okko-accent);
+.nav-actions {
+    display: flex;
+    gap: var(--okko-spacing-sm);
 }
 
-.app-subtitle {
+.nav-btn {
+    width: 40px;
+    height: 40px;
+    border: none;
+    border-radius: 50%;
+    background: var(--okko-surface-2);
     color: var(--okko-text-muted);
-    font-size: 1rem;
-    font-weight: 500;
-}
-
-/* Main content */
-.main-content {
-    flex: 1;
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 20px;
-    position: relative;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: 1px solid var(--okko-border);
 }
 
-/* Cards container */
-.cards-container {
-    position: relative;
-    width: 100%;
-    height: 500px;
-    max-width: 350px;
+.nav-btn:hover {
+    background: var(--okko-surface-3);
+    color: var(--okko-text);
+    transform: translateY(-1px);
+}
+
+/* Основной контент */
+.main-content {
+    padding: var(--okko-spacing-lg);
+    padding-bottom: var(--okko-spacing-2xl);
+}
+
+/* Приветственная секция */
+.welcome-section {
+    text-align: center;
+    margin-bottom: var(--okko-spacing-2xl);
+    padding: var(--okko-spacing-xl) 0;
+}
+
+.welcome-title {
+    font-size: 2.5rem;
+    font-weight: 800;
+    color: var(--okko-text);
+    margin-bottom: var(--okko-spacing-md);
+    letter-spacing: -0.02em;
+    background: linear-gradient(135deg, var(--okko-text) 0%, var(--okko-text-muted) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.welcome-subtitle {
+    font-size: 1.1rem;
+    color: var(--okko-text-muted);
+    font-weight: 500;
+    max-width: 300px;
     margin: 0 auto;
 }
 
-/* Movie card */
-.movie-card {
+/* Секции */
+.section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: var(--okko-spacing-lg);
+}
+
+.section-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--okko-text);
+    letter-spacing: -0.01em;
+}
+
+.section-subtitle {
+    font-size: 0.9rem;
+    color: var(--okko-text-muted);
+    margin-top: var(--okko-spacing-xs);
+}
+
+/* Категории */
+.categories-section {
+    margin-bottom: var(--okko-spacing-2xl);
+}
+
+.categories-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--okko-spacing-md);
+}
+
+.category-card {
+    background: var(--okko-surface-2);
+    border: 1px solid var(--okko-border);
+    border-radius: var(--okko-radius-lg);
+    padding: var(--okko-spacing-lg);
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.category-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, var(--okko-accent-light) 0%, transparent 100%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.category-card:hover::before {
+    opacity: 1;
+}
+
+.category-card:hover {
+    transform: translateY(-2px);
+    border-color: var(--okko-accent);
+    box-shadow: var(--okko-shadow-lg);
+}
+
+.category-icon {
+    font-size: 2rem;
+    color: var(--okko-accent);
+    margin-bottom: var(--okko-spacing-sm);
+}
+
+.category-title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--okko-text);
+    margin-bottom: var(--okko-spacing-xs);
+}
+
+.category-description {
+    font-size: 0.85rem;
+    color: var(--okko-text-muted);
+}
+
+/* Рекомендации */
+.recommendations-section {
+    margin-bottom: var(--okko-spacing-2xl);
+}
+
+.refresh-btn {
+    width: 36px;
+    height: 36px;
+    border: none;
+    border-radius: 50%;
+    background: var(--okko-surface-2);
+    color: var(--okko-text-muted);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: 1px solid var(--okko-border);
+}
+
+.refresh-btn:hover {
+    background: var(--okko-accent);
+    color: var(--okko-text);
+    transform: rotate(180deg);
+}
+
+.content-carousel {
+    display: flex;
+    gap: var(--okko-spacing-md);
+    overflow-x: auto;
+    padding-bottom: var(--okko-spacing-sm);
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+.content-carousel::-webkit-scrollbar {
+    display: none;
+}
+
+.content-card {
+    min-width: 200px;
+    background: var(--okko-surface-2);
+    border: 1px solid var(--okko-border);
+    border-radius: var(--okko-radius-md);
+    overflow: hidden;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.content-card:hover {
+    transform: translateY(-4px);
+    border-color: var(--okko-accent);
+    box-shadow: var(--okko-shadow-lg);
+}
+
+.content-poster {
+    width: 100%;
+    height: 120px;
+    background-size: cover;
+    background-position: center;
+    position: relative;
+}
+
+.content-poster::before {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 50%;
+    background: linear-gradient(transparent, rgba(0, 0, 0, 0.8));
+}
+
+.content-info {
+    padding: var(--okko-spacing-md);
+}
+
+.content-title {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--okko-text);
+    margin-bottom: var(--okko-spacing-xs);
+    line-height: 1.3;
+}
+
+.content-meta {
+    font-size: 0.8rem;
+    color: var(--okko-text-muted);
+    display: flex;
+    align-items: center;
+    gap: var(--okko-spacing-xs);
+}
+
+.content-rating {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 6px;
+    background: var(--okko-success);
+    color: #0b2b17;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    font-weight: 700;
+}
+
+/* Интерактивная секция */
+.interactive-section {
+    margin-bottom: var(--okko-spacing-2xl);
+}
+
+.cards-container {
+    position: relative;
+    height: 400px;
+    margin-bottom: var(--okko-spacing-lg);
+}
+
+.interactive-card {
     position: absolute;
     width: 100%;
     height: 100%;
-    background: var(--okko-surface);
-    border-radius: 20px;
-    box-shadow: 
-        0 15px 35px rgba(0, 0, 0, 0.3),
-        0 5px 15px rgba(0, 0, 0, 0.2);
+    background: var(--okko-surface-2);
+    border: 1px solid var(--okko-border);
+    border-radius: var(--okko-radius-lg);
     overflow: hidden;
     cursor: grab;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     transform-origin: center;
     z-index: 1;
-    border: 1px solid var(--okko-border);
+    box-shadow: var(--okko-shadow-lg);
 }
 
-.movie-card:active {
+.interactive-card:active {
     cursor: grabbing;
 }
 
-.movie-card.swiping {
+.interactive-card.swiping {
     transition: none;
 }
 
-.movie-card.like {
+.interactive-card.like {
     transform: translateX(100vw) rotate(30deg);
     opacity: 0;
 }
 
-.movie-card.dislike {
+.interactive-card.dislike {
     transform: translateX(-100vw) rotate(-30deg);
     opacity: 0;
 }
 
-/* Movie poster */
-.movie-poster {
+.card-poster {
     width: 100%;
     height: 60%;
     background-size: cover;
     background-position: center;
     position: relative;
-    overflow: hidden;
-    border-radius: 20px 20px 0 0;
 }
 
-.movie-poster::before {
+.card-poster::before {
     content: '';
     position: absolute;
     bottom: 0;
@@ -169,95 +422,61 @@ body {
     right: 0;
     height: 60%;
     background: linear-gradient(transparent, rgba(0, 0, 0, 0.8));
-    z-index: 1;
 }
 
-/* Movie info */
-.movie-info {
+.card-info {
     position: absolute;
     bottom: 0;
     left: 0;
     right: 0;
-    padding: 25px;
+    padding: var(--okko-spacing-lg);
     color: white;
     z-index: 2;
-    background: linear-gradient(transparent, rgba(0, 0, 0, 0.8));
-    border-radius: 0 0 20px 20px;
 }
 
-.movie-title {
-    font-size: 2rem;
-    font-weight: 800;
-    margin-bottom: 8px;
+.card-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: var(--okko-spacing-xs);
     text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
-    line-height: 1.1;
 }
 
-.movie-year {
-    font-size: 1rem;
-    opacity: 0.9;
-    margin-bottom: 10px;
-    font-weight: 500;
-    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.7);
-}
-
-.movie-genre {
+.card-description {
     font-size: 0.9rem;
-    opacity: 0.8;
-    margin-bottom: 12px;
-    font-weight: 500;
-    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.7);
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-}
-
-.movie-description {
-    font-size: 0.95rem;
-    line-height: 1.5;
     opacity: 0.9;
-    margin-bottom: 15px;
-    display: -webkit-box;
-    -webkit-line-clamp: 3;
-    line-clamp: 3;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.7);
+    line-height: 1.4;
+    margin-bottom: var(--okko-spacing-sm);
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
 }
 
-/* Okko-style rating pill */
-.movie-rating {
+.card-rating {
     display: inline-flex;
     align-items: center;
-    gap: 6px;
-    margin-top: 12px;
-    padding: 6px 10px;
-    font-weight: 800;
-    font-size: 13px;
+    gap: 4px;
+    padding: 4px 8px;
+    background: var(--okko-success);
     color: #0b2b17;
-    background: var(--okko-green);
-    border-radius: 10px;
-    box-shadow: 0 4px 18px rgba(34, 197, 94, 0.28);
+    border-radius: 8px;
+    font-size: 0.8rem;
+    font-weight: 700;
 }
 
-.movie-rating i {
-    display: none;
-}
-
-/* Swipe indicators */
+/* Индикаторы свайпа */
 .swipe-indicator {
     position: absolute;
-    top: 18px;
-    padding: 10px 12px;
-    font-size: 12px;
-    font-weight: 900;
+    top: 20px;
+    padding: 8px 16px;
+    font-size: 0.8rem;
+    font-weight: 700;
     letter-spacing: 1px;
-    border-radius: 10px;
-    border: 1px solid var(--okko-border-2);
+    border-radius: 20px;
+    border: 2px solid;
     opacity: 0;
-    transform: translateY(-6px);
-    transition: 0.2s ease;
+    transform: translateY(-10px);
+    transition: all 0.3s ease;
     text-transform: uppercase;
-    backdrop-filter: blur(4px);
+    backdrop-filter: blur(10px);
+    z-index: 10;
 }
 
 .swipe-indicator.show {
@@ -266,189 +485,279 @@ body {
 }
 
 .swipe-indicator.like {
-    right: 16px;
-    background: var(--okko-purple-light);
+    right: 20px;
+    background: var(--okko-accent-light);
     color: var(--okko-accent);
-    border-color: var(--okko-purple-medium);
+    border-color: var(--okko-accent);
 }
 
 .swipe-indicator.dislike {
-    left: 16px;
-    background: rgba(239, 68, 68, 0.16);
+    left: 20px;
+    background: rgba(239, 68, 68, 0.1);
     color: var(--okko-danger);
-    border-color: rgba(239, 68, 68, 0.32);
+    border-color: var(--okko-danger);
 }
 
-/* Action buttons */
-.action-buttons {
+/* Элементы управления */
+.interaction-controls {
     display: flex;
     justify-content: center;
-    gap: 28px;
-    padding: 16px 14px 18px;
-    border-top: 1px solid var(--okko-border);
-    background: linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0));
+    gap: var(--okko-spacing-xl);
+    padding: var(--okko-spacing-lg) 0;
 }
 
-.action-btn {
-    width: 64px;
-    height: 64px;
+.control-btn {
+    width: 60px;
+    height: 60px;
+    border: none;
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    border: 1px solid var(--okko-border-2);
-    background: var(--okko-surface);
-    color: var(--okko-text);
-    font-size: 22px;
+    font-size: 1.5rem;
     cursor: pointer;
-    transition: transform 0.15s ease, box-shadow 0.2s ease, background 0.2s ease, border-color 0.2s ease;
-    box-shadow: 0 10px 22px rgba(0, 0, 0, 0.35);
+    transition: all 0.3s ease;
     position: relative;
     overflow: hidden;
+    border: 2px solid var(--okko-border);
+    background: var(--okko-surface);
 }
 
-.action-btn:hover {
-    transform: translateY(-2px);
+.control-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: radial-gradient(circle at center, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+    transform: scale(0);
+    transition: transform 0.3s ease;
 }
 
-.action-btn:active {
-    transform: scale(0.96);
+.control-btn:hover::before {
+    transform: scale(1);
 }
 
 .dislike-btn {
-    color: #ff6b6b;
+    color: var(--okko-danger);
+}
+
+.dislike-btn:hover {
+    background: var(--okko-danger);
+    color: white;
+    transform: scale(1.1);
+    box-shadow: 0 8px 20px rgba(239, 68, 68, 0.3);
 }
 
 .like-btn {
     color: var(--okko-accent);
 }
 
-.dislike-btn:hover {
-    box-shadow: 0 12px 30px rgba(239, 68, 68, 0.25);
-}
-
 .like-btn:hover {
-    box-shadow: 0 12px 30px rgba(123, 97, 255, 0.28);
-}
-
-/* Stats */
-.stats {
-    display: flex;
-    gap: 12px;
-    justify-content: space-between;
-    padding: 10px 14px 18px;
-    border-top: 1px solid var(--okko-border);
-    background: var(--okko-surface);
-}
-
-.stat-item {
-    flex: 1;
-    background: var(--okko-surface);
-    border: 1px solid var(--okko-border);
-    border-radius: 14px;
-    padding: 12px 10px;
-    text-align: center;
-}
-
-.stat-number {
-    display: block;
-    font-weight: 900;
-    font-size: 22px;
-    color: var(--okko-text);
-}
-
-.stat-label {
-    margin-top: 4px;
-    color: var(--okko-text-muted-2);
-    font-size: 12px;
-}
-
-/* No more movies */
-.no-more-movies {
-    position: absolute;
-    inset: 0;
-    display: none;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-}
-
-.no-movies-content i {
-    display: none;
-}
-
-.no-movies-content h2 {
-    font-size: 22px;
-    margin-bottom: 6px;
-    color: var(--okko-text);
-}
-
-.no-movies-content p {
-    color: var(--okko-text-muted);
-    margin-bottom: 14px;
-}
-
-.reset-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    padding: 10px 14px;
     background: var(--okko-accent);
-    color: #fff;
-    border: 0;
-    border-radius: 12px;
-    font-weight: 700;
-    cursor: pointer;
-    transition: filter 0.2s ease, transform 0.15s ease, box-shadow 0.2s ease;
-    box-shadow: 0 10px 26px rgba(123, 97, 255, 0.3);
+    color: white;
+    transform: scale(1.1);
+    box-shadow: 0 8px 20px rgba(123, 97, 255, 0.3);
 }
 
-.reset-btn:hover {
-    filter: brightness(1.06);
+.control-btn:active {
+    transform: scale(0.95);
 }
 
-.reset-btn:active {
-    transform: translateY(1px);
+/* Статистика */
+.stats-section {
+    margin-bottom: var(--okko-spacing-2xl);
 }
 
-/* Loading screen */
-.loading-screen {
-    position: fixed;
-    inset: 0;
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--okko-spacing-md);
+}
+
+.stat-card {
+    background: var(--okko-surface-2);
+    border: 1px solid var(--okko-border);
+    border-radius: var(--okko-radius-md);
+    padding: var(--okko-spacing-md);
+    text-align: center;
+    transition: all 0.3s ease;
+}
+
+.stat-card:hover {
+    transform: translateY(-2px);
+    border-color: var(--okko-accent);
+    box-shadow: var(--okko-shadow-md);
+}
+
+.stat-icon {
+    font-size: 1.5rem;
+    color: var(--okko-accent);
+    margin-bottom: var(--okko-spacing-sm);
+}
+
+.stat-content {
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
-    background: radial-gradient(900px 650px at 50% -10%, rgba(123, 97, 255, 0.1), transparent 60%), var(--okko-bg);
-    z-index: 1000;
+}
+
+.stat-number {
+    font-size: 1.5rem;
+    font-weight: 800;
     color: var(--okko-text);
+    margin-bottom: var(--okko-spacing-xs);
+}
+
+.stat-label {
+    font-size: 0.8rem;
+    color: var(--okko-text-muted);
+    font-weight: 500;
+}
+
+/* Завершающий экран */
+.completion-screen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: var(--okko-bg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: var(--okko-spacing-lg);
+}
+
+.completion-content {
+    text-align: center;
+    max-width: 400px;
+}
+
+.completion-icon {
+    font-size: 4rem;
+    color: var(--okko-success);
+    margin-bottom: var(--okko-spacing-lg);
+}
+
+.completion-title {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--okko-text);
+    margin-bottom: var(--okko-spacing-md);
+}
+
+.completion-text {
+    font-size: 1rem;
+    color: var(--okko-text-muted);
+    margin-bottom: var(--okko-spacing-xl);
+    line-height: 1.6;
+}
+
+.completion-actions {
+    display: flex;
+    flex-direction: column;
+    gap: var(--okko-spacing-md);
+}
+
+.action-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--okko-spacing-sm);
+    padding: var(--okko-spacing-md) var(--okko-spacing-lg);
+    border: none;
+    border-radius: var(--okko-radius-md);
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+}
+
+.primary-btn {
+    background: var(--okko-accent);
+    color: white;
+    box-shadow: 0 4px 16px rgba(123, 97, 255, 0.3);
+}
+
+.primary-btn:hover {
+    background: var(--okko-accent-hover);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(123, 97, 255, 0.4);
+}
+
+.secondary-btn {
+    background: var(--okko-surface-2);
+    color: var(--okko-text);
+    border: 1px solid var(--okko-border);
+}
+
+.secondary-btn:hover {
+    background: var(--okko-surface-3);
+    transform: translateY(-2px);
+}
+
+/* Загрузочный экран */
+.loading-screen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: var(--okko-bg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.loading-content {
+    text-align: center;
 }
 
 .loading-spinner {
-    font-size: 40px;
-    color: var(--okko-accent);
-    animation: spin 1.2s linear infinite;
+    margin-bottom: var(--okko-spacing-lg);
 }
 
-.loading-screen p {
-    margin-top: 14px;
+.spinner-ring {
+    width: 60px;
+    height: 60px;
+    border: 3px solid var(--okko-border);
+    border-top: 3px solid var(--okko-accent);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 0 auto;
+}
+
+.loading-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--okko-text);
+    margin-bottom: var(--okko-spacing-sm);
+}
+
+.loading-text {
+    font-size: 1rem;
     color: var(--okko-text-muted);
 }
 
 .loading-screen.hidden {
     opacity: 0;
     visibility: hidden;
-    transition: 0.35s ease;
+    transition: all 0.5s ease;
 }
 
+/* Анимации */
 @keyframes spin {
     to {
         transform: rotate(360deg);
     }
 }
 
-/* Card enter animation */
-.movie-card.enter {
+.interactive-card.enter {
     animation: cardEnter 0.5s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
@@ -463,39 +772,45 @@ body {
     }
 }
 
-/* Responsive design */
+/* Адаптивность */
 @media (max-width: 480px) {
     .app-container {
-        margin: 10px;
-        border-radius: 18px;
+        margin: 0;
+        border-radius: 0;
     }
     
-    .cards-container {
-        height: 500px;
+    .main-content {
+        padding: var(--okko-spacing-md);
     }
     
-    .action-btn {
-        width: 56px;
-        height: 56px;
-        font-size: 20px;
+    .welcome-title {
+        font-size: 2rem;
     }
     
-    .movie-title {
-        font-size: 1.8rem;
+    .categories-grid {
+        grid-template-columns: 1fr;
     }
     
-    .app-title {
-        font-size: 2.2rem;
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .completion-actions {
+        flex-direction: column;
     }
 }
 
-/* Touch device optimizations */
+/* Touch оптимизации */
 @media (hover: none) and (pointer: coarse) {
-    .action-btn:hover {
+    .control-btn:hover {
         transform: none;
     }
     
-    .action-btn:active {
+    .control-btn:active {
         transform: scale(0.95);
+    }
+    
+    .stat-card:hover {
+        transform: none;
     }
 }
