@@ -7,7 +7,9 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-    <meta name="theme-color" content="#0f0f23">
+    <meta name="theme-color" content="#000000">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 </head>
 <body>
     <div class="app-container">
@@ -17,7 +19,7 @@
                 <i class="fas fa-film"></i>
                 Movie Swiper
             </h1>
-            <p class="app-subtitle">✨ Свайпайте фильмы как в Tinder! ✨</p>
+            <p class="app-subtitle">Свайпайте фильмы как в Tinder</p>
         </header>
 
         <!-- Основная область с карточками -->
@@ -29,8 +31,7 @@
             <!-- Сообщение когда фильмы закончились -->
             <div class="no-more-movies" id="noMoreMovies" style="display: none;">
                 <div class="no-movies-content">
-                    <i class="fas fa-check-circle"></i>
-                    <h2>🎉 Отлично!</h2>
+                    <h2>Отлично!</h2>
                     <p>Вы просмотрели все фильмы</p>
                     <button class="reset-btn" onclick="resetMovies()">
                         <i class="fas fa-refresh"></i>
@@ -54,11 +55,11 @@
         <div class="stats" id="stats">
             <div class="stat-item">
                 <span class="stat-number" id="likedCount">0</span>
-                <span class="stat-label">❤️ Понравилось</span>
+                <span class="stat-label">Понравилось</span>
             </div>
             <div class="stat-item">
                 <span class="stat-number" id="dislikedCount">0</span>
-                <span class="stat-label">💔 Не понравилось</span>
+                <span class="stat-label">Не понравилось</span>
             </div>
         </div>
     </div>
@@ -68,7 +69,7 @@
         <div class="loading-spinner">
             <i class="fas fa-film"></i>
         </div>
-        <p>🎬 Загружаем фильмы...</p>
+        <p>Загружаем фильмы...</p>
     </div>
 
     <script src="{{ url_for('static', filename='js/script.js') }}"></script>

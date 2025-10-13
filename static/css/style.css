@@ -1,138 +1,501 @@
-
 /* ==============================
-  Okko-inspired dark theme
-  by ChatGPT Okko-like green pill */
-.movie-rating{
- display:inline-flex;
- align-items:center;
- gap:6px;
- margin-top: 12px;
- padding: 6px 10px;
- font-weight: 800;
- font-size: 13px;
- color: #0b2b17;
- background: var(--okko-green);
- border-radius: 10px;
- box-shadow: 0 4px 18px rgba(34,197,94,.28);
+  Okko-inspired Movie Swiper
+  Dark theme with purple accents
+  ============================== */
+
+/* CSS Variables for Okko theme */
+:root {
+    --okko-bg: #000000;
+    --okko-surface: #0f0f17;
+    --okko-surface-2: #1a1a1f;
+    --okko-border: rgba(255, 255, 255, 0.08);
+    --okko-border-2: rgba(255, 255, 255, 0.12);
+    --okko-text: #ffffff;
+    --okko-text-muted: #a0a0a0;
+    --okko-text-muted-2: #666666;
+    --okko-accent: #7b61ff;
+    --okko-accent-hover: #8b71ff;
+    --okko-green: #22c55e;
+    --okko-danger: #ef4444;
+    --okko-warning: #f59e0b;
+    --okko-purple: #7b61ff;
+    --okko-purple-light: rgba(123, 97, 255, 0.1);
+    --okko-purple-medium: rgba(123, 97, 255, 0.2);
+    --okko-purple-dark: rgba(123, 97, 255, 0.3);
 }
-.movie-rating i{ display:none } /* keep markup, hide star icon */
+
+/* Reset and base styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: var(--okko-bg);
+    min-height: 100vh;
+    overflow-x: hidden;
+    color: var(--okko-text);
+    position: relative;
+}
+
+/* Main app container */
+.app-container {
+    max-width: 420px;
+    margin: 0 auto;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    background: var(--okko-surface);
+    border-radius: 20px;
+    margin: 15px auto;
+    box-shadow: 
+        0 20px 40px rgba(0, 0, 0, 0.4),
+        0 0 0 1px var(--okko-border);
+    overflow: hidden;
+}
+
+/* Header */
+.header {
+    text-align: center;
+    padding: 30px 20px 20px;
+    background: linear-gradient(135deg, var(--okko-surface-2) 0%, var(--okko-surface) 100%);
+    border-radius: 20px 20px 0 0;
+    position: relative;
+}
+
+.header::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 20px;
+    right: 20px;
+    height: 1px;
+    background: var(--okko-border);
+}
+
+.app-title {
+    font-size: 2.5rem;
+    font-weight: 800;
+    color: var(--okko-text);
+    margin-bottom: 8px;
+    letter-spacing: -0.02em;
+}
+
+.app-title i {
+    margin-right: 10px;
+    color: var(--okko-accent);
+}
+
+.app-subtitle {
+    color: var(--okko-text-muted);
+    font-size: 1rem;
+    font-weight: 500;
+}
+
+/* Main content */
+.main-content {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    position: relative;
+}
+
+/* Cards container */
+.cards-container {
+    position: relative;
+    width: 100%;
+    height: 500px;
+    max-width: 350px;
+    margin: 0 auto;
+}
+
+/* Movie card */
+.movie-card {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background: var(--okko-surface);
+    border-radius: 20px;
+    box-shadow: 
+        0 15px 35px rgba(0, 0, 0, 0.3),
+        0 5px 15px rgba(0, 0, 0, 0.2);
+    overflow: hidden;
+    cursor: grab;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transform-origin: center;
+    z-index: 1;
+    border: 1px solid var(--okko-border);
+}
+
+.movie-card:active {
+    cursor: grabbing;
+}
+
+.movie-card.swiping {
+    transition: none;
+}
+
+.movie-card.like {
+    transform: translateX(100vw) rotate(30deg);
+    opacity: 0;
+}
+
+.movie-card.dislike {
+    transform: translateX(-100vw) rotate(-30deg);
+    opacity: 0;
+}
+
+/* Movie poster */
+.movie-poster {
+    width: 100%;
+    height: 60%;
+    background-size: cover;
+    background-position: center;
+    position: relative;
+    overflow: hidden;
+    border-radius: 20px 20px 0 0;
+}
+
+.movie-poster::before {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 60%;
+    background: linear-gradient(transparent, rgba(0, 0, 0, 0.8));
+    z-index: 1;
+}
+
+/* Movie info */
+.movie-info {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 25px;
+    color: white;
+    z-index: 2;
+    background: linear-gradient(transparent, rgba(0, 0, 0, 0.8));
+    border-radius: 0 0 20px 20px;
+}
+
+.movie-title {
+    font-size: 2rem;
+    font-weight: 800;
+    margin-bottom: 8px;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
+    line-height: 1.1;
+}
+
+.movie-year {
+    font-size: 1rem;
+    opacity: 0.9;
+    margin-bottom: 10px;
+    font-weight: 500;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.7);
+}
+
+.movie-genre {
+    font-size: 0.9rem;
+    opacity: 0.8;
+    margin-bottom: 12px;
+    font-weight: 500;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.7);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.movie-description {
+    font-size: 0.95rem;
+    line-height: 1.5;
+    opacity: 0.9;
+    margin-bottom: 15px;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.7);
+}
+
+/* Okko-style rating pill */
+.movie-rating {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 12px;
+    padding: 6px 10px;
+    font-weight: 800;
+    font-size: 13px;
+    color: #0b2b17;
+    background: var(--okko-green);
+    border-radius: 10px;
+    box-shadow: 0 4px 18px rgba(34, 197, 94, 0.28);
+}
+
+.movie-rating i {
+    display: none;
+}
 
 /* Swipe indicators */
-.swipe-indicator{
- position:absolute;
- top: 18px;
- padding: 10px 12px;
- font-size: 12px;
- font-weight: 900;
- letter-spacing: 1px;
- border-radius: 10px;
- border:1px solid var(--border-2);
- opacity:0; transform: translateY(-6px);
- transition: .2s ease;
- text-transform: uppercase;
- backdrop-filter: blur(4px);
+.swipe-indicator {
+    position: absolute;
+    top: 18px;
+    padding: 10px 12px;
+    font-size: 12px;
+    font-weight: 900;
+    letter-spacing: 1px;
+    border-radius: 10px;
+    border: 1px solid var(--okko-border-2);
+    opacity: 0;
+    transform: translateY(-6px);
+    transition: 0.2s ease;
+    text-transform: uppercase;
+    backdrop-filter: blur(4px);
 }
-.swipe-indicator.show{ opacity:1; transform: translateY(0) }
-.swipe-indicator.like{ right: 16px; background: rgba(123,97,255,.18); color: var(--accent); border-color: rgba(123,97,255,.32) }
-.swipe-indicator.dislike{ left: 16px; background: rgba(239,68,68,.16); color: var(--danger); border-color: rgba(239,68,68,.32) }
 
-/* Like/dislike swipe end */
-.movie-card.like{ transform: translateX(110%) rotate(16deg); opacity:0 }
-.movie-card.dislike{ transform: translateX(-110%) rotate(-16deg); opacity:0 }
-.movie-card.swiping{ transition:none }
+.swipe-indicator.show {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.swipe-indicator.like {
+    right: 16px;
+    background: var(--okko-purple-light);
+    color: var(--okko-accent);
+    border-color: var(--okko-purple-medium);
+}
+
+.swipe-indicator.dislike {
+    left: 16px;
+    background: rgba(239, 68, 68, 0.16);
+    color: var(--okko-danger);
+    border-color: rgba(239, 68, 68, 0.32);
+}
 
 /* Action buttons */
-.action-buttons{
- display:flex; justify-content:center; gap:28px;
- padding: 16px 14px 18px;
- border-top:1px solid var(--border);
- background: linear-gradient(180deg, rgba(255,255,255,.02), rgba(255,255,255,0));
+.action-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 28px;
+    padding: 16px 14px 18px;
+    border-top: 1px solid var(--okko-border);
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0));
 }
-.action-btn{
- width:64px; height:64px; border-radius:50%;
- display:flex; align-items:center; justify-content:center;
- border: 1px solid var(--border-2);
- background: #0f0f17;
- color: var(--text);
- font-size: 22px;
- cursor:pointer;
- transition: transform .15s ease, box-shadow .2s ease, background .2s ease, border-color .2s ease;
- box-shadow: 0 10px 22px rgba(0,0,0,.35);
- position:relative;
- overflow:hidden;
+
+.action-btn {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--okko-border-2);
+    background: var(--okko-surface);
+    color: var(--okko-text);
+    font-size: 22px;
+    cursor: pointer;
+    transition: transform 0.15s ease, box-shadow 0.2s ease, background 0.2s ease, border-color 0.2s ease;
+    box-shadow: 0 10px 22px rgba(0, 0, 0, 0.35);
+    position: relative;
+    overflow: hidden;
 }
-.action-btn:hover{ transform: translateY(-2px) }
-.action-btn:active{ transform: scale(.96) }
-.dislike-btn{ color: #ff6b6b; }
-.like-btn{ color: var(--accent); }
-.dislike-btn:hover{ box-shadow: 0 12px 30px rgba(239,68,68,.25) }
-.like-btn:hover{ box-shadow: 0 12px 30px rgba(123,97,255,.28) }
+
+.action-btn:hover {
+    transform: translateY(-2px);
+}
+
+.action-btn:active {
+    transform: scale(0.96);
+}
+
+.dislike-btn {
+    color: #ff6b6b;
+}
+
+.like-btn {
+    color: var(--okko-accent);
+}
+
+.dislike-btn:hover {
+    box-shadow: 0 12px 30px rgba(239, 68, 68, 0.25);
+}
+
+.like-btn:hover {
+    box-shadow: 0 12px 30px rgba(123, 97, 255, 0.28);
+}
 
 /* Stats */
-.stats{
- display:flex; gap:12px; justify-content:space-between;
- padding: 10px 14px 18px;
- border-top:1px solid var(--border);
- background: var(--surface);
+.stats {
+    display: flex;
+    gap: 12px;
+    justify-content: space-between;
+    padding: 10px 14px 18px;
+    border-top: 1px solid var(--okko-border);
+    background: var(--okko-surface);
 }
-.stat-item{
- flex:1;
- background: #0f0f17;
- border:1px solid var(--border);
- border-radius: 14px;
- padding: 12px 10px;
- text-align:center;
+
+.stat-item {
+    flex: 1;
+    background: var(--okko-surface);
+    border: 1px solid var(--okko-border);
+    border-radius: 14px;
+    padding: 12px 10px;
+    text-align: center;
 }
-.stat-number{
- display:block;
- font-weight: 900;
- font-size: 22px;
+
+.stat-number {
+    display: block;
+    font-weight: 900;
+    font-size: 22px;
+    color: var(--okko-text);
 }
-.stat-label{
- margin-top: 4px;
- color: var(--muted-2);
- font-size: 12px;
+
+.stat-label {
+    margin-top: 4px;
+    color: var(--okko-text-muted-2);
+    font-size: 12px;
 }
 
 /* No more movies */
-.no-more-movies{
- position:absolute; inset:0;
- display:none;
- align-items:center; justify-content:center;
- text-align:center;
+.no-more-movies {
+    position: absolute;
+    inset: 0;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
 }
-.no-movies-content i{ display:none }
-.no-movies-content h2{ font-size: 22px; margin-bottom: 6px }
-.no-movies-content p{ color: var(--muted); margin-bottom: 14px }
-.reset-btn{
- display:inline-flex; align-items:center; gap:8px;
- padding: 10px 14px;
- background: var(--accent);
- color:#fff; border:0; border-radius: 12px;
- font-weight: 700;
- cursor:pointer;
- transition: filter .2s ease, transform .15s ease, box-shadow .2s ease;
- box-shadow: 0 10px 26px rgba(123,97,255,.3);
+
+.no-movies-content i {
+    display: none;
 }
-.reset-btn:hover{ filter: brightness(1.06) }
-.reset-btn:active{ transform: translateY(1px) }
+
+.no-movies-content h2 {
+    font-size: 22px;
+    margin-bottom: 6px;
+    color: var(--okko-text);
+}
+
+.no-movies-content p {
+    color: var(--okko-text-muted);
+    margin-bottom: 14px;
+}
+
+.reset-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 14px;
+    background: var(--okko-accent);
+    color: #fff;
+    border: 0;
+    border-radius: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: filter 0.2s ease, transform 0.15s ease, box-shadow 0.2s ease;
+    box-shadow: 0 10px 26px rgba(123, 97, 255, 0.3);
+}
+
+.reset-btn:hover {
+    filter: brightness(1.06);
+}
+
+.reset-btn:active {
+    transform: translateY(1px);
+}
 
 /* Loading screen */
-.loading-screen{
- position: fixed; inset:0;
- display:flex; flex-direction:column; align-items:center; justify-content:center;
- background: radial-gradient(900px 650px at 50% -10%, rgba(123,97,255,.1), transparent 60%) , var(--bg);
- z-index:1000; color:var(--text);
+.loading-screen {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: radial-gradient(900px 650px at 50% -10%, rgba(123, 97, 255, 0.1), transparent 60%), var(--okko-bg);
+    z-index: 1000;
+    color: var(--okko-text);
 }
-.loading-spinner{ font-size: 40px; color: var(--accent); animation: spin 1.2s linear infinite }
-.loading-screen p{ margin-top: 14px; color: var(--muted) }
-.loading-screen.hidden{ opacity:0; visibility:hidden; transition: .35s ease }
 
-@keyframes spin{ to{ transform:rotate(360deg) } }
+.loading-spinner {
+    font-size: 40px;
+    color: var(--okko-accent);
+    animation: spin 1.2s linear infinite;
+}
 
-/* Responsive */
-@media (max-width: 480px){
- .app-container{ margin:10px; border-radius:18px }
- .cards-container{ height: 500px }
- .action-btn{ width:56px; height:56px; font-size:20px }
+.loading-screen p {
+    margin-top: 14px;
+    color: var(--okko-text-muted);
+}
+
+.loading-screen.hidden {
+    opacity: 0;
+    visibility: hidden;
+    transition: 0.35s ease;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Card enter animation */
+.movie-card.enter {
+    animation: cardEnter 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes cardEnter {
+    0% {
+        opacity: 0;
+        transform: scale(0.8) translateY(50px);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+/* Responsive design */
+@media (max-width: 480px) {
+    .app-container {
+        margin: 10px;
+        border-radius: 18px;
+    }
+    
+    .cards-container {
+        height: 500px;
+    }
+    
+    .action-btn {
+        width: 56px;
+        height: 56px;
+        font-size: 20px;
+    }
+    
+    .movie-title {
+        font-size: 1.8rem;
+    }
+    
+    .app-title {
+        font-size: 2.2rem;
+    }
+}
+
+/* Touch device optimizations */
+@media (hover: none) and (pointer: coarse) {
+    .action-btn:hover {
+        transform: none;
+    }
+    
+    .action-btn:active {
+        transform: scale(0.95);
+    }
 }

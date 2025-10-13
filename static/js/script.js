@@ -67,8 +67,8 @@ function createMovieCard(movie) {
                 <span>${movie.rating}/10</span>
             </div>
         </div>
-        <div class="swipe-indicator like">❤️ НРАВИТСЯ</div>
-        <div class="swipe-indicator dislike">💔 НЕ НРАВИТСЯ</div>
+        <div class="swipe-indicator like">НРАВИТСЯ</div>
+        <div class="swipe-indicator dislike">НЕ НРАВИТСЯ</div>
     `;
 
     return card;
