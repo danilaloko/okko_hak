@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Movie Swiper - Найдите свой идеальный фильм</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <meta name="theme-color" content="#0f0f23">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Заголовок -->
+        <header class="header">
+            <h1 class="app-title">
+                <i class="fas fa-film"></i>
+                Movie Swiper
+            </h1>
+            <p class="app-subtitle">✨ Свайпайте фильмы как в Tinder! ✨</p>
+        </header>
+
+        <!-- Основная область с карточками -->
+        <main class="main-content">
+            <div class="cards-container" id="cardsContainer">
+                <!-- Карточки фильмов будут добавлены динамически -->
+            </div>
+
+            <!-- Сообщение когда фильмы закончились -->
+            <div class="no-more-movies" id="noMoreMovies" style="display: none;">
+                <div class="no-movies-content">
+                    <i class="fas fa-check-circle"></i>
+                    <h2>🎉 Отлично!</h2>
+                    <p>Вы просмотрели все фильмы</p>
+                    <button class="reset-btn" onclick="resetMovies()">
+                        <i class="fas fa-refresh"></i>
+                        Начать заново
+                    </button>
+                </div>
+            </div>
+        </main>
+
+        <!-- Кнопки действий -->
+        <div class="action-buttons" id="actionButtons">
+            <button class="action-btn dislike-btn" onclick="swipeMovie('dislike')">
+                <i class="fas fa-times"></i>
+            </button>
+            <button class="action-btn like-btn" onclick="swipeMovie('like')">
+                <i class="fas fa-heart"></i>
+            </button>
+        </div>
+
+        <!-- Статистика -->
+        <div class="stats" id="stats">
+            <div class="stat-item">
+                <span class="stat-number" id="likedCount">0</span>
+                <span class="stat-label">❤️ Понравилось</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-number" id="dislikedCount">0</span>
+                <span class="stat-label">💔 Не понравилось</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Загрузочный экран -->
+    <div class="loading-screen" id="loadingScreen">
+        <div class="loading-spinner">
+            <i class="fas fa-film"></i>
+        </div>
+        <p>🎬 Загружаем фильмы...</p>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+</html>
