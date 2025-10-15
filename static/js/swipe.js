@@ -10,6 +10,7 @@ let swipeCount = 0;
 let totalSwipes = 20;
 let isAnimating = false;
 let currentCard = null;
+let isInitialized = false;
 
 // Инициализация
 document.addEventListener('DOMContentLoaded', function() {
@@ -18,10 +19,13 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // Основная инициализация
 function initializeSwipe() {
+    if (isInitialized) return;
+    
     hideLoadingScreen();
     setupEventListeners();
     loadCards();
     updateProgress();
+    isInitialized = true;
 }
 
 // Скрытие загрузочного экрана
@@ -100,6 +104,9 @@ function setupEventListeners() {
     if (continueSwipingBtn) {
         continueSwipingBtn.addEventListener('click', () => {
             hideCompletionScreen();
+            // Сбрасываем состояние и загружаем новые карточки
+            currentCardIndex = 0;
+            swipeCount = 0;
             loadCards();
         });
     }
@@ -126,7 +133,9 @@ function switchContentType(type) {
         }
     });
     
-    // Загружаем новые карточки
+    // Сбрасываем состояние и загружаем новые карточки
+    currentCardIndex = 0;
+    swipeCount = 0;
     loadCards();
 }
 
@@ -139,7 +148,7 @@ async function loadCards() {
         currentCardIndex = 0;
         swipeCount = 0;
         
-        displayCards();
+        displayCurrentCard();
         updateProgress();
     } catch (error) {
         console.error('Ошибка загрузки карточек:', error);
@@ -175,6 +184,24 @@ function generateMockCards(type) {
             year: 2022,
             genre: 'Боевик',
             rating: 8.3
+        },
+        {
+            id: 4,
+            title: 'Бегущий по лезвию 2049',
+            description: 'Продолжение культового фильма о репликантах в будущем',
+            poster: 'https://images.unsplash.com/photo-1518709268805-4e9042af2176?w=400&h=600&fit=crop',
+            year: 2017,
+            genre: 'Фантастика',
+            rating: 8.0
+        },
+        {
+            id: 5,
+            title: 'Матрица',
+            description: 'Культовая фантастическая трилогия о виртуальной реальности',
+            poster: 'https://images.unsplash.com/photo-1440404653325-ab127d49abc1?w=400&h=600&fit=crop',
+            year: 1999,
+            genre: 'Фантастика',
+            rating: 8.7
         }
     ];
     
@@ -182,20 +209,20 @@ function generateMockCards(type) {
     return baseCards;
 }
 
-// Отображение карточек
-function displayCards() {
+// Отображение текущей карточки
+function displayCurrentCard() {
     const cardsStack = document.getElementById('cardsStack');
     cardsStack.innerHTML = '';
     
-    // Показываем первые 3 карточки
-    const cardsToShow = Math.min(3, currentCards.length - currentCardIndex);
-    
-    for (let i = 0; i < cardsToShow; i++) {
-        const cardIndex = currentCardIndex + i;
-        if (cardIndex < currentCards.length) {
-            const card = createSwipeCard(currentCards[cardIndex], i);
-            cardsStack.appendChild(card);
-        }
+    // Показываем только текущую карточку
+    if (currentCardIndex < currentCards.length) {
+        const card = createSwipeCard(currentCards[currentCardIndex], 0);
+        cardsStack.appendChild(card);
+        
+        // Анимация появления
+        setTimeout(() => {
+            card.classList.add('enter');
+        }, 100);
     }
 }
 
@@ -243,19 +270,17 @@ function setupTouchEvents() {
     cardsStack.addEventListener('mouseup', handleMouseUp);
     
     function handleTouchStart(e) {
-        if (isAnimating) return;
+        if (isAnimating || currentCardIndex >= currentCards.length) return;
         
         const touch = e.touches[0];
         startX = touch.clientX;
         startY = touch.clientY;
         isDragging = true;
         
-        // Всегда получаем актуальную верхнюю карточку
-        currentCard = getTopCard();
-        console.log('Touch start - currentCard:', currentCard);
+        // Получаем текущую карточку
+        currentCard = getCurrentCard();
         if (currentCard) {
             currentCard.classList.add('swiping');
-            console.log('Добавлен класс swiping');
         }
     }
     
@@ -286,20 +311,17 @@ function setupTouchEvents() {
         } else {
             resetCardPosition();
         }
-        
-        // Сбрасываем текущую карточку
-        currentCard = null;
     }
     
     function handleMouseDown(e) {
-        if (isAnimating) return;
+        if (isAnimating || currentCardIndex >= currentCards.length) return;
         
         startX = e.clientX;
         startY = e.clientY;
         isDragging = true;
         
-        // Всегда получаем актуальную верхнюю карточку
-        currentCard = getTopCard();
+        // Получаем текущую карточку
+        currentCard = getCurrentCard();
         if (currentCard) {
             currentCard.classList.add('swiping');
         }
@@ -332,18 +354,13 @@ function setupTouchEvents() {
         } else {
             resetCardPosition();
         }
-        
-        // Сбрасываем текущую карточку
-        currentCard = null;
     }
 }
 
-// Получение верхней карточки
-function getTopCard() {
+// Получение текущей карточки
+function getCurrentCard() {
     const cards = document.querySelectorAll('.swipe-card');
-    console.log('Всего карточек:', cards.length);
     if (cards.length > 0) {
-        console.log('Верхняя карточка:', cards[0]);
         return cards[0];
     }
     return null;
@@ -351,43 +368,40 @@ function getTopCard() {
 
 // Обновление позиции карточки
 function updateCardPosition(deltaX, deltaY) {
-    // Всегда получаем актуальную верхнюю карточку
-    const topCard = getTopCard();
-    if (!topCard) return;
+    const currentCard = getCurrentCard();
+    if (!currentCard) return;
     
     const rotation = deltaX * 0.1;
     const opacity = Math.max(0.3, 1 - Math.abs(deltaX) / 200);
     
-    topCard.style.transform = `translate(${deltaX}px, ${deltaY}px) rotate(${rotation}deg)`;
-    topCard.style.opacity = opacity;
+    currentCard.style.transform = `translate(${deltaX}px, ${deltaY}px) rotate(${rotation}deg)`;
+    currentCard.style.opacity = opacity;
 }
 
 // Обновление индикаторов свайпа
 function updateSwipeIndicators(deltaX) {
-    // Всегда получаем актуальную верхнюю карточку
-    const topCard = getTopCard();
-    if (!topCard) return;
+    const currentCard = getCurrentCard();
+    if (!currentCard) return;
     
     // Убираем все цветовые индикаторы
-    topCard.classList.remove('swipe-like', 'swipe-dislike', 'swipe-superlike');
+    currentCard.classList.remove('swipe-like', 'swipe-dislike', 'swipe-superlike');
     
     // Добавляем соответствующий цветовой индикатор
     if (deltaX > 50) {
-        topCard.classList.add('swipe-like');
+        currentCard.classList.add('swipe-like');
     } else if (deltaX < -50) {
-        topCard.classList.add('swipe-dislike');
+        currentCard.classList.add('swipe-dislike');
     }
 }
 
 // Сброс позиции карточки
 function resetCardPosition() {
-    // Всегда получаем актуальную верхнюю карточку
-    const topCard = getTopCard();
-    if (!topCard) return;
+    const currentCard = getCurrentCard();
+    if (!currentCard) return;
     
-    topCard.style.transform = '';
-    topCard.style.opacity = '';
-    topCard.classList.remove('swiping', 'swipe-like', 'swipe-dislike', 'swipe-superlike');
+    currentCard.style.transform = '';
+    currentCard.style.opacity = '';
+    currentCard.classList.remove('swiping', 'swipe-like', 'swipe-dislike', 'swipe-superlike');
 }
 
 // Обработка действия свайпа
@@ -395,16 +409,16 @@ async function handleSwipeAction(action) {
     if (isAnimating || currentCardIndex >= currentCards.length) return;
     
     isAnimating = true;
-    const topCard = getTopCard();
+    const currentCard = getCurrentCard();
     
-    if (topCard) {
+    if (currentCard) {
         // Убираем все классы и inline стили
-        topCard.classList.remove('swipe-like', 'swipe-dislike', 'swipe-superlike', 'swiping');
-        topCard.style.transform = '';
-        topCard.style.opacity = '';
+        currentCard.classList.remove('swipe-like', 'swipe-dislike', 'swipe-superlike', 'swiping');
+        currentCard.style.transform = '';
+        currentCard.style.opacity = '';
         
         // Добавляем класс анимации
-        topCard.classList.add(action);
+        currentCard.classList.add(action);
         
         // Отправляем данные на сервер
         await sendSwipeAction(action, currentCards[currentCardIndex]);
@@ -420,11 +434,11 @@ async function handleSwipeAction(action) {
             navigator.vibrate(50);
         }
         
-        // Загружаем следующую карточку после анимации
+        // Показываем следующую карточку после анимации
         setTimeout(() => {
-            loadNextCard();
+            showNextCard();
             isAnimating = false;
-        }, 500); // Увеличиваем время для завершения анимации
+        }, 500);
     }
 }
 
@@ -451,43 +465,16 @@ async function sendSwipeAction(action, cardData) {
     }
 }
 
-// Загрузка следующей карточки
-function loadNextCard() {
-    const cardsStack = document.getElementById('cardsStack');
-    
-    console.log('loadNextCard - currentCardIndex:', currentCardIndex, 'swipeCount:', swipeCount);
-    
-    // Удаляем верхнюю карточку
-    const topCard = getTopCard();
-    if (topCard) {
-        console.log('Удаляем карточку:', topCard);
-        topCard.remove();
-    }
-    
-    // Обновляем z-index для оставшихся карточек
-    const remainingCards = document.querySelectorAll('.swipe-card');
-    console.log('Оставшиеся карточки:', remainingCards.length);
-    remainingCards.forEach((card, index) => {
-        card.style.zIndex = 10 - index;
-    });
-    
+// Показ следующей карточки
+function showNextCard() {
     // Проверяем, нужно ли показать экран завершения
     if (swipeCount >= totalSwipes || currentCardIndex >= currentCards.length) {
         showCompletionScreen();
         return;
     }
     
-    // Добавляем новую карточку, если есть
-    if (currentCardIndex < currentCards.length) {
-        const newCard = createSwipeCard(currentCards[currentCardIndex], 0);
-        console.log('Создаем новую карточку:', newCard);
-        cardsStack.appendChild(newCard);
-        
-        // Анимация появления
-        setTimeout(() => {
-            newCard.classList.add('enter');
-        }, 100);
-    }
+    // Показываем следующую карточку
+    displayCurrentCard();
 }
 
 // Обновление прогресса
@@ -533,11 +520,9 @@ function hideCompletionScreen() {
 
 // Показать информацию о карточке
 function showCardInfo() {
-    const currentCard = getTopCard();
-    if (!currentCard) return;
+    if (currentCardIndex >= currentCards.length) return;
     
-    const cardId = currentCard.dataset.cardId;
-    const cardData = currentCards.find(card => card.id == cardId);
+    const cardData = currentCards[currentCardIndex];
     
     if (cardData) {
         const modal = document.getElementById('cardModal');
