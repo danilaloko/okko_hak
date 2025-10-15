@@ -77,10 +77,12 @@ body {
 .app-container {
     max-width: 420px;
     margin: 0 auto;
-    min-height: 100vh;
+    height: 100vh;
     background: var(--okko-surface);
     position: relative;
     overflow: hidden;
+    display: flex;
+    flex-direction: column;
 }
 
 /* Навигационная панель */
@@ -1138,10 +1140,12 @@ body {
 /* Контейнер свайпов */
 .swipe-container {
     position: relative;
-    height: 500px;
+    flex: 1;
     margin: var(--okko-spacing-lg);
     border-radius: var(--okko-radius-lg);
     overflow: hidden;
+    display: flex;
+    flex-direction: column;
 }
 
 .cards-stack {
@@ -1217,6 +1221,7 @@ body {
     padding: var(--okko-spacing-lg);
     background: var(--okko-surface-2);
     border-top: 1px solid var(--okko-border);
+    flex-shrink: 0;
 }
 
 .control-btn {
@@ -1310,6 +1315,7 @@ body {
     padding: var(--okko-spacing-md) var(--okko-spacing-lg);
     background: var(--okko-surface-2);
     border-top: 1px solid var(--okko-border);
+    flex-shrink: 0;
 }
 
 .progress-bar {
