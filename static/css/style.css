@@ -1567,29 +1567,47 @@ body {
 
 .guess-container {
     background: var(--okko-surface-2);
-    border: 1px solid var(--okko-border);
+    border: 2px solid var(--okko-accent);
     border-radius: var(--okko-radius-lg);
     padding: var(--okko-spacing-lg);
     margin-bottom: var(--okko-spacing-xl);
 }
 
+.guess-header {
+    text-align: center;
+    margin-bottom: var(--okko-spacing-lg);
+}
+
+.guess-header h3 {
+    color: var(--okko-text);
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin: 0;
+}
+
 .guess-card {
     display: flex;
     gap: var(--okko-spacing-lg);
-    align-items: center;
+    align-items: flex-start;
+    padding: var(--okko-spacing-md);
+    background: var(--okko-surface-3);
+    border-radius: var(--okko-radius-md);
+    border: 1px solid var(--okko-border);
+    margin-bottom: var(--okko-spacing-lg);
 }
 
 .guess-poster {
-    width: 120px;
-    height: 180px;
+    width: 100px;
+    height: 150px;
     background-size: cover;
     background-position: center;
-    border-radius: var(--okko-radius-md);
+    border-radius: var(--okko-radius-sm);
     flex-shrink: 0;
 }
 
 .guess-info {
     flex: 1;
+    min-width: 0;
 }
 
 .guess-title {
@@ -1597,6 +1615,9 @@ body {
     font-weight: 700;
     color: var(--okko-text);
     margin-bottom: var(--okko-spacing-xs);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .guess-year {
@@ -1605,49 +1626,105 @@ body {
     margin-bottom: var(--okko-spacing-sm);
 }
 
-.guess-confidence {
+.guess-description {
     font-size: 0.85rem;
+    color: var(--okko-text-muted);
+    line-height: 1.4;
+    margin-bottom: var(--okko-spacing-sm);
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.guess-confidence {
+    font-size: 0.8rem;
     color: var(--okko-accent);
     font-weight: 600;
+    background: var(--okko-surface-2);
+    padding: var(--okko-spacing-xs) var(--okko-spacing-sm);
+    border-radius: var(--okko-radius-sm);
+    display: inline-block;
 }
 
 .guess-actions {
     display: flex;
     gap: var(--okko-spacing-md);
+    justify-content: center;
 }
 
 .guess-btn {
-    padding: var(--okko-spacing-sm) var(--okko-spacing-md);
+    padding: var(--okko-spacing-md) var(--okko-spacing-lg);
     border: none;
     border-radius: var(--okko-radius-md);
-    font-size: 0.9rem;
+    font-size: 1rem;
     font-weight: 600;
     cursor: pointer;
     transition: all 0.2s ease;
     display: flex;
     align-items: center;
-    gap: var(--okko-spacing-xs);
+    gap: var(--okko-spacing-sm);
+    min-width: 140px;
+    justify-content: center;
 }
 
-.correct-btn {
-    background: var(--okko-success);
+.guess-btn.watch-btn {
+    background: var(--okko-accent);
     color: white;
 }
 
-.correct-btn:hover {
-    background: #1ea54a;
-    transform: translateY(-1px);
+.guess-btn.watch-btn:hover {
+    background: var(--okko-accent-hover);
+    transform: translateY(-2px);
 }
 
-.wrong-btn {
-    background: var(--okko-surface-3);
-    color: var(--okko-text);
-    border: 1px solid var(--okko-border);
+.guess-btn.watch-btn i {
+    font-size: 0.9rem;
 }
 
-.wrong-btn:hover {
-    background: var(--okko-surface);
-    transform: translateY(-1px);
+.guess-btn.no-btn {
+    background: var(--okko-danger);
+    color: white;
+}
+
+.guess-btn.no-btn:hover {
+    background: var(--okko-danger-hover);
+    transform: translateY(-2px);
+}
+
+/* Адаптивность для Okkonator */
+@media (max-width: 768px) {
+    .guess-card {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .guess-poster {
+        width: 80px;
+        height: 120px;
+        margin: 0 auto;
+    }
+    
+    .guess-title {
+        font-size: 1.1rem;
+    }
+    
+    .guess-description {
+        font-size: 0.8rem;
+        -webkit-line-clamp: 2;
+        line-clamp: 2;
+    }
+    
+    .guess-actions {
+        flex-direction: column;
+        gap: var(--okko-spacing-sm);
+    }
+    
+    .guess-btn {
+        min-width: auto;
+        width: 100%;
+    }
 }
 
 .okkonator-actions {

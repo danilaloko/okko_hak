@@ -78,25 +78,29 @@
 
             <!-- Угаданный кандидат -->
             <div class="guess-container" id="guessContainer" style="display: none;">
+                <div class="guess-header">
+                    <h3>Возможно, вы имели в виду:</h3>
+                </div>
                 <div class="guess-card">
                     <div class="guess-poster" id="guessPoster"></div>
                     <div class="guess-info">
                         <div class="guess-title" id="guessTitle"></div>
                         <div class="guess-year" id="guessYear"></div>
+                        <div class="guess-description" id="guessDescription"></div>
                         <div class="guess-confidence">
                             Уверенность: <span id="guessConfidence"></span>%
                         </div>
                     </div>
-                    <div class="guess-actions">
-                        <button class="guess-btn correct-btn" id="correctBtn">
-                            <i class="fas fa-check"></i>
-                            Да, это он!
-                        </button>
-                        <button class="guess-btn wrong-btn" id="wrongBtn">
-                            <i class="fas fa-times"></i>
-                            Нет, не он
-                        </button>
-                    </div>
+                </div>
+                <div class="guess-actions">
+                    <button class="guess-btn watch-btn" id="watchBtn">
+                        <i class="fas fa-play"></i>
+                        Смотреть
+                    </button>
+                    <button class="guess-btn no-btn" id="wrongBtn">
+                        <i class="fas fa-times"></i>
+                        Нет, не он
+                    </button>
                 </div>
             </div>
 

@@ -67,12 +67,12 @@ function setupEventListeners() {
     });
     
     // Кнопки угаданного кандидата
-    const correctBtn = document.getElementById('correctBtn');
+    const watchBtn = document.getElementById('watchBtn');
     const wrongBtn = document.getElementById('wrongBtn');
     
-    if (correctBtn) {
-        correctBtn.addEventListener('click', () => {
-            handleGuessResponse(true);
+    if (watchBtn) {
+        watchBtn.addEventListener('click', () => {
+            handleWatchMovie();
         });
     }
     if (wrongBtn) {
@@ -214,6 +214,7 @@ function showGuessedCandidate() {
     const guessPoster = document.getElementById('guessPoster');
     const guessTitle = document.getElementById('guessTitle');
     const guessYear = document.getElementById('guessYear');
+    const guessDescription = document.getElementById('guessDescription');
     const guessConfidence = document.getElementById('guessConfidence');
     
     if (guessContainer) {
@@ -222,6 +223,7 @@ function showGuessedCandidate() {
             title: 'Blade Runner 2049',
             year: 2017,
             poster: 'https://images.unsplash.com/photo-1518709268805-4e9042af2176?w=400&h=600&fit=crop',
+            description: 'В 2049 году человечество разделено на тех, кто эволюционировал в киборгов, и тех, кто остался человеком. Агент K раскрывает секрет, который может погрузить общество в хаос.',
             confidence: confidence
         };
         
@@ -234,6 +236,9 @@ function showGuessedCandidate() {
         if (guessYear) {
             guessYear.textContent = mockCandidate.year;
         }
+        if (guessDescription) {
+            guessDescription.textContent = mockCandidate.description;
+        }
         if (guessConfidence) {
             guessConfidence.textContent = mockCandidate.confidence;
         }
@@ -242,6 +247,29 @@ function showGuessedCandidate() {
     }
     
     isProcessing = false;
+}
+
+// Обработка перехода к просмотру фильма
+function handleWatchMovie() {
+    // Получаем информацию о фильме
+    const guessTitle = document.getElementById('guessTitle');
+    const guessYear = document.getElementById('guessYear');
+    
+    if (guessTitle && guessYear) {
+        const movieTitle = guessTitle.textContent;
+        const movieYear = guessYear.textContent;
+        
+        // Показываем сообщение об успехе
+        showSuccessMessage(`Переходим к просмотру "${movieTitle}" (${movieYear})`);
+        
+        // В реальном приложении здесь был бы переход на страницу фильма
+        // Например: window.location.href = `/movie/${movieId}`;
+        
+        // Для демонстрации переходим на страницу результатов
+        setTimeout(() => {
+            window.location.href = '/results';
+        }, 2000);
+    }
 }
 
 // Обработка ответа на угаданного кандидата
@@ -270,10 +298,10 @@ function handleGuessResponse(isCorrect) {
 }
 
 // Показать сообщение об успехе
-function showSuccessMessage() {
+function showSuccessMessage(message = 'Отлично! Мы угадали ваш фильм!') {
     const questionText = document.getElementById('questionText');
     if (questionText) {
-        questionText.textContent = 'Отлично! Мы угадали ваш фильм!';
+        questionText.textContent = message;
         questionText.style.color = 'var(--okko-success)';
     }
 }
