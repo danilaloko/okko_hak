@@ -2412,6 +2412,16 @@ textarea::-webkit-scrollbar-thumb:hover,
     transform: translateY(-1px);
 }
 
+.analyze-btn-container {
+    margin-top: var(--okko-spacing-md);
+    width: 100%;
+}
+
+.analyze-btn.full-width {
+    width: 100%;
+    display: block;
+}
+
 .drag-drop-area {
     border: 2px dashed var(--okko-border);
     border-radius: var(--okko-radius-lg);

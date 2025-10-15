@@ -32,7 +32,7 @@
                 </button>
                 <button class="tab-btn" data-tab="describe">
                     <i class="fas fa-comment"></i>
-                    <span>По описанию/голосу</span>
+                    <span>По описанию</span>
                 </button>
             </div>
 
@@ -46,11 +46,9 @@
                     
                     <div class="url-input-container">
                         <input type="url" id="urlInput" placeholder="https://youtube.com/watch?v=..." class="url-input">
-                        <button class="analyze-btn" id="analyzeUrlBtn">
-                            <i class="fas fa-search"></i>
-                            Анализировать
-                        </button>
                     </div>
+                    
+                    
                     
                     <div class="drag-drop-area" id="dragDropArea">
                         <div class="drag-drop-content">
@@ -63,6 +61,12 @@
                             </button>
                             <input type="file" id="fileInput" accept="video/*" style="display: none;">
                         </div>
+                    </div>
+                    <div class="analyze-btn-container">
+                        <button class="analyze-btn full-width" id="analyzeUrlBtn">
+                            <i class="fas fa-search"></i>
+                            Анализировать
+                        </button>
                     </div>
                 </div>
             </div>
@@ -77,16 +81,13 @@
                     
                     <div class="description-input-container">
                         <textarea id="descriptionInput" placeholder="Например: фильм про шахматиста в СССР, снято в тёплых тонах, главный герой играет в шахматы с компьютером..." class="description-textarea"></textarea>
-                        <div class="input-actions">
-                            <button class="voice-record-btn" id="voiceRecordBtn">
-                                <i class="fas fa-microphone"></i>
-                                Записать голос
-                            </button>
-                            <button class="analyze-btn" id="analyzeDescriptionBtn">
-                                <i class="fas fa-search"></i>
-                                Найти фильм
-                            </button>
-                        </div>
+                    </div>
+                    
+                    <div class="analyze-btn-container">
+                        <button class="analyze-btn full-width" id="analyzeDescriptionBtn">
+                            <i class="fas fa-search"></i>
+                            Найти фильм
+                        </button>
                     </div>
                 </div>
             </div>
