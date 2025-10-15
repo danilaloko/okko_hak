@@ -89,9 +89,10 @@ body {
 .nav-bar {
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    justify-content: center;
     padding: var(--okko-spacing-md) var(--okko-spacing-lg);
     background: var(--okko-surface);
+    position: relative;
     border-bottom: 1px solid var(--okko-border);
     position: sticky;
     top: 0;
@@ -149,6 +150,8 @@ body {
     overflow-y: auto;
     display: flex;
     flex-direction: column;
+    justify-content: center;
+    align-items: center;
 }
 
 /* Приветственная секция */
@@ -911,7 +914,8 @@ body {
 
 /* Режимы работы */
 .modes-section {
-    margin-bottom: var(--okko-spacing-2xl);
+    width: 100%;
+    max-width: 400px;
 }
 
 .modes-grid {
@@ -1060,6 +1064,8 @@ body {
 
 .back-btn {
     color: var(--okko-text-muted);
+    position: absolute;
+    left: var(--okko-spacing-lg);
 }
 
 .back-btn:hover {
