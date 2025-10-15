@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Чат - ökko Discovery</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <meta name="theme-color" content="#000000">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Навигационная панель -->
+        <nav class="nav-bar">
+            <button class="nav-btn back-btn" id="backBtn">
+                <i class="fas fa-arrow-left"></i>
+            </button>
+            <div class="nav-title">Чат</div>
+            <button class="nav-btn profile-btn" id="profileBtn">
+                <i class="fas fa-user"></i>
+            </button>
+        </nav>
+
+        <!-- Основной контент -->
+        <main class="chat-content">
+            <!-- Сайд-панель профиля -->
+            <div class="profile-sidebar" id="profileSidebar">
+                <div class="sidebar-header">
+                    <h3>Ваш профиль вкуса</h3>
+                    <button class="sidebar-close" id="sidebarClose">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="profile-content">
+                    <div class="profile-section">
+                        <h4>Любимые жанры</h4>
+                        <div class="profile-tags" id="likedGenres">
+                            <!-- Теги будут добавлены динамически -->
+                        </div>
+                    </div>
+                    <div class="profile-section">
+                        <h4>Нелюбимые жанры</h4>
+                        <div class="profile-tags" id="dislikedGenres">
+                            <!-- Теги будут добавлены динамически -->
+                        </div>
+                    </div>
+                    <div class="profile-section">
+                        <h4>Любимые актёры</h4>
+                        <div class="profile-tags" id="likedActors">
+                            <!-- Теги будут добавлены динамически -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Чат-интерфейс -->
+            <div class="chat-interface">
+                <!-- История сообщений -->
+                <div class="chat-messages" id="chatMessages">
+                    <div class="message assistant-message">
+                        <div class="message-avatar">
+                            <i class="fas fa-robot"></i>
+                        </div>
+                        <div class="message-content">
+                            <div class="message-text">
+                                Привет! Расскажите, что вы хотите посмотреть? Я помогу найти идеальный фильм для вас.
+                            </div>
+                            <div class="message-time">только что</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Быстрые подсказки -->
+                <div class="quick-suggestions" id="quickSuggestions">
+                    <div class="suggestions-title">Попробуйте:</div>
+                    <div class="suggestions-chips">
+                        <button class="suggestion-chip" data-suggestion="что-то лёгкое">Что-то лёгкое</button>
+                        <button class="suggestion-chip" data-suggestion="45-60 мин">45-60 мин</button>
+                        <button class="suggestion-chip" data-suggestion="без насилия">Без насилия</button>
+                        <button class="suggestion-chip" data-suggestion="как True Detective">Как True Detective</button>
+                        <button class="suggestion-chip" data-suggestion="для компании">Для компании</button>
+                        <button class="suggestion-chip" data-suggestion="романтическое">Романтическое</button>
+                    </div>
+                </div>
+
+                <!-- Поле ввода -->
+                <div class="chat-input-container">
+                    <div class="input-wrapper">
+                        <input type="text" id="messageInput" placeholder="Опишите, что хотите посмотреть..." maxlength="500">
+                        <button class="input-btn voice-btn" id="voiceBtn">
+                            <i class="fas fa-microphone"></i>
+                        </button>
+                        <button class="input-btn send-btn" id="sendBtn">
+                            <i class="fas fa-paper-plane"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+
+    <!-- Загрузочный экран -->
+    <div class="loading-screen" id="loadingScreen">
+        <div class="loading-content">
+            <div class="loading-spinner">
+                <div class="spinner-ring"></div>
+            </div>
+            <h3 class="loading-title">Ищем рекомендации</h3>
+            <p class="loading-text">Анализируем ваши предпочтения...</p>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/chat.js') }}"></script>
+</body>
+</html>

@@ -6,6 +6,25 @@ import random
 app = Flask(__name__)
 CORS(app)
 
+# Глобальные переменные для состояния пользователя
+user_profile = {
+    'mood_joy_sadness': 0.5,  # 0 = грусть, 1 = радость
+    'mood_calm_energy': 0.5,  # 0 = спокойствие, 1 = энергия
+    'alone_company': 'alone',  # 'alone' или 'company'
+    'duration': 'short',  # 'short' или 'full'
+    'preferences': {
+        'liked_movies': [],
+        'disliked_movies': [],
+        'liked_genres': [],
+        'disliked_genres': [],
+        'liked_actors': [],
+        'disliked_actors': []
+    },
+    'okkonator_answers': [],
+    'chat_history': [],
+    'identified_movies': []
+}
+
 # Примеры данных фильмов
 movies_data = [
     {
@@ -73,9 +92,37 @@ movies_data = [
 # Глобальная переменная для отслеживания текущего индекса фильма
 current_movie_index = 0
 
+# Главный хаб
 @app.route('/')
-def index():
-    return render_template('index.html')
+def hub():
+    return render_template('hub.html')
+
+# Режимы
+@app.route('/swipe')
+def swipe():
+    swipe_type = request.args.get('type', 'movies')
+    return render_template('swipe.html', swipe_type=swipe_type)
+
+@app.route('/okkonator')
+def okkonator():
+    return render_template('okkonator.html')
+
+@app.route('/chat')
+def chat():
+    return render_template('chat.html')
+
+@app.route('/identify')
+def identify():
+    tab = request.args.get('tab', 'link')
+    return render_template('identify.html', tab=tab)
+
+@app.route('/results')
+def results():
+    return render_template('results.html')
+
+@app.route('/demo')
+def demo():
+    return render_template('demo.html')
 
 @app.route('/api/movies')
 def get_movies():
@@ -121,7 +168,226 @@ def reset_movies():
     current_movie_index = 0
     return jsonify({"success": True, "message": "Индекс сброшен"})
 
+# API для настроек профиля
+@app.route('/api/profile/update', methods=['POST'])
+def update_profile():
+    """Обновить настройки профиля"""
+    global user_profile
+    data = request.get_json()
+    
+    if 'mood_joy_sadness' in data:
+        user_profile['mood_joy_sadness'] = float(data['mood_joy_sadness'])
+    if 'mood_calm_energy' in data:
+        user_profile['mood_calm_energy'] = float(data['mood_calm_energy'])
+    if 'alone_company' in data:
+        user_profile['alone_company'] = data['alone_company']
+    if 'duration' in data:
+        user_profile['duration'] = data['duration']
+    
+    return jsonify({"success": True, "profile": user_profile})
+
+@app.route('/api/profile')
+def get_profile():
+    """Получить текущий профиль"""
+    return jsonify(user_profile)
+
+# API для свайпов
+@app.route('/api/swipe/action', methods=['POST'])
+def swipe_action():
+    """Обработать действие свайпа"""
+    global user_profile
+    data = request.get_json()
+    action = data.get('action')  # 'like', 'dislike', 'superlike'
+    content = data.get('content')
+    content_type = data.get('type', 'movies')
+    
+    if action == 'like' or action == 'superlike':
+        if content_type == 'movies':
+            user_profile['preferences']['liked_movies'].append(content['id'])
+        elif content_type == 'genres':
+            user_profile['preferences']['liked_genres'].append(content)
+        elif content_type == 'actors':
+            user_profile['preferences']['liked_actors'].append(content)
+    elif action == 'dislike':
+        if content_type == 'movies':
+            user_profile['preferences']['disliked_movies'].append(content['id'])
+        elif content_type == 'genres':
+            user_profile['preferences']['disliked_genres'].append(content)
+        elif content_type == 'actors':
+            user_profile['preferences']['disliked_actors'].append(content)
+    
+    return jsonify({"success": True, "profile": user_profile})
+
+# API для Окконатора
+@app.route('/api/okkonator/question')
+def get_okkonator_question():
+    """Получить следующий вопрос для Окконатора"""
+    questions = [
+        "Это более современный, чем 2010?",
+        "Действие происходит в США?",
+        "Больше драмы, чем экшена?",
+        "Главный герой - мужчина?",
+        "Есть элементы фантастики?",
+        "Фильм длится больше 2 часов?",
+        "Есть романтическая линия?",
+        "Это комедия?",
+        "Есть насилие?",
+        "Фильм получил Оскар?"
+    ]
+    
+    question_index = len(user_profile['okkonator_answers'])
+    if question_index < len(questions):
+        return jsonify({
+            "question": questions[question_index],
+            "question_id": question_index,
+            "confidence": min(question_index * 10, 90)
+        })
+    else:
+        return jsonify({"message": "Вопросы закончились"})
+
+@app.route('/api/okkonator/answer', methods=['POST'])
+def submit_okkonator_answer():
+    """Отправить ответ на вопрос Окконатора"""
+    data = request.get_json()
+    answer = data.get('answer')  # 'yes', 'no', 'maybe'
+    question_id = data.get('question_id')
+    
+    user_profile['okkonator_answers'].append({
+        'question_id': question_id,
+        'answer': answer
+    })
+    
+    return jsonify({"success": True})
+
+# API для чата
+@app.route('/api/chat/message', methods=['POST'])
+def chat_message():
+    """Отправить сообщение в чат"""
+    data = request.get_json()
+    message = data.get('message')
+    
+    # Простая логика ответа (в реальном приложении здесь будет AI)
+    responses = [
+        "Понял! Рекомендую посмотреть 'Интерстеллар' - отличная фантастика с глубоким сюжетом.",
+        "Учитывая ваши предпочтения, предлагаю 'Дюна' - эпическая фантастическая сага.",
+        "Попробуйте 'Темный рыцарь' - это классика жанра с отличной актерской игрой.",
+        "Рекомендую 'Начало' - сложный, но увлекательный фильм с необычным сюжетом."
+    ]
+    
+    response = random.choice(responses)
+    
+    user_profile['chat_history'].append({
+        'user': message,
+        'assistant': response,
+        'timestamp': 'now'
+    })
+    
+    # Простая логика рекомендаций на основе сообщения
+    recommendations = []
+    message_lower = message.lower()
+    
+    if any(word in message_lower for word in ['короткое', 'короткий', 'быстро', '45', '60', 'минут']):
+        recommendations = [
+            {"id": 1, "title": "Интерстеллар", "reason": "Эпическая фантастика, 169 минут"},
+            {"id": 2, "title": "Дюна", "reason": "Космическая сага, 155 минут"},
+            {"id": 3, "title": "Темный рыцарь", "reason": "Классика жанра, 152 минуты"}
+        ]
+    elif any(word in message_lower for word in ['легкое', 'лёгкое', 'комедия', 'веселое']):
+        recommendations = [
+            {"id": 4, "title": "Барби", "reason": "Яркая комедия с глубоким смыслом"},
+            {"id": 5, "title": "Топ Ган: Мэверик", "reason": "Захватывающий боевик с юмором"},
+            {"id": 6, "title": "Начало", "reason": "Умная фантастика с необычным сюжетом"}
+        ]
+    else:
+        recommendations = [
+            {"id": 1, "title": "Интерстеллар", "reason": "Соответствует вашим предпочтениям"},
+            {"id": 2, "title": "Дюна", "reason": "Эпическая фантастика"},
+            {"id": 3, "title": "Темный рыцарь", "reason": "Классика жанра"}
+        ]
+    
+    return jsonify({
+        "success": True,
+        "response": response,
+        "recommendations": recommendations
+    })
+
+# API для идентификации фильмов
+@app.route('/api/identify/url', methods=['POST'])
+def identify_by_url():
+    """Идентифицировать фильм по URL"""
+    data = request.get_json()
+    url = data.get('url')
+    
+    # Имитация анализа URL
+    candidates = [
+        {"id": 1, "title": "Интерстеллар", "confidence": 85, "reason": "По трейлеру"},
+        {"id": 2, "title": "Дюна", "confidence": 78, "reason": "По визуальному стилю"},
+        {"id": 3, "title": "Бегущий по лезвию 2049", "confidence": 65, "reason": "По атмосфере"}
+    ]
+    
+    return jsonify({
+        "success": True,
+        "candidates": candidates
+    })
+
+@app.route('/api/identify/description', methods=['POST'])
+def identify_by_description():
+    """Идентифицировать фильм по описанию"""
+    data = request.get_json()
+    description = data.get('description')
+    
+    # Имитация анализа описания
+    candidates = [
+        {"id": 1, "title": "Интерстеллар", "confidence": 90, "reason": "Космическая драма о путешествии"},
+        {"id": 2, "title": "Дюна", "confidence": 75, "reason": "Эпическая фантастика"},
+        {"id": 3, "title": "Начало", "confidence": 60, "reason": "Сложный сюжет"}
+    ]
+    
+    return jsonify({
+        "success": True,
+        "candidates": candidates
+    })
+
+# API для результатов
+@app.route('/api/results')
+def get_results():
+    """Получить рекомендации на основе профиля"""
+    # Простая логика рекомендаций
+    recommendations = []
+    
+    # Фильтруем по предпочтениям
+    for movie in movies_data:
+        score = 0
+        if movie['id'] in user_profile['preferences']['liked_movies']:
+            score += 100
+        if movie['id'] in user_profile['preferences']['disliked_movies']:
+            score -= 100
+        
+        # Учитываем настроение
+        if user_profile['mood_joy_sadness'] > 0.7:  # Радостное настроение
+            if 'Комедия' in movie['genre']:
+                score += 20
+        else:  # Грустное настроение
+            if 'Драма' in movie['genre']:
+                score += 20
+        
+        if score > 0:
+            recommendations.append({
+                **movie,
+                'score': score,
+                'reason': f"Подходит по настроению и предпочтениям"
+            })
+    
+    # Сортируем по релевантности
+    recommendations.sort(key=lambda x: x['score'], reverse=True)
+    
+    return jsonify({
+        "recommendations": recommendations[:10],
+        "profile": user_profile
+    })
+
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5000)
+
 
 

@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Демо-режим - ökko Discovery</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <meta name="theme-color" content="#000000">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Навигационная панель -->
+        <nav class="nav-bar">
+            <button class="nav-btn back-btn" id="backBtn">
+                <i class="fas fa-arrow-left"></i>
+            </button>
+            <div class="nav-title">Демо-режим</div>
+            <button class="nav-btn exit-btn" id="exitDemoBtn">
+                <i class="fas fa-times"></i>
+            </button>
+        </nav>
+
+        <!-- Основной контент -->
+        <main class="demo-content">
+            <!-- Прогресс демо -->
+            <div class="demo-progress">
+                <div class="progress-steps">
+                    <div class="step active" data-step="1">
+                        <div class="step-number">1</div>
+                        <div class="step-title">Свайпы</div>
+                    </div>
+                    <div class="step" data-step="2">
+                        <div class="step-number">2</div>
+                        <div class="step-title">Окконатор</div>
+                    </div>
+                    <div class="step" data-step="3">
+                        <div class="step-number">3</div>
+                        <div class="step-title">Узнать фильм</div>
+                    </div>
+                    <div class="step" data-step="4">
+                        <div class="step-number">4</div>
+                        <div class="step-title">Чат</div>
+                    </div>
+                    <div class="step" data-step="5">
+                        <div class="step-number">5</div>
+                        <div class="step-title">Результаты</div>
+                    </div>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="demoProgressFill"></div>
+                </div>
+            </div>
+
+            <!-- Текущий блок демо -->
+            <div class="demo-block" id="demoBlock">
+                <!-- Блок 1: Свайпы -->
+                <div class="demo-step active" id="step1">
+                    <div class="step-header">
+                        <h2>Блок 1: Свайпы (30 сек)</h2>
+                        <p>Свайпайте карточки, чтобы мы поняли ваши предпочтения</p>
+                    </div>
+                    <div class="demo-cards-container">
+                        <div class="demo-card" id="demoCard1">
+                            <div class="card-poster" style="background-image: url('https://images.unsplash.com/photo-1440404653325-ab127d49abc1?w=400&h=600&fit=crop')"></div>
+                            <div class="card-info">
+                                <div class="card-title">Интерстеллар</div>
+                                <div class="card-description">Эпическая космическая драма</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="demo-controls">
+                        <button class="demo-btn dislike-btn">
+                            <i class="fas fa-times"></i>
+                        </button>
+                        <button class="demo-btn like-btn">
+                            <i class="fas fa-heart"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Блок 2: Окконатор -->
+                <div class="demo-step" id="step2">
+                    <div class="step-header">
+                        <h2>Блок 2: Окконатор (40 сек)</h2>
+                        <p>Отвечайте на вопросы, и мы угадаем ваш фильм</p>
+                    </div>
+                    <div class="demo-question">
+                        <div class="question-text">Это более современный, чем 2010?</div>
+                        <div class="demo-answers">
+                            <button class="demo-answer-btn">Да</button>
+                            <button class="demo-answer-btn">Нет</button>
+                            <button class="demo-answer-btn">Не знаю</button>
+                        </div>
+                    </div>
+                    <div class="demo-confidence">
+                        <div class="confidence-bar">
+                            <div class="confidence-fill" style="width: 30%"></div>
+                        </div>
+                        <div class="confidence-text">Уверенность: 30%</div>
+                    </div>
+                </div>
+
+                <!-- Блок 3: Узнать фильм -->
+                <div class="demo-step" id="step3">
+                    <div class="step-header">
+                        <h2>Блок 3: Узнать фильм (30 сек)</h2>
+                        <p>Загрузите ссылку или опишите фильм</p>
+                    </div>
+                    <div class="demo-identify">
+                        <div class="demo-url-input">
+                            <input type="url" placeholder="https://youtube.com/watch?v=..." class="demo-input">
+                            <button class="demo-analyze-btn">Анализировать</button>
+                        </div>
+                        <div class="demo-candidates" style="display: none;">
+                            <div class="candidate-card">
+                                <div class="candidate-poster"></div>
+                                <div class="candidate-info">
+                                    <div class="candidate-title">Интерстеллар</div>
+                                    <div class="candidate-confidence">85% уверенности</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Блок 4: Чат -->
+                <div class="demo-step" id="step4">
+                    <div class="step-header">
+                        <h2>Блок 4: Чат (40 сек)</h2>
+                        <p>Свободный диалог о том, что вы хотите посмотреть</p>
+                    </div>
+                    <div class="demo-chat">
+                        <div class="demo-messages">
+                            <div class="demo-message assistant">
+                                <div class="message-text">Привет! Расскажите, что вы хотите посмотреть?</div>
+                            </div>
+                            <div class="demo-message user">
+                                <div class="message-text">Хочу что-то короткое и лёгкое</div>
+                            </div>
+                            <div class="demo-message assistant">
+                                <div class="message-text">Понял! Рекомендую посмотреть 'Интерстеллар' - отличная фантастика с глубоким сюжетом.</div>
+                            </div>
+                        </div>
+                        <div class="demo-chat-input">
+                            <input type="text" placeholder="Введите сообщение..." class="demo-input">
+                            <button class="demo-send-btn">Отправить</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Блок 5: Результаты -->
+                <div class="demo-step" id="step5">
+                    <div class="step-header">
+                        <h2>Блок 5: Результаты (20 сек)</h2>
+                        <p>Персонализированные рекомендации на основе ваших предпочтений</p>
+                    </div>
+                    <div class="demo-results">
+                        <div class="demo-recommendations">
+                            <div class="demo-recommendation-card">
+                                <div class="recommendation-poster"></div>
+                                <div class="recommendation-info">
+                                    <div class="recommendation-title">Интерстеллар</div>
+                                    <div class="recommendation-reason">Подходит по настроению и предпочтениям</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="demo-actions">
+                            <button class="demo-action-btn">Сохранить сет</button>
+                            <button class="demo-action-btn">Поделиться</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Управление демо -->
+            <div class="demo-controls-panel">
+                <button class="demo-control-btn" id="prevStepBtn" disabled>
+                    <i class="fas fa-arrow-left"></i>
+                    Назад
+                </button>
+                <button class="demo-control-btn primary" id="nextStepBtn">
+                    Далее
+                    <i class="fas fa-arrow-right"></i>
+                </button>
+                <button class="demo-control-btn" id="skipStepBtn">
+                    <i class="fas fa-forward"></i>
+                    Пропустить
+                </button>
+            </div>
+
+            <!-- Метрики демо -->
+            <div class="demo-metrics" id="demoMetrics" style="display: none;">
+                <div class="metrics-header">
+                    <h3>Метрики демо</h3>
+                </div>
+                <div class="metrics-grid">
+                    <div class="metric-card">
+                        <div class="metric-value">2.3 мин</div>
+                        <div class="metric-label">Time-to-choice</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-value">87%</div>
+                        <div class="metric-label">Top-3 acceptance</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-value">0.73</div>
+                        <div class="metric-label">Diversity@K</div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Загрузочный экран -->
+    <div class="loading-screen" id="loadingScreen">
+        <div class="loading-content">
+            <div class="loading-spinner">
+                <div class="spinner-ring"></div>
+            </div>
+            <h3 class="loading-title" id="loadingTitle">Переходим к следующему блоку</h3>
+            <p class="loading-text" id="loadingText">Подготавливаем демонстрацию...</p>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/demo.js') }}"></script>
+</body>
+</html>

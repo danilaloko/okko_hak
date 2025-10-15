@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Результаты - ökko Discovery</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <meta name="theme-color" content="#000000">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Навигационная панель -->
+        <nav class="nav-bar">
+            <button class="nav-btn back-btn" id="backBtn">
+                <i class="fas fa-arrow-left"></i>
+            </button>
+            <div class="nav-title">Рекомендации</div>
+            <button class="nav-btn share-btn" id="shareBtn">
+                <i class="fas fa-share"></i>
+            </button>
+        </nav>
+
+        <!-- Основной контент -->
+        <main class="results-content">
+            <!-- Фильтры -->
+            <div class="filters-section">
+                <div class="filters-header">
+                    <h3>Фильтры</h3>
+                    <button class="filter-toggle" id="filterToggle">
+                        <i class="fas fa-filter"></i>
+                    </button>
+                </div>
+                
+                <div class="filters-content" id="filtersContent">
+                    <div class="filter-group">
+                        <label class="filter-label">Платформа</label>
+                        <select class="filter-select" id="platformFilter">
+                            <option value="">Любая</option>
+                            <option value="okko">Okko</option>
+                            <option value="netflix">Netflix</option>
+                            <option value="youtube">YouTube</option>
+                            <option value="kinopoisk">Кинопоиск</option>
+                        </select>
+                    </div>
+                    
+                    <div class="filter-group">
+                        <label class="filter-label">Язык</label>
+                        <select class="filter-select" id="languageFilter">
+                            <option value="">Любой</option>
+                            <option value="ru">Русский</option>
+                            <option value="en">Английский</option>
+                            <option value="sub">С субтитрами</option>
+                        </select>
+                    </div>
+                    
+                    <div class="filter-group">
+                        <label class="filter-label">Длительность</label>
+                        <select class="filter-select" id="durationFilter">
+                            <option value="">Любая</option>
+                            <option value="short">До 90 мин</option>
+                            <option value="medium">90-150 мин</option>
+                            <option value="long">Более 150 мин</option>
+                        </select>
+                    </div>
+                    
+                    <div class="filter-group">
+                        <label class="filter-label">Новизна</label>
+                        <select class="filter-select" id="noveltyFilter">
+                            <option value="">Любая</option>
+                            <option value="new">Новинки</option>
+                            <option value="recent">Последние 5 лет</option>
+                            <option value="classic">Классика</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Переключатель диверсификации -->
+            <div class="diversification-control">
+                <div class="control-label">
+                    <span>Точность</span>
+                    <span>Разнообразие</span>
+                </div>
+                <input type="range" id="diversificationSlider" class="diversification-range" min="0" max="1" step="0.1" value="0.5">
+            </div>
+
+            <!-- Рекомендации -->
+            <div class="recommendations-section">
+                <div class="recommendations-header">
+                    <h2>Рекомендуем вам</h2>
+                    <div class="recommendations-count">
+                        <span id="recommendationsCount">0</span> фильмов
+                    </div>
+                </div>
+                
+                <div class="recommendations-list" id="recommendationsList">
+                    <!-- Рекомендации будут добавлены динамически -->
+                </div>
+            </div>
+
+            <!-- Действия -->
+            <div class="results-actions">
+                <button class="action-btn primary-btn" id="saveSetBtn">
+                    <i class="fas fa-bookmark"></i>
+                    Сохранить сет на вечер
+                </button>
+                <button class="action-btn secondary-btn" id="refreshBtn">
+                    <i class="fas fa-sync-alt"></i>
+                    Обновить рекомендации
+                </button>
+            </div>
+        </main>
+    </div>
+
+    <!-- Модальное окно с деталями фильма -->
+    <div class="modal" id="movieModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title" id="movieTitle">Детали фильма</h3>
+                <button class="modal-close" id="modalClose">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body" id="movieDetails">
+                <!-- Детали фильма будут добавлены динамически -->
+            </div>
+            <div class="modal-footer">
+                <button class="action-btn primary-btn" id="watchTrailerBtn">
+                    <i class="fas fa-play"></i>
+                    Смотреть трейлер
+                </button>
+                <button class="action-btn secondary-btn" id="addToWatchlistBtn">
+                    <i class="fas fa-plus"></i>
+                    Добавить в список
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Модальное окно "Сохранить сет" -->
+    <div class="modal" id="saveSetModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Сохранить сет на вечер</h3>
+                <button class="modal-close" id="saveSetModalClose">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="set-form">
+                    <div class="form-group">
+                        <label class="form-label">Название сета</label>
+                        <input type="text" id="setName" placeholder="Например: Вечер фантастики" class="form-input">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Описание</label>
+                        <textarea id="setDescription" placeholder="Краткое описание вашего вечера..." class="form-textarea"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Выбранные фильмы</label>
+                        <div class="selected-movies" id="selectedMovies">
+                            <!-- Выбранные фильмы будут добавлены динамически -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="action-btn primary-btn" id="confirmSaveSetBtn">
+                    <i class="fas fa-save"></i>
+                    Сохранить сет
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Загрузочный экран -->
+    <div class="loading-screen" id="loadingScreen">
+        <div class="loading-content">
+            <div class="loading-spinner">
+                <div class="spinner-ring"></div>
+            </div>
+            <h3 class="loading-title">Формируем рекомендации</h3>
+            <p class="loading-text">Анализируем ваши предпочтения...</p>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/results.js') }}"></script>
+</body>
+</html>

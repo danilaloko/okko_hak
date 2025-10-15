@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Узнать фильм - ökko Discovery</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <meta name="theme-color" content="#000000">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Навигационная панель -->
+        <nav class="nav-bar">
+            <button class="nav-btn back-btn" id="backBtn">
+                <i class="fas fa-arrow-left"></i>
+            </button>
+            <div class="nav-title">Узнать фильм</div>
+            <button class="nav-btn help-btn" id="helpBtn">
+                <i class="fas fa-question-circle"></i>
+            </button>
+        </nav>
+
+        <!-- Основной контент -->
+        <main class="identify-content">
+            <!-- Переключатель вкладок -->
+            <div class="tab-selector">
+                <button class="tab-btn active" data-tab="link">
+                    <i class="fas fa-link"></i>
+                    <span>По ссылке/видео</span>
+                </button>
+                <button class="tab-btn" data-tab="describe">
+                    <i class="fas fa-comment"></i>
+                    <span>По описанию/голосу</span>
+                </button>
+            </div>
+
+            <!-- Вкладка "По ссылке/видео" -->
+            <div class="tab-content active" id="linkTab">
+                <div class="input-section">
+                    <div class="input-header">
+                        <h3>Вставьте ссылку или загрузите видео</h3>
+                        <p>Поддерживаем YouTube, Vimeo и другие платформы</p>
+                    </div>
+                    
+                    <div class="url-input-container">
+                        <input type="url" id="urlInput" placeholder="https://youtube.com/watch?v=..." class="url-input">
+                        <button class="analyze-btn" id="analyzeUrlBtn">
+                            <i class="fas fa-search"></i>
+                            Анализировать
+                        </button>
+                    </div>
+                    
+                    <div class="drag-drop-area" id="dragDropArea">
+                        <div class="drag-drop-content">
+                            <i class="fas fa-cloud-upload-alt"></i>
+                            <h4>Перетащите видео сюда</h4>
+                            <p>или</p>
+                            <button class="file-select-btn" id="fileSelectBtn">
+                                <i class="fas fa-folder-open"></i>
+                                Выберите файл
+                            </button>
+                            <input type="file" id="fileInput" accept="video/*" style="display: none;">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Вкладка "По описанию/голосу" -->
+            <div class="tab-content" id="describeTab">
+                <div class="input-section">
+                    <div class="input-header">
+                        <h3>Опишите фильм или запишите голос</h3>
+                        <p>Чем больше деталей, тем точнее результат</p>
+                    </div>
+                    
+                    <div class="description-input-container">
+                        <textarea id="descriptionInput" placeholder="Например: фильм про шахматиста в СССР, снято в тёплых тонах, главный герой играет в шахматы с компьютером..." class="description-textarea"></textarea>
+                        <div class="input-actions">
+                            <button class="voice-record-btn" id="voiceRecordBtn">
+                                <i class="fas fa-microphone"></i>
+                                Записать голос
+                            </button>
+                            <button class="analyze-btn" id="analyzeDescriptionBtn">
+                                <i class="fas fa-search"></i>
+                                Найти фильм
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Результаты поиска -->
+            <div class="results-section" id="resultsSection" style="display: none;">
+                <div class="results-header">
+                    <h3>Возможные варианты</h3>
+                    <p>Выберите правильный фильм или уточните поиск</p>
+                </div>
+                
+                <div class="candidates-list" id="candidatesList">
+                    <!-- Кандидаты будут добавлены динамически -->
+                </div>
+                
+                <div class="results-actions">
+                    <button class="action-btn secondary-btn" id="refineSearchBtn">
+                        <i class="fas fa-search"></i>
+                        Уточнить поиск
+                    </button>
+                    <button class="action-btn primary-btn" id="showSimilarBtn">
+                        <i class="fas fa-star"></i>
+                        Показать похожие
+                    </button>
+                </div>
+            </div>
+
+            <!-- Уточняющие вопросы -->
+            <div class="clarification-section" id="clarificationSection" style="display: none;">
+                <div class="clarification-header">
+                    <h3>Уточняющие вопросы</h3>
+                    <p>Помогите нам найти точный фильм</p>
+                </div>
+                
+                <div class="clarification-questions" id="clarificationQuestions">
+                    <!-- Вопросы будут добавлены динамически -->
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Модальное окно с деталями фильма -->
+    <div class="modal" id="movieModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title" id="movieTitle">Детали фильма</h3>
+                <button class="modal-close" id="modalClose">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body" id="movieDetails">
+                <!-- Детали фильма будут добавлены динамически -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Загрузочный экран -->
+    <div class="loading-screen" id="loadingScreen">
+        <div class="loading-content">
+            <div class="loading-spinner">
+                <div class="spinner-ring"></div>
+            </div>
+            <h3 class="loading-title" id="loadingTitle">Анализируем контент</h3>
+            <p class="loading-text" id="loadingText">Это займет всего несколько секунд...</p>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/identify.js') }}"></script>
+</body>
+</html>

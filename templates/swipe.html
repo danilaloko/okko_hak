@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Свайпы - ökko Discovery</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <meta name="theme-color" content="#000000">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Навигационная панель -->
+        <nav class="nav-bar">
+            <button class="nav-btn back-btn" id="backBtn">
+                <i class="fas fa-arrow-left"></i>
+            </button>
+            <div class="nav-title">Свайпы</div>
+            <button class="nav-btn info-btn" id="infoBtn">
+                <i class="fas fa-info-circle"></i>
+            </button>
+        </nav>
+
+        <!-- Переключатель типа контента -->
+        <div class="content-type-selector">
+            <div class="selector-tabs">
+                <button class="selector-tab active" data-type="movies">Фильмы</button>
+                <button class="selector-tab" data-type="actors">Актёры</button>
+                <button class="selector-tab" data-type="directors">Режиссёры</button>
+                <button class="selector-tab" data-type="genres">Жанры</button>
+            </div>
+        </div>
+
+        <!-- Серендипити слайдер -->
+        <div class="serendipity-control">
+            <div class="serendipity-label">
+                <span>Похожее</span>
+                <span>Неожиданное</span>
+            </div>
+            <input type="range" id="serendipitySlider" class="serendipity-range" min="0" max="1" step="0.1" value="0.5">
+        </div>
+
+        <!-- Контейнер для карточек -->
+        <div class="swipe-container">
+            <div class="cards-stack" id="cardsStack">
+                <!-- Карточки будут добавлены динамически -->
+            </div>
+            
+            <!-- Индикаторы свайпа -->
+            <div class="swipe-indicator like">НРАВИТСЯ</div>
+            <div class="swipe-indicator dislike">НЕ НРАВИТСЯ</div>
+            <div class="swipe-indicator superlike">СУПЕР!</div>
+        </div>
+
+        <!-- Элементы управления -->
+        <div class="swipe-controls">
+            <button class="control-btn dislike-btn" id="dislikeBtn">
+                <i class="fas fa-times"></i>
+            </button>
+            <button class="control-btn skip-btn" id="skipBtn">
+                <i class="fas fa-forward"></i>
+            </button>
+            <button class="control-btn info-btn" id="cardInfoBtn">
+                <i class="fas fa-info"></i>
+            </button>
+            <button class="control-btn like-btn" id="likeBtn">
+                <i class="fas fa-heart"></i>
+            </button>
+            <button class="control-btn superlike-btn" id="superlikeBtn">
+                <i class="fas fa-star"></i>
+            </button>
+        </div>
+
+        <!-- Прогресс -->
+        <div class="swipe-progress">
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+            <div class="progress-text">
+                <span id="swipeCount">0</span> / <span id="totalSwipes">20</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Модальное окно с деталями -->
+    <div class="modal" id="cardModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title" id="modalTitle">Детали</h3>
+                <button class="modal-close" id="modalClose">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body" id="modalBody">
+                <!-- Контент будет добавлен динамически -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Экран завершения -->
+    <div class="completion-screen" id="completionScreen" style="display: none;">
+        <div class="completion-content">
+            <div class="completion-icon">
+                <i class="fas fa-check-circle"></i>
+            </div>
+            <h2 class="completion-title">Ваш вкус изучен!</h2>
+            <p class="completion-text" id="completionText">Мы поняли ваши предпочтения и готовы предложить персонализированные рекомендации</p>
+            <div class="completion-actions">
+                <button class="action-btn primary-btn" id="showResultsBtn">
+                    <i class="fas fa-star"></i>
+                    Показать рекомендации
+                </button>
+                <button class="action-btn secondary-btn" id="continueSwipingBtn">
+                    <i class="fas fa-redo"></i>
+                    Продолжить свайпы
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/swipe.js') }}"></script>
+</body>
+</html>
