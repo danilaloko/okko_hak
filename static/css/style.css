@@ -96,6 +96,7 @@ body {
     position: sticky;
     top: 0;
     z-index: 100;
+    flex-shrink: 0;
 }
 
 .nav-brand {
@@ -143,8 +144,11 @@ body {
 
 /* Основной контент */
 .main-content {
+    flex: 1;
     padding: var(--okko-spacing-lg);
-    padding-bottom: var(--okko-spacing-2xl);
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
 }
 
 /* Приветственная секция */
@@ -595,6 +599,8 @@ body {
     justify-content: center;
     z-index: 1000;
     padding: var(--okko-spacing-lg);
+    height: 100vh;
+    width: 100vw;
 }
 
 .completion-content {
@@ -678,6 +684,8 @@ body {
     align-items: center;
     justify-content: center;
     z-index: 1000;
+    height: 100vh;
+    width: 100vw;
 }
 
 .loading-content {
@@ -1357,6 +1365,8 @@ body {
     opacity: 0;
     visibility: hidden;
     transition: all 0.3s ease;
+    height: 100vh;
+    width: 100vw;
 }
 
 .modal.active {
@@ -1431,7 +1441,9 @@ body {
 
 /* Окконатор */
 .okkonator-content {
+    flex: 1;
     padding: var(--okko-spacing-lg);
+    overflow-y: auto;
 }
 
 .confidence-indicator {
@@ -1459,6 +1471,7 @@ body {
     font-size: 0.9rem;
     color: var(--okko-text-muted);
     font-weight: 500;
+    flex-shrink: 0;
 }
 
 .question-container {
@@ -1721,12 +1734,14 @@ body {
     display: flex;
     gap: var(--okko-spacing-md);
     justify-content: center;
+    flex-shrink: 0;
 }
 
 /* Чат */
 .chat-content {
     display: flex;
-    height: calc(100vh - 60px);
+    flex: 1;
+    overflow: hidden;
 }
 
 .profile-sidebar {
@@ -1737,11 +1752,12 @@ body {
     transform: translateX(-100%);
     transition: transform 0.3s ease;
     position: fixed;
-    top: 60px;
+    top: 0;
     left: 0;
     bottom: 0;
     z-index: 100;
     overflow-y: auto;
+    height: 100vh;
 }
 
 .profile-sidebar.active {
@@ -1806,6 +1822,7 @@ body {
     flex-direction: column;
     max-width: 100%;
     overflow: hidden;
+    min-height: 0;
 }
 
 .chat-messages {
@@ -1930,6 +1947,7 @@ body {
     padding: var(--okko-spacing-md) var(--okko-spacing-lg);
     background: var(--okko-surface-2);
     border-top: 1px solid var(--okko-border);
+    flex-shrink: 0;
 }
 
 .suggestions-title {
@@ -1966,6 +1984,7 @@ body {
     padding: var(--okko-spacing-lg);
     background: var(--okko-surface-2);
     border-top: 1px solid var(--okko-border);
+    flex-shrink: 0;
 }
 
 .input-wrapper {
@@ -2370,7 +2389,9 @@ textarea::-webkit-scrollbar-thumb:hover,
 
 /* Узнать фильм */
 .identify-content {
+    flex: 1;
     padding: var(--okko-spacing-lg);
+    overflow-y: auto;
 }
 
 .tab-selector {
@@ -2679,6 +2700,7 @@ textarea::-webkit-scrollbar-thumb:hover,
 .candidate-actions {
     display: flex;
     gap: var(--okko-spacing-sm);
+    flex-shrink: 0;
 }
 
 .candidate-btn {
@@ -2720,6 +2742,7 @@ textarea::-webkit-scrollbar-thumb:hover,
     gap: var(--okko-spacing-md);
     justify-content: center;
     margin-top: var(--okko-spacing-xl);
+    flex-shrink: 0;
 }
 
 .clarification-section {
@@ -2777,7 +2800,9 @@ textarea::-webkit-scrollbar-thumb:hover,
 
 /* Результаты */
 .results-content {
+    flex: 1;
     padding: var(--okko-spacing-lg);
+    overflow-y: auto;
 }
 
 .filters-section {
@@ -2986,6 +3011,7 @@ textarea::-webkit-scrollbar-thumb:hover,
 .recommendation-actions {
     display: flex;
     gap: var(--okko-spacing-md);
+    flex-shrink: 0;
 }
 
 .results-actions {
@@ -2993,21 +3019,26 @@ textarea::-webkit-scrollbar-thumb:hover,
     gap: var(--okko-spacing-md);
     justify-content: center;
     margin-top: var(--okko-spacing-xl);
+    flex-shrink: 0;
 }
 
 /* Демо */
 .demo-content {
+    flex: 1;
     padding: var(--okko-spacing-lg);
+    overflow-y: auto;
 }
 
 .demo-progress {
     margin-bottom: var(--okko-spacing-xl);
+    flex-shrink: 0;
 }
 
 .progress-steps {
     display: flex;
     justify-content: space-between;
     margin-bottom: var(--okko-spacing-md);
+    flex-shrink: 0;
 }
 
 .step {
@@ -3017,6 +3048,7 @@ textarea::-webkit-scrollbar-thumb:hover,
     gap: var(--okko-spacing-sm);
     opacity: 0.5;
     transition: all 0.3s ease;
+    flex-shrink: 0;
 }
 
 .step.active {
@@ -3034,6 +3066,7 @@ textarea::-webkit-scrollbar-thumb:hover,
     justify-content: center;
     font-weight: 600;
     transition: all 0.3s ease;
+    flex-shrink: 0;
 }
 
 .step.active .step-number {
@@ -3045,6 +3078,7 @@ textarea::-webkit-scrollbar-thumb:hover,
     font-size: 0.8rem;
     color: var(--okko-text-muted);
     font-weight: 500;
+    flex-shrink: 0;
 }
 
 .step.active .step-title {
@@ -3057,6 +3091,7 @@ textarea::-webkit-scrollbar-thumb:hover,
     background: var(--okko-border);
     border-radius: 2px;
     overflow: hidden;
+    flex-shrink: 0;
 }
 
 .progress-fill {
@@ -3064,23 +3099,28 @@ textarea::-webkit-scrollbar-thumb:hover,
     background: var(--okko-accent);
     border-radius: 2px;
     transition: width 0.5s ease;
+    flex-shrink: 0;
 }
 
 .demo-block {
     margin-bottom: var(--okko-spacing-xl);
+    flex-shrink: 0;
 }
 
 .demo-step {
     display: none;
+    flex-shrink: 0;
 }
 
 .demo-step.active {
     display: block;
+    flex-shrink: 0;
 }
 
 .step-header {
     text-align: center;
     margin-bottom: var(--okko-spacing-xl);
+    flex-shrink: 0;
 }
 
 .step-header h2 {
@@ -3088,17 +3128,20 @@ textarea::-webkit-scrollbar-thumb:hover,
     font-weight: 700;
     color: var(--okko-text);
     margin-bottom: var(--okko-spacing-sm);
+    flex-shrink: 0;
 }
 
 .step-header p {
     font-size: 1rem;
     color: var(--okko-text-muted);
+    flex-shrink: 0;
 }
 
 .demo-cards-container {
     position: relative;
     height: 300px;
     margin-bottom: var(--okko-spacing-lg);
+    flex-shrink: 0;
 }
 
 .demo-card {
@@ -3111,6 +3154,7 @@ textarea::-webkit-scrollbar-thumb:hover,
     overflow: hidden;
     cursor: pointer;
     transition: all 0.3s ease;
+    flex-shrink: 0;
 }
 
 .demo-card:hover {
@@ -3123,10 +3167,12 @@ textarea::-webkit-scrollbar-thumb:hover,
     height: 60%;
     background-size: cover;
     background-position: center;
+    flex-shrink: 0;
 }
 
 .card-info {
     padding: var(--okko-spacing-lg);
+    flex-shrink: 0;
 }
 
 .card-title {
@@ -3134,18 +3180,21 @@ textarea::-webkit-scrollbar-thumb:hover,
     font-weight: 700;
     color: var(--okko-text);
     margin-bottom: var(--okko-spacing-xs);
+    flex-shrink: 0;
 }
 
 .card-description {
     font-size: 0.9rem;
     color: var(--okko-text-muted);
     line-height: 1.4;
+    flex-shrink: 0;
 }
 
 .demo-controls {
     display: flex;
     justify-content: center;
     gap: var(--okko-spacing-lg);
+    flex-shrink: 0;
 }
 
 .demo-btn {
@@ -3161,6 +3210,7 @@ textarea::-webkit-scrollbar-thumb:hover,
     transition: all 0.3s ease;
     border: 2px solid var(--okko-border);
     background: var(--okko-surface);
+    flex-shrink: 0;
 }
 
 .dislike-btn {
@@ -3186,6 +3236,7 @@ textarea::-webkit-scrollbar-thumb:hover,
 .demo-question {
     text-align: center;
     margin-bottom: var(--okko-spacing-xl);
+    flex-shrink: 0;
 }
 
 .question-text {
@@ -3194,12 +3245,14 @@ textarea::-webkit-scrollbar-thumb:hover,
     color: var(--okko-text);
     margin-bottom: var(--okko-spacing-lg);
     line-height: 1.5;
+    flex-shrink: 0;
 }
 
 .demo-answers {
     display: flex;
     justify-content: center;
     gap: var(--okko-spacing-md);
+    flex-shrink: 0;
 }
 
 .demo-answer-btn {
@@ -3212,6 +3265,7 @@ textarea::-webkit-scrollbar-thumb:hover,
     font-weight: 500;
     cursor: pointer;
     transition: all 0.2s ease;
+    flex-shrink: 0;
 }
 
 .demo-answer-btn:hover {
@@ -3223,6 +3277,7 @@ textarea::-webkit-scrollbar-thumb:hover,
 .demo-confidence {
     text-align: center;
     margin-bottom: var(--okko-spacing-xl);
+    flex-shrink: 0;
 }
 
 .confidence-bar {
@@ -3245,16 +3300,19 @@ textarea::-webkit-scrollbar-thumb:hover,
     font-size: 0.9rem;
     color: var(--okko-text-muted);
     font-weight: 500;
+    flex-shrink: 0;
 }
 
 .demo-identify {
     text-align: center;
+    flex-shrink: 0;
 }
 
 .demo-url-input {
     display: flex;
     gap: var(--okko-spacing-md);
     margin-bottom: var(--okko-spacing-lg);
+    flex-shrink: 0;
 }
 
 .demo-input {
@@ -3277,6 +3335,7 @@ textarea::-webkit-scrollbar-thumb:hover,
     font-weight: 600;
     cursor: pointer;
     transition: all 0.2s ease;
+    flex-shrink: 0;
 }
 
 .demo-analyze-btn:hover {
@@ -3288,6 +3347,7 @@ textarea::-webkit-scrollbar-thumb:hover,
     display: flex;
     justify-content: center;
     gap: var(--okko-spacing-md);
+    flex-shrink: 0;
 }
 
 .candidate-card {
@@ -3297,6 +3357,7 @@ textarea::-webkit-scrollbar-thumb:hover,
     border: 1px solid var(--okko-border);
     border-radius: var(--okko-radius-lg);
     text-align: center;
+    flex-shrink: 0;
 }
 
 .candidate-poster {
@@ -3306,6 +3367,7 @@ textarea::-webkit-scrollbar-thumb:hover,
     background-position: center;
     border-radius: var(--okko-radius-md);
     margin-bottom: var(--okko-spacing-sm);
+    flex-shrink: 0;
 }
 
 .candidate-title {
@@ -3313,17 +3375,20 @@ textarea::-webkit-scrollbar-thumb:hover,
     font-weight: 600;
     color: var(--okko-text);
     margin-bottom: var(--okko-spacing-xs);
+    flex-shrink: 0;
 }
 
 .candidate-confidence {
     font-size: 0.8rem;
     color: var(--okko-accent);
     font-weight: 500;
+    flex-shrink: 0;
 }
 
 .demo-chat {
     max-width: 500px;
     margin: 0 auto;
+    flex-shrink: 0;
 }
 
 .demo-messages {
@@ -3334,17 +3399,20 @@ textarea::-webkit-scrollbar-thumb:hover,
     margin-bottom: var(--okko-spacing-lg);
     max-height: 300px;
     overflow-y: auto;
+    flex-shrink: 0;
 }
 
 .demo-message {
     margin-bottom: var(--okko-spacing-md);
     padding: var(--okko-spacing-md);
     border-radius: var(--okko-radius-md);
+    flex-shrink: 0;
 }
 
 .demo-message.assistant {
     background: var(--okko-surface-3);
     text-align: left;
+    flex-shrink: 0;
 }
 
 .demo-message.user {
@@ -3352,11 +3420,13 @@ textarea::-webkit-scrollbar-thumb:hover,
     color: white;
     text-align: right;
     margin-left: 20%;
+    flex-shrink: 0;
 }
 
 .demo-chat-input {
     display: flex;
     gap: var(--okko-spacing-md);
+    flex-shrink: 0;
 }
 
 .demo-send-btn {
@@ -3369,6 +3439,7 @@ textarea::-webkit-scrollbar-thumb:hover,
     font-weight: 600;
     cursor: pointer;
     transition: all 0.2s ease;
+    flex-shrink: 0;
 }
 
 .demo-send-btn:hover {
@@ -3378,6 +3449,7 @@ textarea::-webkit-scrollbar-thumb:hover,
 
 .demo-results {
     text-align: center;
+    flex-shrink: 0;
 }
 
 .demo-recommendations {
@@ -3385,6 +3457,7 @@ textarea::-webkit-scrollbar-thumb:hover,
     justify-content: center;
     gap: var(--okko-spacing-md);
     margin-bottom: var(--okko-spacing-lg);
+    flex-shrink: 0;
 }
 
 .demo-recommendation-card {
@@ -3394,6 +3467,7 @@ textarea::-webkit-scrollbar-thumb:hover,
     border: 1px solid var(--okko-border);
     border-radius: var(--okko-radius-lg);
     text-align: center;
+    flex-shrink: 0;
 }
 
 .recommendation-poster {
@@ -3403,6 +3477,7 @@ textarea::-webkit-scrollbar-thumb:hover,
     background-position: center;
     border-radius: var(--okko-radius-md);
     margin-bottom: var(--okko-spacing-sm);
+    flex-shrink: 0;
 }
 
 .recommendation-title {
@@ -3410,17 +3485,20 @@ textarea::-webkit-scrollbar-thumb:hover,
     font-weight: 600;
     color: var(--okko-text);
     margin-bottom: var(--okko-spacing-xs);
+    flex-shrink: 0;
 }
 
 .recommendation-reason {
     font-size: 0.8rem;
     color: var(--okko-text-muted);
+    flex-shrink: 0;
 }
 
 .demo-actions {
     display: flex;
     justify-content: center;
     gap: var(--okko-spacing-md);
+    flex-shrink: 0;
 }
 
 .demo-action-btn {
@@ -3433,6 +3511,7 @@ textarea::-webkit-scrollbar-thumb:hover,
     font-weight: 600;
     cursor: pointer;
     transition: all 0.2s ease;
+    flex-shrink: 0;
 }
 
 .demo-action-btn:hover {
@@ -3448,6 +3527,7 @@ textarea::-webkit-scrollbar-thumb:hover,
     padding: var(--okko-spacing-lg);
     background: var(--okko-surface-2);
     border-top: 1px solid var(--okko-border);
+    flex-shrink: 0;
 }
 
 .demo-control-btn {
@@ -3463,6 +3543,7 @@ textarea::-webkit-scrollbar-thumb:hover,
     display: flex;
     align-items: center;
     gap: var(--okko-spacing-sm);
+    flex-shrink: 0;
 }
 
 .demo-control-btn:hover {
@@ -3474,6 +3555,7 @@ textarea::-webkit-scrollbar-thumb:hover,
     background: var(--okko-accent);
     color: white;
     border-color: var(--okko-accent);
+    flex-shrink: 0;
 }
 
 .demo-control-btn.primary:hover {
@@ -3483,11 +3565,13 @@ textarea::-webkit-scrollbar-thumb:hover,
 .demo-control-btn:disabled {
     opacity: 0.5;
     cursor: not-allowed;
+    flex-shrink: 0;
 }
 
 .demo-control-btn:disabled:hover {
     transform: none;
     background: var(--okko-surface);
+    flex-shrink: 0;
 }
 
 .demo-metrics {
@@ -3496,23 +3580,27 @@ textarea::-webkit-scrollbar-thumb:hover,
     background: var(--okko-surface-2);
     border: 1px solid var(--okko-border);
     border-radius: var(--okko-radius-lg);
+    flex-shrink: 0;
 }
 
 .metrics-header {
     text-align: center;
     margin-bottom: var(--okko-spacing-lg);
+    flex-shrink: 0;
 }
 
 .metrics-header h3 {
     font-size: 1.3rem;
     font-weight: 700;
     color: var(--okko-text);
+    flex-shrink: 0;
 }
 
 .metrics-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: var(--okko-spacing-lg);
+    flex-shrink: 0;
 }
 
 .metric-card {
@@ -3521,6 +3609,7 @@ textarea::-webkit-scrollbar-thumb:hover,
     background: var(--okko-surface);
     border: 1px solid var(--okko-border);
     border-radius: var(--okko-radius-md);
+    flex-shrink: 0;
 }
 
 .metric-value {
@@ -3528,10 +3617,12 @@ textarea::-webkit-scrollbar-thumb:hover,
     font-weight: 800;
     color: var(--okko-accent);
     margin-bottom: var(--okko-spacing-sm);
+    flex-shrink: 0;
 }
 
 .metric-label {
     font-size: 0.9rem;
     color: var(--okko-text-muted);
     font-weight: 500;
+    flex-shrink: 0;
 }
