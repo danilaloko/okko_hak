@@ -260,7 +260,7 @@ function setupTouchEvents() {
     }
     
     function handleTouchMove(e) {
-        if (!isDragging || isAnimating || !currentCard) return;
+        if (!isDragging || isAnimating) return;
         
         e.preventDefault();
         const touch = e.touches[0];
@@ -275,7 +275,7 @@ function setupTouchEvents() {
     }
     
     function handleTouchEnd(e) {
-        if (!isDragging || isAnimating || !currentCard) return;
+        if (!isDragging || isAnimating) return;
         
         isDragging = false;
         const deltaX = currentX - startX;
@@ -308,7 +308,7 @@ function setupTouchEvents() {
     }
     
     function handleMouseMove(e) {
-        if (!isDragging || isAnimating || !currentCard) return;
+        if (!isDragging || isAnimating) return;
         
         currentX = e.clientX;
         currentY = e.clientY;
@@ -321,7 +321,7 @@ function setupTouchEvents() {
     }
     
     function handleMouseUp(e) {
-        if (!isDragging || isAnimating || !currentCard) return;
+        if (!isDragging || isAnimating) return;
         
         isDragging = false;
         const deltaX = currentX - startX;
@@ -351,49 +351,43 @@ function getTopCard() {
 
 // Обновление позиции карточки
 function updateCardPosition(deltaX, deltaY) {
-    if (!currentCard) {
-        // Если currentCard не определена, попробуем получить актуальную карточку
-        currentCard = getTopCard();
-        if (!currentCard) return;
-    }
+    // Всегда получаем актуальную верхнюю карточку
+    const topCard = getTopCard();
+    if (!topCard) return;
     
     const rotation = deltaX * 0.1;
     const opacity = Math.max(0.3, 1 - Math.abs(deltaX) / 200);
     
-    currentCard.style.transform = `translate(${deltaX}px, ${deltaY}px) rotate(${rotation}deg)`;
-    currentCard.style.opacity = opacity;
+    topCard.style.transform = `translate(${deltaX}px, ${deltaY}px) rotate(${rotation}deg)`;
+    topCard.style.opacity = opacity;
 }
 
 // Обновление индикаторов свайпа
 function updateSwipeIndicators(deltaX) {
-    if (!currentCard) {
-        // Если currentCard не определена, попробуем получить актуальную карточку
-        currentCard = getTopCard();
-        if (!currentCard) return;
-    }
+    // Всегда получаем актуальную верхнюю карточку
+    const topCard = getTopCard();
+    if (!topCard) return;
     
     // Убираем все цветовые индикаторы
-    currentCard.classList.remove('swipe-like', 'swipe-dislike', 'swipe-superlike');
+    topCard.classList.remove('swipe-like', 'swipe-dislike', 'swipe-superlike');
     
     // Добавляем соответствующий цветовой индикатор
     if (deltaX > 50) {
-        currentCard.classList.add('swipe-like');
+        topCard.classList.add('swipe-like');
     } else if (deltaX < -50) {
-        currentCard.classList.add('swipe-dislike');
+        topCard.classList.add('swipe-dislike');
     }
 }
 
 // Сброс позиции карточки
 function resetCardPosition() {
-    if (!currentCard) {
-        // Если currentCard не определена, попробуем получить актуальную карточку
-        currentCard = getTopCard();
-        if (!currentCard) return;
-    }
+    // Всегда получаем актуальную верхнюю карточку
+    const topCard = getTopCard();
+    if (!topCard) return;
     
-    currentCard.style.transform = '';
-    currentCard.style.opacity = '';
-    currentCard.classList.remove('swiping', 'swipe-like', 'swipe-dislike', 'swipe-superlike');
+    topCard.style.transform = '';
+    topCard.style.opacity = '';
+    topCard.classList.remove('swiping', 'swipe-like', 'swipe-dislike', 'swipe-superlike');
 }
 
 // Обработка действия свайпа
@@ -404,8 +398,12 @@ async function handleSwipeAction(action) {
     const topCard = getTopCard();
     
     if (topCard) {
-        // Убираем цветовые индикаторы и добавляем класс анимации
-        topCard.classList.remove('swipe-like', 'swipe-dislike', 'swipe-superlike');
+        // Убираем все классы и inline стили
+        topCard.classList.remove('swipe-like', 'swipe-dislike', 'swipe-superlike', 'swiping');
+        topCard.style.transform = '';
+        topCard.style.opacity = '';
+        
+        // Добавляем класс анимации
         topCard.classList.add(action);
         
         // Отправляем данные на сервер

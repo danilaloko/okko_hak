@@ -1191,21 +1191,21 @@ body {
 
 /* Анимации свайпа */
 .swipe-card.like {
-    transform: translateX(100vw) rotate(30deg);
-    opacity: 0;
-    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    transform: translateX(100vw) rotate(30deg) !important;
+    opacity: 0 !important;
+    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1) !important;
 }
 
 .swipe-card.dislike {
-    transform: translateX(-100vw) rotate(-30deg);
-    opacity: 0;
-    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    transform: translateX(-100vw) rotate(-30deg) !important;
+    opacity: 0 !important;
+    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1) !important;
 }
 
 .swipe-card.superlike {
-    transform: translateY(-100vh) scale(1.1);
-    opacity: 0;
-    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    transform: translateY(-100vh) scale(1.1) !important;
+    opacity: 0 !important;
+    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1) !important;
 }
 
 /* Элементы управления свайпами */
