@@ -9,6 +9,7 @@ let currentCardIndex = 0;
 let swipeCount = 0;
 let totalSwipes = 20;
 let isAnimating = false;
+let currentCard = null;
 
 // Инициализация
 document.addEventListener('DOMContentLoaded', function() {
@@ -230,7 +231,6 @@ function setupTouchEvents() {
     let currentX = 0;
     let currentY = 0;
     let isDragging = false;
-    let currentCard = null;
     
     // Touch события
     cardsStack.addEventListener('touchstart', handleTouchStart, { passive: false });
@@ -250,9 +250,12 @@ function setupTouchEvents() {
         startY = touch.clientY;
         isDragging = true;
         
+        // Всегда получаем актуальную верхнюю карточку
         currentCard = getTopCard();
+        console.log('Touch start - currentCard:', currentCard);
         if (currentCard) {
             currentCard.classList.add('swiping');
+            console.log('Добавлен класс swiping');
         }
     }
     
@@ -283,6 +286,9 @@ function setupTouchEvents() {
         } else {
             resetCardPosition();
         }
+        
+        // Сбрасываем текущую карточку
+        currentCard = null;
     }
     
     function handleMouseDown(e) {
@@ -292,6 +298,7 @@ function setupTouchEvents() {
         startY = e.clientY;
         isDragging = true;
         
+        // Всегда получаем актуальную верхнюю карточку
         currentCard = getTopCard();
         if (currentCard) {
             currentCard.classList.add('swiping');
@@ -325,17 +332,30 @@ function setupTouchEvents() {
         } else {
             resetCardPosition();
         }
+        
+        // Сбрасываем текущую карточку
+        currentCard = null;
     }
 }
 
 // Получение верхней карточки
 function getTopCard() {
-    return document.querySelector('.swipe-card');
+    const cards = document.querySelectorAll('.swipe-card');
+    console.log('Всего карточек:', cards.length);
+    if (cards.length > 0) {
+        console.log('Верхняя карточка:', cards[0]);
+        return cards[0];
+    }
+    return null;
 }
 
 // Обновление позиции карточки
 function updateCardPosition(deltaX, deltaY) {
-    if (!currentCard) return;
+    if (!currentCard) {
+        // Если currentCard не определена, попробуем получить актуальную карточку
+        currentCard = getTopCard();
+        if (!currentCard) return;
+    }
     
     const rotation = deltaX * 0.1;
     const opacity = Math.max(0.3, 1 - Math.abs(deltaX) / 200);
@@ -346,36 +366,34 @@ function updateCardPosition(deltaX, deltaY) {
 
 // Обновление индикаторов свайпа
 function updateSwipeIndicators(deltaX) {
-    const likeIndicator = document.querySelector('.swipe-indicator.like');
-    const dislikeIndicator = document.querySelector('.swipe-indicator.dislike');
-    const superlikeIndicator = document.querySelector('.swipe-indicator.superlike');
+    if (!currentCard) {
+        // Если currentCard не определена, попробуем получить актуальную карточку
+        currentCard = getTopCard();
+        if (!currentCard) return;
+    }
     
-    // Скрываем все индикаторы
-    [likeIndicator, dislikeIndicator, superlikeIndicator].forEach(indicator => {
-        if (indicator) {
-            indicator.classList.remove('show');
-        }
-    });
+    // Убираем все цветовые индикаторы
+    currentCard.classList.remove('swipe-like', 'swipe-dislike', 'swipe-superlike');
     
-    // Показываем соответствующий индикатор
+    // Добавляем соответствующий цветовой индикатор
     if (deltaX > 50) {
-        if (likeIndicator) likeIndicator.classList.add('show');
+        currentCard.classList.add('swipe-like');
     } else if (deltaX < -50) {
-        if (dislikeIndicator) dislikeIndicator.classList.add('show');
+        currentCard.classList.add('swipe-dislike');
     }
 }
 
 // Сброс позиции карточки
 function resetCardPosition() {
-    if (!currentCard) return;
+    if (!currentCard) {
+        // Если currentCard не определена, попробуем получить актуальную карточку
+        currentCard = getTopCard();
+        if (!currentCard) return;
+    }
     
     currentCard.style.transform = '';
     currentCard.style.opacity = '';
-    currentCard.classList.remove('swiping');
-    
-    document.querySelectorAll('.swipe-indicator').forEach(indicator => {
-        indicator.classList.remove('show');
-    });
+    currentCard.classList.remove('swiping', 'swipe-like', 'swipe-dislike', 'swipe-superlike');
 }
 
 // Обработка действия свайпа
@@ -383,11 +401,12 @@ async function handleSwipeAction(action) {
     if (isAnimating || currentCardIndex >= currentCards.length) return;
     
     isAnimating = true;
-    const currentCard = getTopCard();
+    const topCard = getTopCard();
     
-    if (currentCard) {
-        // Анимация свайпа
-        currentCard.classList.add(action);
+    if (topCard) {
+        // Убираем цветовые индикаторы и добавляем класс анимации
+        topCard.classList.remove('swipe-like', 'swipe-dislike', 'swipe-superlike');
+        topCard.classList.add(action);
         
         // Отправляем данные на сервер
         await sendSwipeAction(action, currentCards[currentCardIndex]);
@@ -403,11 +422,11 @@ async function handleSwipeAction(action) {
             navigator.vibrate(50);
         }
         
-        // Загружаем следующую карточку
+        // Загружаем следующую карточку после анимации
         setTimeout(() => {
             loadNextCard();
             isAnimating = false;
-        }, 300);
+        }, 500); // Увеличиваем время для завершения анимации
     }
 }
 
@@ -438,11 +457,21 @@ async function sendSwipeAction(action, cardData) {
 function loadNextCard() {
     const cardsStack = document.getElementById('cardsStack');
     
+    console.log('loadNextCard - currentCardIndex:', currentCardIndex, 'swipeCount:', swipeCount);
+    
     // Удаляем верхнюю карточку
     const topCard = getTopCard();
     if (topCard) {
+        console.log('Удаляем карточку:', topCard);
         topCard.remove();
     }
+    
+    // Обновляем z-index для оставшихся карточек
+    const remainingCards = document.querySelectorAll('.swipe-card');
+    console.log('Оставшиеся карточки:', remainingCards.length);
+    remainingCards.forEach((card, index) => {
+        card.style.zIndex = 10 - index;
+    });
     
     // Проверяем, нужно ли показать экран завершения
     if (swipeCount >= totalSwipes || currentCardIndex >= currentCards.length) {
@@ -453,6 +482,7 @@ function loadNextCard() {
     // Добавляем новую карточку, если есть
     if (currentCardIndex < currentCards.length) {
         const newCard = createSwipeCard(currentCards[currentCardIndex], 0);
+        console.log('Создаем новую карточку:', newCard);
         cardsStack.appendChild(newCard);
         
         // Анимация появления

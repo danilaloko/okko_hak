@@ -461,42 +461,6 @@ body {
     font-weight: 700;
 }
 
-/* Индикаторы свайпа */
-.swipe-indicator {
-    position: absolute;
-    top: 20px;
-    padding: 8px 16px;
-    font-size: 0.8rem;
-    font-weight: 700;
-    letter-spacing: 1px;
-    border-radius: 20px;
-    border: 2px solid;
-    opacity: 0;
-    transform: translateY(-10px);
-    transition: all 0.3s ease;
-    text-transform: uppercase;
-    backdrop-filter: blur(10px);
-    z-index: 10;
-}
-
-.swipe-indicator.show {
-    opacity: 1;
-    transform: translateY(0);
-}
-
-.swipe-indicator.like {
-    right: 20px;
-    background: var(--okko-accent-light);
-    color: var(--okko-accent);
-    border-color: var(--okko-accent);
-}
-
-.swipe-indicator.dislike {
-    left: 20px;
-    background: rgba(239, 68, 68, 0.1);
-    color: var(--okko-danger);
-    border-color: var(--okko-danger);
-}
 
 /* Элементы управления */
 .interaction-controls {
@@ -1191,7 +1155,7 @@ body {
     width: 100%;
     height: 100%;
     background: var(--okko-surface-2);
-    border: 1px solid var(--okko-border);
+    border: 2px solid var(--okko-border);
     border-radius: var(--okko-radius-lg);
     overflow: hidden;
     cursor: grab;
@@ -1209,19 +1173,39 @@ body {
     transition: none;
 }
 
+/* Цветовые индикаторы при свайпе */
+.swipe-card.swipe-like {
+    border-color: var(--okko-success);
+    box-shadow: 0 0 20px rgba(34, 197, 94, 0.3);
+}
+
+.swipe-card.swipe-dislike {
+    border-color: var(--okko-danger);
+    box-shadow: 0 0 20px rgba(239, 68, 68, 0.3);
+}
+
+.swipe-card.swipe-superlike {
+    border-color: var(--okko-accent);
+    box-shadow: 0 0 20px rgba(123, 97, 255, 0.3);
+}
+
+/* Анимации свайпа */
 .swipe-card.like {
     transform: translateX(100vw) rotate(30deg);
     opacity: 0;
+    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .swipe-card.dislike {
     transform: translateX(-100vw) rotate(-30deg);
     opacity: 0;
+    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .swipe-card.superlike {
     transform: translateY(-100vh) scale(1.1);
     opacity: 0;
+    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* Элементы управления свайпами */
