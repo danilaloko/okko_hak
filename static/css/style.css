@@ -2122,6 +2122,185 @@ body {
     }
 }
 
+/* Кастомные скроллбары */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--okko-surface-2);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--okko-surface-3);
+    border-radius: 4px;
+    border: 1px solid var(--okko-border);
+    transition: all 0.2s ease;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--okko-accent);
+    border-color: var(--okko-accent);
+}
+
+::-webkit-scrollbar-thumb:active {
+    background: var(--okko-accent-hover);
+}
+
+::-webkit-scrollbar-corner {
+    background: var(--okko-surface-2);
+}
+
+/* Для Firefox */
+* {
+    scrollbar-width: thin;
+    scrollbar-color: var(--okko-surface-3) var(--okko-surface-2);
+}
+
+/* Специальные стили для чата */
+.chat-messages::-webkit-scrollbar {
+    width: 6px;
+}
+
+.chat-messages::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.chat-messages::-webkit-scrollbar-thumb {
+    background: var(--okko-surface-3);
+    border-radius: 3px;
+    border: none;
+}
+
+.chat-messages::-webkit-scrollbar-thumb:hover {
+    background: var(--okko-accent);
+}
+
+/* Стили для модальных окон и выпадающих списков */
+.modal-content::-webkit-scrollbar,
+.dropdown::-webkit-scrollbar {
+    width: 6px;
+}
+
+.modal-content::-webkit-scrollbar-track,
+.dropdown::-webkit-scrollbar-track {
+    background: var(--okko-surface-2);
+    border-radius: 3px;
+}
+
+.modal-content::-webkit-scrollbar-thumb,
+.dropdown::-webkit-scrollbar-thumb {
+    background: var(--okko-surface-3);
+    border-radius: 3px;
+}
+
+.modal-content::-webkit-scrollbar-thumb:hover,
+.dropdown::-webkit-scrollbar-thumb:hover {
+    background: var(--okko-accent);
+}
+
+/* Стили для списков результатов */
+.recommendations-list::-webkit-scrollbar,
+.candidates-list::-webkit-scrollbar,
+.results-list::-webkit-scrollbar {
+    width: 6px;
+}
+
+.recommendations-list::-webkit-scrollbar-track,
+.candidates-list::-webkit-scrollbar-track,
+.results-list::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.recommendations-list::-webkit-scrollbar-thumb,
+.candidates-list::-webkit-scrollbar-thumb,
+.results-list::-webkit-scrollbar-thumb {
+    background: var(--okko-surface-3);
+    border-radius: 3px;
+}
+
+.recommendations-list::-webkit-scrollbar-thumb:hover,
+.candidates-list::-webkit-scrollbar-thumb:hover,
+.results-list::-webkit-scrollbar-thumb:hover {
+    background: var(--okko-accent);
+}
+
+/* Стили для сайдбаров */
+.profile-sidebar::-webkit-scrollbar,
+.sidebar::-webkit-scrollbar {
+    width: 4px;
+}
+
+.profile-sidebar::-webkit-scrollbar-track,
+.sidebar::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.profile-sidebar::-webkit-scrollbar-thumb,
+.sidebar::-webkit-scrollbar-thumb {
+    background: var(--okko-surface-3);
+    border-radius: 2px;
+}
+
+.profile-sidebar::-webkit-scrollbar-thumb:hover,
+.sidebar::-webkit-scrollbar-thumb:hover {
+    background: var(--okko-accent);
+}
+
+/* Стили для текстовых областей */
+textarea::-webkit-scrollbar,
+.text-input::-webkit-scrollbar {
+    width: 6px;
+}
+
+textarea::-webkit-scrollbar-track,
+.text-input::-webkit-scrollbar-track {
+    background: var(--okko-surface-2);
+    border-radius: 3px;
+}
+
+textarea::-webkit-scrollbar-thumb,
+.text-input::-webkit-scrollbar-thumb {
+    background: var(--okko-surface-3);
+    border-radius: 3px;
+}
+
+textarea::-webkit-scrollbar-thumb:hover,
+.text-input::-webkit-scrollbar-thumb:hover {
+    background: var(--okko-accent);
+}
+
+/* Мобильные стили для скроллбаров */
+@media (max-width: 768px) {
+    ::-webkit-scrollbar {
+        width: 4px;
+        height: 4px;
+    }
+    
+    .chat-messages::-webkit-scrollbar,
+    .modal-content::-webkit-scrollbar,
+    .dropdown::-webkit-scrollbar {
+        width: 3px;
+    }
+    
+    .profile-sidebar::-webkit-scrollbar,
+    .sidebar::-webkit-scrollbar {
+        width: 2px;
+    }
+    
+    /* Скрыть скроллбары на мобильных устройствах при необходимости */
+    .hide-scrollbar::-webkit-scrollbar {
+        display: none;
+    }
+    
+    .hide-scrollbar {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+    }
+}
+
 /* Узнать фильм */
 .identify-content {
     padding: var(--okko-spacing-lg);
