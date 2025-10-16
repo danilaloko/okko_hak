@@ -3697,199 +3697,332 @@ textarea::-webkit-scrollbar-thumb:hover,
     margin-bottom: var(--okko-spacing-sm);
 }
 
-/* Адаптивные размеры для разных экранов */
+/* ==============================
+   Групповой опрос
+   ============================== */
 
-/* Мобильные устройства (до 480px) */
-@media (max-width: 480px) {
-    .app-container {
-        max-width: 100%;
-    }
-    
-    .nav-bar {
-        padding: var(--okko-spacing-sm) var(--okko-spacing-md);
-    }
-    
-    .nav-title {
-        font-size: 1.1rem;
-    }
-    
-    .nav-button {
-        padding: var(--okko-spacing-xs) var(--okko-spacing-sm);
-        font-size: 0.8rem;
-    }
-    
-    .section-title {
-        font-size: 1.1rem;
-        margin-bottom: var(--okko-spacing-md);
-        margin-top: var(--okko-spacing-sm);
-    }
-    
-    .modes-grid {
-        gap: var(--okko-spacing-xs);
-        margin-bottom: var(--okko-spacing-sm);
-    }
-    
-    .mode-card {
-        padding: var(--okko-spacing-sm);
-    }
-    
-    .mode-icon {
-        font-size: 1.5rem;
-    }
-    
-    .mode-title {
-        font-size: 0.9rem;
-    }
-    
-    .mode-description {
-        font-size: 0.75rem;
-        line-height: 1.2;
-    }
-    
-    .mode-badge {
-        padding: 3px 6px;
-        font-size: 0.7rem;
-    }
-    
-    .company-card {
-        padding: var(--okko-spacing-sm);
-    }
-    
-    .company-card .mode-title {
-        font-size: 0.9rem;
-    }
-    
-    .company-card .mode-description {
-        font-size: 0.75rem;
-    }
+.group-survey-content {
+    flex: 1;
+    padding: var(--okko-spacing-lg);
+    overflow-y: auto;
 }
 
-/* Планшеты (481px - 768px) */
-@media (min-width: 481px) and (max-width: 768px) {
-    .app-container {
-        max-width: 500px;
-    }
-    
-    .nav-bar {
-        padding: var(--okko-spacing-md) var(--okko-spacing-lg);
-    }
-    
-    .nav-title {
-        font-size: 1.3rem;
-    }
-    
-    .nav-button {
-        padding: var(--okko-spacing-sm) var(--okko-spacing-md);
-        font-size: 0.9rem;
-    }
-    
-    .section-title {
-        font-size: 1.4rem;
-        margin-bottom: var(--okko-spacing-lg);
-        margin-top: var(--okko-spacing-md);
-    }
-    
-    .modes-grid {
+.step-container {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.step-header {
+    text-align: center;
+    margin-bottom: var(--okko-spacing-xl);
+}
+
+.step-header h2 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--okko-text);
+    margin-bottom: var(--okko-spacing-sm);
+}
+
+.step-header p {
+    font-size: 1rem;
+    color: var(--okko-text-muted);
+}
+
+.participants-selector {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.participant-options {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--okko-spacing-lg);
+    max-width: 400px;
+    width: 100%;
+}
+
+.participant-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--okko-spacing-md);
+    padding: var(--okko-spacing-xl);
+    background: var(--okko-surface-2);
+    border: 2px solid var(--okko-border);
+    border-radius: var(--okko-radius-lg);
+    color: var(--okko-text);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-align: center;
+}
+
+.participant-btn:hover {
+    border-color: var(--okko-accent);
+    background: var(--okko-accent-light);
+    transform: translateY(-2px);
+    box-shadow: var(--okko-shadow-lg);
+}
+
+.participant-btn.selected {
+    border-color: var(--okko-accent);
+    background: var(--okko-accent);
+    color: white;
+    transform: scale(1.05);
+}
+
+.participant-btn i {
+    font-size: 2rem;
+    color: var(--okko-accent);
+}
+
+.participant-btn.selected i {
+    color: white;
+}
+
+.participant-btn span {
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+
+.participant-progress {
+    margin-bottom: var(--okko-spacing-xl);
+    flex-shrink: 0;
+}
+
+.progress-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--okko-spacing-sm);
+}
+
+.current-participant {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--okko-text);
+}
+
+.progress-counter {
+    font-size: 0.9rem;
+    color: var(--okko-text-muted);
+}
+
+.progress-bar {
+    width: 100%;
+    height: 6px;
+    background: var(--okko-border);
+    border-radius: 3px;
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--okko-accent) 0%, var(--okko-success) 100%);
+    border-radius: 3px;
+    transition: width 0.5s ease;
+}
+
+.question-container {
+    text-align: center;
+    margin-bottom: var(--okko-spacing-xl);
+    flex-shrink: 0;
+}
+
+.question-text {
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: var(--okko-text);
+    line-height: 1.5;
+}
+
+.answer-options {
+    display: flex;
+    flex-direction: column;
+    gap: var(--okko-spacing-md);
+    margin-bottom: var(--okko-spacing-xl);
+    flex-shrink: 0;
+}
+
+.answer-btn {
+    display: flex;
+    align-items: center;
+    gap: var(--okko-spacing-md);
+    padding: var(--okko-spacing-lg);
+    border: 2px solid var(--okko-border);
+    border-radius: var(--okko-radius-md);
+    background: var(--okko-surface-2);
+    color: var(--okko-text);
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.answer-btn:hover {
+    border-color: var(--okko-accent);
+    background: var(--okko-accent-light);
+    transform: translateY(-2px);
+}
+
+.answer-btn.selected {
+    border-color: var(--okko-accent);
+    background: var(--okko-accent);
+    color: white;
+}
+
+.yes-btn:hover {
+    border-color: var(--okko-success);
+    background: rgba(34, 197, 94, 0.1);
+}
+
+.no-btn:hover {
+    border-color: var(--okko-danger);
+    background: rgba(239, 68, 68, 0.1);
+}
+
+.results-header {
+    text-align: center;
+    margin-bottom: var(--okko-spacing-xl);
+    flex-shrink: 0;
+}
+
+.results-header h2 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--okko-text);
+    margin-bottom: var(--okko-spacing-sm);
+}
+
+.results-header p {
+    font-size: 1rem;
+    color: var(--okko-text-muted);
+}
+
+.group-recommendations {
+    flex: 1;
+    overflow-y: auto;
+    margin-bottom: var(--okko-spacing-xl);
+}
+
+.recommendation-card {
+    display: flex;
+    gap: var(--okko-spacing-lg);
+    padding: var(--okko-spacing-lg);
+    background: var(--okko-surface-2);
+    border: 1px solid var(--okko-border);
+    border-radius: var(--okko-radius-lg);
+    margin-bottom: var(--okko-spacing-lg);
+    transition: all 0.3s ease;
+}
+
+.recommendation-card:hover {
+    transform: translateY(-2px);
+    border-color: var(--okko-accent);
+    box-shadow: var(--okko-shadow-lg);
+}
+
+.recommendation-poster {
+    width: 120px;
+    height: 180px;
+    background-size: cover;
+    background-position: center;
+    border-radius: var(--okko-radius-md);
+    flex-shrink: 0;
+}
+
+.recommendation-info {
+    flex: 1;
+}
+
+.recommendation-title {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--okko-text);
+    margin-bottom: var(--okko-spacing-sm);
+}
+
+.recommendation-meta {
+    display: flex;
+    gap: var(--okko-spacing-md);
+    margin-bottom: var(--okko-spacing-sm);
+    font-size: 0.9rem;
+    color: var(--okko-text-muted);
+}
+
+.recommendation-year {
+    font-weight: 500;
+}
+
+.recommendation-genre {
+    color: var(--okko-accent);
+    font-weight: 500;
+}
+
+.recommendation-rating {
+    background: var(--okko-success);
+    color: #0b2b17;
+    padding: 2px 6px;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    font-weight: 700;
+}
+
+.recommendation-reason {
+    font-size: 0.9rem;
+    color: var(--okko-text-muted);
+    margin-bottom: var(--okko-spacing-md);
+    line-height: 1.5;
+}
+
+.match-score {
+    font-size: 0.85rem;
+    color: var(--okko-text-muted);
+}
+
+.score-value {
+    color: var(--okko-accent);
+    font-weight: 600;
+}
+
+.results-actions {
+    display: flex;
+    gap: var(--okko-spacing-md);
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+/* Адаптивность для группового опроса */
+@media (max-width: 768px) {
+    .participant-options {
+        grid-template-columns: 1fr;
         gap: var(--okko-spacing-md);
-        margin-bottom: var(--okko-spacing-lg);
     }
     
-    .mode-card {
+    .participant-btn {
         padding: var(--okko-spacing-lg);
     }
     
-    .mode-icon {
-        font-size: 2.2rem;
+    .recommendation-card {
+        flex-direction: column;
+        text-align: center;
     }
     
-    .mode-title {
+    .recommendation-poster {
+        width: 100px;
+        height: 150px;
+        margin: 0 auto;
+    }
+    
+    .recommendation-title {
         font-size: 1.1rem;
     }
     
-    .mode-description {
-        font-size: 0.85rem;
-        line-height: 1.4;
-    }
-    
-    .mode-badge {
-        padding: 5px 10px;
-        font-size: 0.8rem;
-    }
-    
-    .company-card {
-        padding: var(--okko-spacing-lg);
-    }
-    
-    .company-card .mode-title {
-        font-size: 1.1rem;
-    }
-    
-    .company-card .mode-description {
-        font-size: 0.85rem;
-    }
-}
-
-/* Десктопы (769px и больше) */
-@media (min-width: 769px) {
-    .app-container {
-        max-width: 600px;
-    }
-    
-    .nav-bar {
-        padding: var(--okko-spacing-lg) var(--okko-spacing-xl);
-    }
-    
-    .nav-title {
-        font-size: 1.5rem;
-    }
-    
-    .nav-button {
-        padding: var(--okko-spacing-md) var(--okko-spacing-lg);
-        font-size: 1rem;
-    }
-    
-    .section-title {
-        font-size: 1.6rem;
-        margin-bottom: var(--okko-spacing-xl);
-        margin-top: var(--okko-spacing-lg);
-    }
-    
-    .modes-grid {
-        gap: var(--okko-spacing-lg);
-        margin-bottom: var(--okko-spacing-xl);
-    }
-    
-    .mode-card {
-        padding: var(--okko-spacing-xl);
-    }
-    
-    .mode-icon {
-        font-size: 2.8rem;
-    }
-    
-    .mode-title {
-        font-size: 1.2rem;
-    }
-    
-    .mode-description {
-        font-size: 0.9rem;
-        line-height: 1.5;
-    }
-    
-    .mode-badge {
-        padding: 6px 12px;
-        font-size: 0.9rem;
-    }
-    
-    .company-card {
-        padding: var(--okko-spacing-xl);
-    }
-    
-    .company-card .mode-title {
-        font-size: 1.2rem;
-    }
-    
-    .company-card .mode-description {
-        font-size: 0.9rem;
+    .results-actions {
+        flex-direction: column;
+        gap: var(--okko-spacing-sm);
     }
 }

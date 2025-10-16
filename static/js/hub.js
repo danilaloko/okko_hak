@@ -204,7 +204,8 @@ function navigateToMode(mode) {
         'swipe': '/swipe?type=movies',
         'okkonator': '/okkonator',
         'chat': '/chat',
-        'identify': '/identify?tab=link'
+        'identify': '/identify?tab=link',
+        'group-survey': '/group-survey'
     };
     
     const url = modeUrls[mode];

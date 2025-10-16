@@ -124,6 +124,10 @@ def results():
 def demo():
     return render_template('demo.html')
 
+@app.route('/group-survey')
+def group_survey():
+    return render_template('group_survey.html')
+
 @app.route('/api/movies')
 def get_movies():
     """Получить список всех фильмов"""
