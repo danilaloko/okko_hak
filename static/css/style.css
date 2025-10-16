@@ -950,6 +950,15 @@ body {
     max-width: 400px;
 }
 
+.section-title {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--okko-text);
+    text-align: center;
+    margin-bottom: var(--okko-spacing-lg);
+    margin-top: var(--okko-spacing-md);
+}
+
 .modes-grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
@@ -3686,4 +3695,201 @@ textarea::-webkit-scrollbar-thumb:hover,
 .company-card .mode-description {
     font-size: 0.8rem;
     margin-bottom: var(--okko-spacing-sm);
+}
+
+/* Адаптивные размеры для разных экранов */
+
+/* Мобильные устройства (до 480px) */
+@media (max-width: 480px) {
+    .app-container {
+        max-width: 100%;
+    }
+    
+    .nav-bar {
+        padding: var(--okko-spacing-sm) var(--okko-spacing-md);
+    }
+    
+    .nav-title {
+        font-size: 1.1rem;
+    }
+    
+    .nav-button {
+        padding: var(--okko-spacing-xs) var(--okko-spacing-sm);
+        font-size: 0.8rem;
+    }
+    
+    .section-title {
+        font-size: 1.1rem;
+        margin-bottom: var(--okko-spacing-md);
+        margin-top: var(--okko-spacing-sm);
+    }
+    
+    .modes-grid {
+        gap: var(--okko-spacing-xs);
+        margin-bottom: var(--okko-spacing-sm);
+    }
+    
+    .mode-card {
+        padding: var(--okko-spacing-sm);
+    }
+    
+    .mode-icon {
+        font-size: 1.5rem;
+    }
+    
+    .mode-title {
+        font-size: 0.9rem;
+    }
+    
+    .mode-description {
+        font-size: 0.75rem;
+        line-height: 1.2;
+    }
+    
+    .mode-badge {
+        padding: 3px 6px;
+        font-size: 0.7rem;
+    }
+    
+    .company-card {
+        padding: var(--okko-spacing-sm);
+    }
+    
+    .company-card .mode-title {
+        font-size: 0.9rem;
+    }
+    
+    .company-card .mode-description {
+        font-size: 0.75rem;
+    }
+}
+
+/* Планшеты (481px - 768px) */
+@media (min-width: 481px) and (max-width: 768px) {
+    .app-container {
+        max-width: 500px;
+    }
+    
+    .nav-bar {
+        padding: var(--okko-spacing-md) var(--okko-spacing-lg);
+    }
+    
+    .nav-title {
+        font-size: 1.3rem;
+    }
+    
+    .nav-button {
+        padding: var(--okko-spacing-sm) var(--okko-spacing-md);
+        font-size: 0.9rem;
+    }
+    
+    .section-title {
+        font-size: 1.4rem;
+        margin-bottom: var(--okko-spacing-lg);
+        margin-top: var(--okko-spacing-md);
+    }
+    
+    .modes-grid {
+        gap: var(--okko-spacing-md);
+        margin-bottom: var(--okko-spacing-lg);
+    }
+    
+    .mode-card {
+        padding: var(--okko-spacing-lg);
+    }
+    
+    .mode-icon {
+        font-size: 2.2rem;
+    }
+    
+    .mode-title {
+        font-size: 1.1rem;
+    }
+    
+    .mode-description {
+        font-size: 0.85rem;
+        line-height: 1.4;
+    }
+    
+    .mode-badge {
+        padding: 5px 10px;
+        font-size: 0.8rem;
+    }
+    
+    .company-card {
+        padding: var(--okko-spacing-lg);
+    }
+    
+    .company-card .mode-title {
+        font-size: 1.1rem;
+    }
+    
+    .company-card .mode-description {
+        font-size: 0.85rem;
+    }
+}
+
+/* Десктопы (769px и больше) */
+@media (min-width: 769px) {
+    .app-container {
+        max-width: 600px;
+    }
+    
+    .nav-bar {
+        padding: var(--okko-spacing-lg) var(--okko-spacing-xl);
+    }
+    
+    .nav-title {
+        font-size: 1.5rem;
+    }
+    
+    .nav-button {
+        padding: var(--okko-spacing-md) var(--okko-spacing-lg);
+        font-size: 1rem;
+    }
+    
+    .section-title {
+        font-size: 1.6rem;
+        margin-bottom: var(--okko-spacing-xl);
+        margin-top: var(--okko-spacing-lg);
+    }
+    
+    .modes-grid {
+        gap: var(--okko-spacing-lg);
+        margin-bottom: var(--okko-spacing-xl);
+    }
+    
+    .mode-card {
+        padding: var(--okko-spacing-xl);
+    }
+    
+    .mode-icon {
+        font-size: 2.8rem;
+    }
+    
+    .mode-title {
+        font-size: 1.2rem;
+    }
+    
+    .mode-description {
+        font-size: 0.9rem;
+        line-height: 1.5;
+    }
+    
+    .mode-badge {
+        padding: 6px 12px;
+        font-size: 0.9rem;
+    }
+    
+    .company-card {
+        padding: var(--okko-spacing-xl);
+    }
+    
+    .company-card .mode-title {
+        font-size: 1.2rem;
+    }
+    
+    .company-card .mode-description {
+        font-size: 0.9rem;
+    }
 }
