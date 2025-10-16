@@ -205,7 +205,8 @@ function navigateToMode(mode) {
         'okkonator': '/okkonator',
         'chat': '/chat',
         'identify': '/identify?tab=link',
-        'group-survey': '/group-survey'
+        'group-survey': '/group-survey',
+        'company': '/group-survey'
     };
     
     const url = modeUrls[mode];
