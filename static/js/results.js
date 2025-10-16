@@ -4,6 +4,7 @@
 
 // Глобальные переменные
 let currentRecommendations = [];
+let selectionHistory = [];
 let currentFilters = {
     platform: '',
     language: '',
@@ -21,6 +22,7 @@ document.addEventListener('DOMContentLoaded', function() {
 function initializeResults() {
     hideLoadingScreen();
     setupEventListeners();
+    loadSelectionHistory();
     loadRecommendations();
     setupFilters();
 }
@@ -138,6 +140,23 @@ function setupEventListeners() {
     }
 }
 
+// Загрузка истории подборок
+async function loadSelectionHistory() {
+    try {
+        const response = await fetch('/api/history');
+        if (response.ok) {
+            const data = await response.json();
+            selectionHistory = data.history;
+            displaySelectionHistory(data.history);
+            updateHistoryStats(data.total);
+        } else {
+            throw new Error('Ошибка загрузки истории');
+        }
+    } catch (error) {
+        console.error('Ошибка загрузки истории:', error);
+    }
+}
+
 // Загрузка рекомендаций
 async function loadRecommendations() {
     try {
@@ -191,6 +210,54 @@ function displayRecommendations(recommendations) {
             </div>
         `)
         .join('');
+}
+
+// Отображение истории подборок
+function displaySelectionHistory(history) {
+    const historyList = document.getElementById('historyList');
+    if (!historyList) return;
+    
+    historyList.innerHTML = history
+        .map(selection => `
+            <div class="history-item">
+                <div class="history-header">
+                    <div class="history-date">${formatDate(selection.date)}</div>
+                    <div class="history-method">${selection.method}</div>
+                </div>
+                <div class="history-movies">
+                    <div class="movies-scroll-container">
+                        ${selection.movies.map(movie => `
+                            <div class="history-movie-card" data-movie-id="${movie.id}">
+                                <div class="movie-poster" style="background-image: url('${movie.poster}')"></div>
+                                <div class="movie-title">${movie.title}</div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            </div>
+        `)
+        .join('');
+}
+
+// Обновление статистики истории
+function updateHistoryStats(total) {
+    const totalEl = document.getElementById('totalSelections');
+    if (totalEl) {
+        totalEl.textContent = total;
+    }
+}
+
+// Форматирование даты
+function formatDate(dateString) {
+    const date = new Date(dateString);
+    const options = { 
+        year: 'numeric', 
+        month: 'long', 
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+    };
+    return date.toLocaleDateString('ru-RU', options);
 }
 
 // Обновление счетчика рекомендаций

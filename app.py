@@ -25,6 +25,54 @@ user_profile = {
     'identified_movies': []
 }
 
+# История подборок пользователя
+selection_history = [
+    {
+        'id': 1,
+        'date': '2024-01-15',
+        'service': 'Okko',
+        'method': 'Свайпы',
+        'movies': [
+            {'id': 1, 'title': 'Интерстеллар', 'poster': 'https://images.unsplash.com/photo-1440404653325-ab127d49abc1?w=200&h=300&fit=crop'},
+            {'id': 2, 'title': 'Дюна', 'poster': 'https://images.unsplash.com/photo-1518709268805-4e9042af2176?w=200&h=300&fit=crop'},
+            {'id': 3, 'title': 'Темный рыцарь', 'poster': 'https://images.unsplash.com/photo-1518709268805-4e9042af2176?w=200&h=300&fit=crop'}
+        ]
+    },
+    {
+        'id': 2,
+        'date': '2024-01-10',
+        'service': 'Netflix',
+        'method': 'Окконатор',
+        'movies': [
+            {'id': 4, 'title': 'Начало', 'poster': 'https://images.unsplash.com/photo-1518709268805-4e9042af2176?w=200&h=300&fit=crop'},
+            {'id': 5, 'title': 'Матрица', 'poster': 'https://images.unsplash.com/photo-1518709268805-4e9042af2176?w=200&h=300&fit=crop'},
+            {'id': 6, 'title': 'Бегущий по лезвию 2049', 'poster': 'https://images.unsplash.com/photo-1518709268805-4e9042af2176?w=200&h=300&fit=crop'}
+        ]
+    },
+    {
+        'id': 3,
+        'date': '2024-01-05',
+        'service': 'YouTube',
+        'method': 'Чат',
+        'movies': [
+            {'id': 1, 'title': 'Интерстеллар', 'poster': 'https://images.unsplash.com/photo-1440404653325-ab127d49abc1?w=200&h=300&fit=crop'},
+            {'id': 3, 'title': 'Темный рыцарь', 'poster': 'https://images.unsplash.com/photo-1518709268805-4e9042af2176?w=200&h=300&fit=crop'}
+        ]
+    },
+    {
+        'id': 4,
+        'date': '2024-01-01',
+        'service': 'Кинопоиск',
+        'method': 'Помощь от звезд',
+        'movies': [
+            {'id': 2, 'title': 'Дюна', 'poster': 'https://images.unsplash.com/photo-1518709268805-4e9042af2176?w=200&h=300&fit=crop'},
+            {'id': 4, 'title': 'Начало', 'poster': 'https://images.unsplash.com/photo-1518709268805-4e9042af2176?w=200&h=300&fit=crop'},
+            {'id': 5, 'title': 'Матрица', 'poster': 'https://images.unsplash.com/photo-1518709268805-4e9042af2176?w=200&h=300&fit=crop'},
+            {'id': 6, 'title': 'Бегущий по лезвию 2049', 'poster': 'https://images.unsplash.com/photo-1518709268805-4e9042af2176?w=200&h=300&fit=crop'}
+        ]
+    }
+]
+
 # Примеры данных фильмов
 movies_data = [
     {
@@ -498,6 +546,15 @@ def get_results():
     return jsonify({
         "recommendations": recommendations[:10],
         "profile": user_profile
+    })
+
+# API для истории подборок
+@app.route('/api/history')
+def get_selection_history():
+    """Получить историю подборок пользователя"""
+    return jsonify({
+        "history": selection_history,
+        "total": len(selection_history)
     })
 
 if __name__ == '__main__':

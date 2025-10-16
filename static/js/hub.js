@@ -97,6 +97,14 @@ function setupEventListeners() {
             showProfileInfo();
         });
     }
+    
+    // Кнопка рекомендаций
+    const recommendationsBtn = document.getElementById('recommendationsBtn');
+    if (recommendationsBtn) {
+        recommendationsBtn.addEventListener('click', () => {
+            navigateToResults();
+        });
+    }
 }
 
 // Загрузка профиля пользователя
@@ -219,6 +227,11 @@ function navigateToMode(mode) {
 // Навигация к демо
 function navigateToDemo() {
     window.location.href = '/demo';
+}
+
+// Навигация к результатам
+function navigateToResults() {
+    window.location.href = '/results';
 }
 
 // Показать информацию о профиле

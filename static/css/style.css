@@ -4337,3 +4337,142 @@ textarea::-webkit-scrollbar-thumb:hover,
         min-width: 180px;
     }
 }
+
+/* ==============================
+   История подборок
+   ============================== */
+
+.history-section {
+    margin-bottom: 2rem;
+}
+
+.history-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+
+.history-header h2 {
+    color: var(--okko-text);
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin: 0;
+}
+
+.history-stats {
+    color: var(--okko-text-muted);
+    font-size: 0.9rem;
+}
+
+.history-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.history-item {
+    background: var(--okko-surface);
+    border: 1px solid var(--okko-border);
+    border-radius: var(--okko-radius-lg);
+    padding: 1.5rem;
+    transition: all 0.3s ease;
+}
+
+.history-item:hover {
+    border-color: var(--okko-border-2);
+    transform: translateY(-2px);
+    box-shadow: var(--okko-shadow-md);
+}
+
+.history-item .history-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--okko-border);
+}
+
+.history-date {
+    color: var(--okko-text);
+    font-weight: 500;
+    font-size: 0.95rem;
+}
+
+.history-service {
+    background: var(--okko-accent-light);
+    color: var(--okko-accent);
+    padding: 0.25rem 0.75rem;
+    border-radius: var(--okko-radius-sm);
+    font-size: 0.8rem;
+    font-weight: 500;
+}
+
+.history-method {
+    color: var(--okko-text-muted);
+    font-size: 0.85rem;
+}
+
+.history-movies {
+    overflow: hidden;
+}
+
+.movies-scroll-container {
+    display: flex;
+    gap: 1rem;
+    overflow-x: auto;
+    padding-bottom: 0.5rem;
+    scrollbar-width: thin;
+    scrollbar-color: var(--okko-accent) transparent;
+}
+
+.movies-scroll-container::-webkit-scrollbar {
+    height: 6px;
+}
+
+.movies-scroll-container::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.movies-scroll-container::-webkit-scrollbar-thumb {
+    background: var(--okko-accent);
+    border-radius: 3px;
+}
+
+.movies-scroll-container::-webkit-scrollbar-thumb:hover {
+    background: var(--okko-accent-hover);
+}
+
+.history-movie-card {
+    flex-shrink: 0;
+    width: 120px;
+    cursor: pointer;
+    transition: transform 0.2s ease;
+}
+
+.history-movie-card:hover {
+    transform: scale(1.05);
+}
+
+.history-movie-card .movie-poster {
+    width: 120px;
+    height: 180px;
+    background-size: cover;
+    background-position: center;
+    border-radius: var(--okko-radius-md);
+    margin-bottom: 0.5rem;
+    box-shadow: var(--okko-shadow-sm);
+}
+
+.history-movie-card .movie-title {
+    color: var(--okko-text);
+    font-size: 0.85rem;
+    font-weight: 500;
+    text-align: center;
+    line-height: 1.3;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}

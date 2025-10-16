@@ -24,75 +24,28 @@
 
         <!-- Основной контент -->
         <main class="results-content">
-            <!-- Фильтры -->
-            <div class="filters-section">
-                <div class="filters-header">
-                    <h3>Фильтры</h3>
-                    <button class="filter-toggle" id="filterToggle">
-                        <i class="fas fa-filter"></i>
-                    </button>
+            <!-- История подборок -->
+            <div class="history-section">
+                <div class="history-header">
+                    <h2>История подборок</h2>
+                    <div class="history-stats">
+                        <span id="totalSelections">0</span> подборок
+                    </div>
                 </div>
                 
-                <div class="filters-content" id="filtersContent">
-                    <div class="filter-group">
-                        <label class="filter-label">Платформа</label>
-                        <select class="filter-select" id="platformFilter">
-                            <option value="">Любая</option>
-                            <option value="okko">Okko</option>
-                            <option value="netflix">Netflix</option>
-                            <option value="youtube">YouTube</option>
-                            <option value="kinopoisk">Кинопоиск</option>
-                        </select>
-                    </div>
-                    
-                    <div class="filter-group">
-                        <label class="filter-label">Язык</label>
-                        <select class="filter-select" id="languageFilter">
-                            <option value="">Любой</option>
-                            <option value="ru">Русский</option>
-                            <option value="en">Английский</option>
-                            <option value="sub">С субтитрами</option>
-                        </select>
-                    </div>
-                    
-                    <div class="filter-group">
-                        <label class="filter-label">Длительность</label>
-                        <select class="filter-select" id="durationFilter">
-                            <option value="">Любая</option>
-                            <option value="short">До 90 мин</option>
-                            <option value="medium">90-150 мин</option>
-                            <option value="long">Более 150 мин</option>
-                        </select>
-                    </div>
-                    
-                    <div class="filter-group">
-                        <label class="filter-label">Новизна</label>
-                        <select class="filter-select" id="noveltyFilter">
-                            <option value="">Любая</option>
-                            <option value="new">Новинки</option>
-                            <option value="recent">Последние 5 лет</option>
-                            <option value="classic">Классика</option>
-                        </select>
-                    </div>
+                <div class="history-list" id="historyList">
+                    <!-- История подборок будет добавлена динамически -->
                 </div>
             </div>
 
-            <!-- Переключатель диверсификации -->
-            <div class="diversification-control">
-                <div class="control-label">
-                    <span>Точность</span>
-                    <span>Разнообразие</span>
-                </div>
-                <input type="range" id="diversificationSlider" class="diversification-range" min="0" max="1" step="0.1" value="0.5">
-            </div>
-
-            <!-- Рекомендации -->
-            <div class="recommendations-section">
+            <!-- Текущие рекомендации -->
+            <div class="current-recommendations-section">
                 <div class="recommendations-header">
-                    <h2>Рекомендуем вам</h2>
-                    <div class="recommendations-count">
-                        <span id="recommendationsCount">0</span> фильмов
-                    </div>
+                    <h2>Новые рекомендации</h2>
+                    <button class="action-btn secondary-btn" id="refreshBtn">
+                        <i class="fas fa-sync-alt"></i>
+                        Обновить
+                    </button>
                 </div>
                 
                 <div class="recommendations-list" id="recommendationsList">
@@ -106,9 +59,9 @@
                     <i class="fas fa-bookmark"></i>
                     Сохранить сет на вечер
                 </button>
-                <button class="action-btn secondary-btn" id="refreshBtn">
-                    <i class="fas fa-sync-alt"></i>
-                    Обновить рекомендации
+                <button class="action-btn secondary-btn" id="filterToggle">
+                    <i class="fas fa-filter"></i>
+                    Фильтры
                 </button>
             </div>
         </main>

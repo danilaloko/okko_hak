@@ -1,372 +1,235 @@
-# okkonator.py
-from __future__ import annotations
-from dataclasses import dataclass, field
-from typing import Dict, List, Optional, Tuple, Any
-import math
-import uuid
+import os
+import json
+import numpy as np
+import pandas as pd
+import streamlit as st
 
-# -----------------------------
-# Константы и утилиты
-# -----------------------------
-LIKERT_MAP: Dict[str, int] = {
-    # RU
-    "совсем нет": -2, "нет": -2,
-    "скорее нет": -1,
-    "не знаю": 0, "пропустить": 0, "скип": 0, "skip": 0,
-    "скорее да": 1,
-    "да": 2,
-    # EN
-    "strongly disagree": -2, "disagree": -2,
-    "rather no": -1, "somewhat no": -1,
-    "neutral": 0, "idk": 0, "unknown": 0, "n/a": 0,
-    "rather yes": 1, "somewhat yes": 1,
-    "agree": 2, "strongly agree": 2,
-}
-LIKERT_OPTIONS = ["Совсем нет", "Скорее нет", "Не знаю", "Скорее да", "Да"]
+# ====== Настройки ======
+ETA = 0.3                 # скорость обучения профиля
+QUESTIONS_MAX = 10        # максимум вопросов (короткий режим)
+MODEL_NAME = "sentence-transformers/all-MiniLM-L6-v2"  # 384-d
 
-def clamp(x: float, lo: float, hi: float) -> float:
-    return max(lo, min(hi, x))
+# ====== Данные ======
+@st.cache_data
+def load_movies():
+    df = pd.read_csv("movies.csv")
+    df["genres_list"] = df["genres"].fillna("").apply(lambda x: [g.strip() for g in x.split(";") if g.strip()])
+    return df
 
-def l2norm(weights: Dict[str, float]) -> float:
-    return math.sqrt(sum(v*v for v in weights.values()))
+movies = load_movies()
 
-def normalize_weights(weights: Dict[str, float]) -> Dict[str, float]:
-    """L2-нормализация весов вопроса, чтобы вклад по осям был сопоставим."""
-    n = l2norm(weights)
-    if n == 0:
-        return weights.copy()
-    return {k: v/n for k, v in weights.items()}
+# ====== Модель эмбеддингов ======
+@st.cache_resource
+def load_model():
+    try:
+        from sentence_transformers import SentenceTransformer
+        return SentenceTransformer(MODEL_NAME), "st"
+    except Exception as e:
+        st.warning("Не удалось загрузить sentence-transformers, переключаюсь на TF-IDF (качество ниже).")
+        from sklearn.feature_extraction.text import TfidfVectorizer
+        vec = TfidfVectorizer(max_features=5000)
+        return vec, "tfidf"
 
-# -----------------------------
-# Модель состояния
-# -----------------------------
-@dataclass
-class AxisState:
-    """Состояние одной скрытой оси предпочтений: среднее (mu) и неопределённость (sigma)."""
-    mu: float = 0.0           # текущая оценка предпочтения [-1..1], 0 = неизвестно/нейтрально
-    sigma: float = 1.0        # неопределённость [sigma_min..sigma_max]; меньше = увереннее
+model, model_kind = load_model()
 
-@dataclass
-class Question:
-    id: str
-    text: str
-    # Веса влияния вопроса на оси (положительные = "да" толкает mu вверх по оси)
-    weights: Dict[str, float]
+@st.cache_resource
+def embed_items(df):
+    texts = (df["title"].fillna("") + " " +
+             df["overview"].fillna("") + " " +
+             df["genres"].fillna(""))
+    if model_kind == "st":
+        X = model.encode(texts.tolist(), normalize_embeddings=True)
+    else:
+        X = model.fit_transform(texts.tolist()).astype(np.float32)
+        # нормализуем
+        norms = np.linalg.norm(X.toarray(), axis=1, keepdims=True) + 1e-9
+        X = X.toarray() / norms
+    return X
 
-@dataclass
-class OkkonatorConfig:
-    axes: List[str]
-    questions: List[Question]
-    q_max: int = 16                # максимум вопросов в сессии
-    sigma_min: float = 0.15        # нижняя граница неопределённости
-    sigma_max: float = 1.00        # верхняя граница неопределённости (стартовое значение)
-    base_lr: float = 0.60          # базовая "скорость обучения" (для сходимости)
-    entropy_target: float = 0.35   # целевая средняя неопределённость (ниже — стоп)
-    coverage_lambda: float = 0.10  # штраф за "переспрашивание" уже тронутых осей
+ITEM_EMB = embed_items(movies)
 
-@dataclass
-class OkkonatorSession:
-    """Хранит всё состояние сессии: оси, история, уже заданные вопросы."""
-    session_id: str
-    axes_state: Dict[str, AxisState]
-    asked_ids: List[str] = field(default_factory=list)
-    history: List[Dict[str, Any]] = field(default_factory=list)  # [{question_id, answer_raw, answer_num, before, after}]
+# ====== Оси профиля (10 шт.) ======
+AXES = [
+    "tempo_slow",         # медленный/атмосферный
+    "darkness",           # мрачность/нуар
+    "humor",              # юмор
+    "novelty",            # новизна (новинки vs классика)
+    "length_short",       # короткое (<=110 мин)
+    "violence_tol",       # толерантность к жестким сценам
+    "genre_crime",
+    "genre_comedy",
+    "genre_scifi",
+    "genre_drama",
+]
 
-# -----------------------------
-# Движок Окконатора
-# -----------------------------
-class OkkonatorEngine:
-    def __init__(self, config: Optional[OkkonatorConfig] = None):
-        if config is None:
-            config = self._default_config()
-        self.config = config
-        self.session = self._new_session()
+# ====== Вопросы: каждый бьет по нескольким осям ======
+# Ответ: -2, -1, 0, +1, +2
+QUESTIONS = [
+    {"id":"q1", "text":"Сейчас хочется чего-то лёгкого и тёплого?",
+     "targets":{"darkness":-1, "humor":+1}},
+    {"id":"q2", "text":"Окей медленный, атмосферный темп?",
+     "targets":{"tempo_slow":+1}},
+    {"id":"q3", "text":"Юмор обязателен сегодня?",
+     "targets":{"humor":+1}},
+    {"id":"q4", "text":"Мрачные/тяжёлые темы — нормально?",
+     "targets":{"darkness":+1}},
+    {"id":"q5", "text":"Хочется короткого (до ~110 минут)?",
+     "targets":{"length_short":+1}},
+    {"id":"q6", "text":"Готовы к нестандартному/экспериментальному?",
+     "targets":{"novelty":+1}},
+    {"id":"q7", "text":"Окей с жёсткими сценами (насилие)?",
+     "targets":{"violence_tol":+1}},
+    {"id":"q8", "text":"Тянет больше к криминалу/детективу, чем к фантастике?",
+     "targets":{"genre_crime":+1, "genre_scifi":-1}},
+    {"id":"q9", "text":"Комедия тоже подойдёт?",
+     "targets":{"genre_comedy":+1}},
+    {"id":"q10","text":"Готовы к серьёзной драме?",
+     "targets":{"genre_drama":+1}},
+]
 
-    # --------- Публичное API ---------
-    def reset(self) -> None:
-        self.session = self._new_session()
+LIKERT_LABELS = ["нет (-2)","скорее нет (-1)","не знаю (0)","скорее да (+1)","да (+2)"]
+LIKERT_VALUES = [-2,-1,0,1,2]
 
-    def start(self) -> Dict[str, Any]:
-        """Вернёт первый вопрос и текущую уверенность (обычно низкая)."""
-        next_q = self._select_next_question()
-        return self._response(next_q)
+# ====== Вспомогалки ======
+def init_state():
+    if "theta" not in st.session_state:
+        st.session_state.theta = {ax: 0.0 for ax in AXES}
+    if "asked" not in st.session_state:
+        st.session_state.asked = set()
+    if "answers" not in st.session_state:
+        st.session_state.answers = {}
 
-    def step(self, question_id: str, answer: Any) -> Dict[str, Any]:
-        """
-        Обрабатывает ответ на предыдущий вопрос и возвращает:
-        - confidence_pct: процент уверенности (0..100)
-        - next_question: {id, text, options} либо None (если готово)
-        - complete: bool (достигнут порог уверенности или лимит вопросов)
-        """
-        # 1) Преобразуем ответ
-        ans_num = self._normalize_answer(answer)  # int в [-2..2]
-        # 2) Найдём вопрос и применим апдейт
-        question = self._get_question(question_id)
-        if question is None:
-            raise ValueError(f"Unknown question_id: {question_id}")
+def update_theta(answer_value, targets):
+    # answer_value ∈ {-2..+2} -> scale to [-1..+1]
+    s = answer_value / 2.0
+    for ax, weight in targets.items():
+        # weight ∈ {-1..+1}: направление оси
+        st.session_state.theta[ax] = float(np.clip(
+            st.session_state.theta[ax] + ETA * weight * s, -1.0, 1.0
+        ))
 
-        before_snapshot = self._axes_snapshot()
-        self._apply_update(question, ans_num)
-        after_snapshot = self._axes_snapshot()
+def profile_keywords(theta):
+    # Простая генерация "профильного текста" из осей
+    tokens = []
+    if theta["tempo_slow"] > 0.2: tokens += ["slow-burn","atmospheric","character-driven"]
+    if theta["darkness"] > 0.2: tokens += ["dark","gritty","noir"]
+    if theta["darkness"] < -0.2: tokens += ["warm","feel-good","cozy"]
+    if theta["humor"] > 0.2: tokens += ["funny","comedy","lighthearted"]
+    if theta["novelty"] > 0.2: tokens += ["unconventional","experimental","fresh"]
+    if theta["genre_crime"] > 0.2: tokens += ["crime","detective","mystery"]
+    if theta["genre_comedy"] > 0.2: tokens += ["comedy"]
+    if theta["genre_scifi"] > 0.2: tokens += ["sci-fi","science fiction","futuristic"]
+    if theta["genre_drama"] > 0.2: tokens += ["drama","emotional"]
+    # длина/насилие — как фильтры, не в текст
+    if not tokens:
+        tokens = ["balanced","popular","well-rated"]
+    return " ".join(tokens)
 
-        # 3) Лог
-        self.session.history.append({
-            "question_id": question_id,
-            "answer_raw": answer,
-            "answer_num": ans_num,
-            "before": before_snapshot,
-            "after": after_snapshot,
-        })
-        if question_id not in self.session.asked_ids:
-            self.session.asked_ids.append(question_id)
+def embed_text(text):
+    if model_kind == "st":
+        emb = model.encode([text], normalize_embeddings=True)[0]
+    else:
+        X = model.transform([text]).astype(np.float32)
+        v = X.toarray()[0]
+        emb = v / (np.linalg.norm(v)+1e-9)
+    return emb
 
-        # 4) Вычислим следующую рекомендацию/вопрос
-        complete = self._is_complete()
-        next_q = None if complete else self._select_next_question()
-        return self._response(next_q, complete=complete)
+def cosine_sim(a, B):
+    # a: (d,), B: (n,d)
+    return (B @ a) / (np.linalg.norm(a)+1e-9)
 
-    # --------- Внутреннее ---------
-    def _new_session(self) -> OkkonatorSession:
-        axes_state = {ax: AxisState(mu=0.0, sigma=self.config.sigma_max) for ax in self.config.axes}
-        return OkkonatorSession(session_id=str(uuid.uuid4()), axes_state=axes_state)
+def filter_and_rank(theta, top_k=10):
+    user_text = profile_keywords(theta)
+    user_emb = embed_text(user_text)
+    sims = cosine_sim(user_emb, ITEM_EMB)
 
-    def _axes_snapshot(self) -> Dict[str, Tuple[float, float]]:
-        return {ax: (state.mu, state.sigma) for ax, state in self.session.axes_state.items()}
+    df = movies.copy()
+    df["sim"] = sims
 
-    def _normalize_answer(self, answer: Any) -> int:
-        """
-        Поддерживает:
-        - уже числовые значения: -2,-1,0,1,2
-        - строковые: см. LIKERT_MAP
-        """
-        if isinstance(answer, int):
-            if answer < -2 or answer > 2:
-                raise ValueError("Numeric answer must be in [-2..2]")
-            return answer
-        if isinstance(answer, float):
-            # округлим к ближайшему допустимому
-            r = int(round(clamp(answer, -2.0, 2.0)))
-            return r
-        if isinstance(answer, str):
-            key = answer.strip().lower()
-            if key in LIKERT_MAP:
-                return LIKERT_MAP[key]
-            # Попытка прочитать +/-2 из текстов "да/нет" без точного совпадения
-            if key in {"y", "yes", "да!", "да.)", "ага"}:
-                return 2
-            if key in {"n", "no", "нет", "неа"}:
-                return -2
-            if key in {"?", "не уверен", "неуверен", "maybe", "может быть"}:
-                return 0
-        raise ValueError(f"Unsupported answer format: {answer!r}")
+    # Жёсткие фильтры
+    if theta["violence_tol"] < 0:    # против жёстких сцен
+        df = df[df["violence"] == 0]
+    if theta["length_short"] > 0.2:  # предпочитаем <=110
+        df["length_penalty"] = np.where(df["runtime"] <= 110, 0.0, -0.1)
+    else:
+        df["length_penalty"] = 0.0
 
-    def _get_question(self, question_id: str) -> Optional[Question]:
-        for q in self.config.questions:
-            if q.id == question_id:
-                return q
+    # Мягкий бонус за новизну/классику
+    year_bonus = 0.0
+    if theta["novelty"] > 0.2:
+        year_bonus = 0.05 * ((df["year"] - df["year"].min()) / (df["year"].max()-df["year"].min()+1e-9))
+    elif theta["novelty"] < -0.2:
+        year_bonus = -0.05 * ((df["year"] - df["year"].min()) / (df["year"].max()-df["year"].min()+1e-9))
+    df["score"] = df["sim"] + df["length_penalty"] + year_bonus
+
+    recs = df.sort_values("score", ascending=False).head(top_k)
+    return recs[["id","title","genres","runtime","year","score"]]
+
+def explain_card(row, theta):
+    bits = []
+    if theta["tempo_slow"] > 0.2: bits.append("медленный/атмосферный темп")
+    if theta["darkness"] > 0.2: bits.append("мрачный вайб")
+    if theta["darkness"] < -0.2: bits.append("тёплый/лайтовый вайб")
+    if theta["humor"] > 0.2 and "Comedy" in row["genres"]: bits.append("хотели юмор — это комедия")
+    if theta["length_short"] > 0.2 and row["runtime"] <= 110: bits.append("короткий (≤110 мин)")
+    if theta["genre_crime"] > 0.2 and "Crime" in row["genres"]: bits.append("криминал/детектив")
+    if theta["genre_scifi"] > 0.2 and "Sci-Fi" in row["genres"]: bits.append("sci-fi")
+    if theta["genre_drama"] > 0.2 and "Drama" in row["genres"]: bits.append("драма")
+    if theta["novelty"] > 0.2 and row["year"] >= 2015: bits.append("свежее")
+    return " · ".join(bits[:3]) if bits else "совпадение по общему вкусу"
+
+def next_question():
+    # берём первый не заданный; чуть-чуть умнее — приоритет тем,
+    # где theta ближе к 0 и которых ещё не трогали.
+    remaining = [q for q in QUESTIONS if q["id"] not in st.session_state.asked]
+    if not remaining:
         return None
+    # примитивный приоритет: сколько новых осей затрагивает вопрос
+    def prio(q):
+        unseen_axes = sum(1 for ax in q["targets"].keys())
+        flatness = sum(1.0 - abs(st.session_state.theta.get(ax, 0.0)) for ax in q["targets"].keys())
+        return (unseen_axes, flatness)
+    remaining.sort(key=prio, reverse=True)
+    return remaining[0]
 
-    def _apply_update(self, q: Question, ans_num: int) -> None:
-        """
-        Локально-байесовская линейная корректировка по осям:
-        - прогноз ответа = sum(w_j * mu_j)
-        - ошибка = (ans_norm - прогноз)
-        - обновление mu_j += kappa * w_j * ошибка
-        - уменьшение sigma_j пропорционально |w_j| и |ans_norm|
-        """
-        if not q.weights:
-            return
-        # нормализуем веса вопроса
-        w = normalize_weights(q.weights)
+# ====== UI ======
+st.set_page_config(page_title="Окконатор (минимал)", page_icon="🎬", layout="centered")
+st.title("🎬 Окконатор — быстрая настройка вкуса")
 
-        # Нормированный ответ [-1,1]
-        ans_norm = ans_num / 2.0  # -1..1
+init_state()
 
-        # Прогноз по текущему состоянию
-        pred = sum(w_ax * self.session.axes_state[ax].mu for ax, w_ax in w.items())
+col1, col2 = st.columns([3,2])
+with col1:
+    st.markdown("Ответьте на несколько вопросов — получим базовый профиль и покажем подборку.")
+with col2:
+    completeness = int(100 * len(st.session_state.asked) / QUESTIONS_MAX)
+    st.progress(min(completeness,100), text=f"Уверенность профиля: {completeness}%")
 
-        # Ошибка модели
-        err = ans_norm - pred
+q = next_question()
+if q and len(st.session_state.asked) < QUESTIONS_MAX:
+    st.subheader(q["text"])
+    choice = st.radio("Ваш ответ:", LIKERT_LABELS, index=2, horizontal=True, key=f"ans_{q['id']}")
+    btns = st.columns(2)
+    if btns[0].button("Следующий вопрос"):
+        val = LIKERT_VALUES[LIKERT_LABELS.index(choice)]
+        if val != 0:  # "не знаю" = 0 → не обновляем
+            update_theta(val, q["targets"])
+        st.session_state.asked.add(q["id"])
+        st.rerun()
+    show_now = btns[1].button("Показать подборку сейчас")
+else:
+    show_now = True
 
-        # Адаптивная скорость обучения по неопределённости затронутых осей
-        sigmas = [self.session.axes_state[ax].sigma for ax in w.keys()]
-        avg_sigma = sum(sigmas) / (len(sigmas) or 1)
-        kappa = self.config.base_lr * (0.5 + 0.5 * (avg_sigma - self.config.sigma_min) / (self.config.sigma_max - self.config.sigma_min))
-        kappa = clamp(kappa, 0.15, 0.95)
+st.divider()
 
-        # Обновляем каждую ось
-        for ax, w_ax in w.items():
-            st = self.session.axes_state[ax]
-            # апдейт среднего
-            st.mu = clamp(st.mu + kappa * w_ax * err, -1.0, 1.0)
-            # апдейт неопределённости (чем информативнее ответ — тем сильнее уверенность)
-            shrink = 0.25 * abs(w_ax) * abs(ans_norm)  # 0..0.25
-            st.sigma = clamp(st.sigma * (1.0 - shrink), self.config.sigma_min, self.config.sigma_max)
+if show_now:
+    st.subheader("Подборка для вас")
+    recs = filter_and_rank(st.session_state.theta, top_k=6)
+    for _, row in recs.iterrows():
+        with st.container(border=True):
+            st.markdown(f"**{row['title']}**  \nЖанры: {row['genres']} · {int(row['runtime'])} мин · {int(row['year'])}")
+            st.caption(explain_card(row, st.session_state.theta))
 
-        # Доп. небольшое «затухание» неопределённости для прочих осей (раз мы задавали вопрос вообще)
-        for ax, st in self.session.axes_state.items():
-            if ax not in w:
-                st.sigma = clamp(st.sigma * 0.995, self.config.sigma_min, self.config.sigma_max)
-
-    def _avg_sigma(self) -> float:
-        return sum(st.sigma for st in self.session.axes_state.values()) / len(self.session.axes_state)
-
-    def _confidence_pct(self) -> float:
-        """
-        Переводим среднюю неопределённость в 0..100%.
-        sigma_max -> 0%, sigma_min -> 100%
-        Плюс лёгкий бонус за прогресс по числу вопросов.
-        """
-        avg_sigma = self._avg_sigma()
-        rng = self.config.sigma_max - self.config.sigma_min
-        if rng <= 1e-9:
-            base = 100.0
-        else:
-            base = 100.0 * (self.config.sigma_max - avg_sigma) / rng
-        # бонус за долю пройденных вопросов (до +10 п.п.)
-        q_bonus = 10.0 * (len(self.session.asked_ids) / max(1, self.config.q_max))
-        return clamp(base + q_bonus, 0.0, 100.0)
-
-    def _is_complete(self) -> bool:
-        # 1) достигли лимит вопросов
-        if len(self.session.asked_ids) >= self.config.q_max:
-            return True
-        # 2) упали ниже целевой неопределённости
-        if self._avg_sigma() <= self.config.entropy_target:
-            return True
-        return False
-
-    def _select_next_question(self) -> Optional[Question]:
-        """Выбирает вопрос, который максимально уменьшит неопределённость (на глазок)."""
-        candidates = [q for q in self.config.questions if q.id not in self.session.asked_ids]
-        if not candidates:
-            return None
-
-        # Оценка "инфо-гейна": сумма |w| * sigma по осям, минус небольшой штраф за перекрытие уже часто тронутых осей
-        # Частота затронутости осей ранее
-        axis_touch_count: Dict[str, int] = {ax: 0 for ax in self.config.axes}
-        for qid in self.session.asked_ids:
-            qq = self._get_question(qid)
-            if not qq:
-                continue
-            for ax in qq.weights.keys():
-                axis_touch_count[ax] += 1
-
-        best_q: Optional[Question] = None
-        best_score: float = -1e9
-
-        for q in candidates:
-            w_norm = normalize_weights(q.weights)
-            gain = 0.0
-            penalty = 0.0
-            for ax, w_ax in w_norm.items():
-                sigma = self.session.axes_state[ax].sigma
-                gain += abs(w_ax) * sigma
-                penalty += self.config.coverage_lambda * axis_touch_count.get(ax, 0) * abs(w_ax)
-            score = gain - penalty
-            if score > best_score:
-                best_score = score
-                best_q = q
-
-        return best_q
-
-    def _response(self, next_q: Optional[Question], complete: Optional[bool] = None) -> Dict[str, Any]:
-        if complete is None:
-            complete = self._is_complete()
-        payload = {
-            "session_id": self.session.session_id,
-            "confidence_pct": round(self._confidence_pct(), 1),
-            "complete": complete,
-            "next_question": None if (complete or next_q is None) else {
-                "id": next_q.id,
-                "text": next_q.text,
-                "options": LIKERT_OPTIONS
-            },
-            # можно отдать наружу краткий срез состояния (по желанию фронта)
-            "profile_preview": self.profile_preview(),
-        }
-        return payload
-
-    def profile_preview(self, top_k: int = 6) -> List[Tuple[str, float]]:
-        """Топ осей по абсолютному выраженному предпочтению (|mu|), для отображения и отладки."""
-        pairs = sorted(((ax, st.mu) for ax, st in self.session.axes_state.items()),
-                       key=lambda t: abs(t[1]), reverse=True)
-        return pairs[:top_k]
-
-    # -----------------------------
-    # Конфигурация по умолчанию
-    # -----------------------------
-    def _default_config(self) -> OkkonatorConfig:
-        axes = [
-            "valence",          # тёплое/радостное (+) ↔ печаль/тяжесть (−)
-            "arousal",          # спокойное (−) ↔ динамичное/энергичное (+)
-            "tempo",            # медленное (−) ↔ быстрое (+)
-            "darkness",         # мрачность/нуар (+)
-            "humor",            # важность юмора (+)
-            "violence_ok",      # терпимость к жестким сценам (+)
-            "novelty",          # готовность к экспериментам/новинкам (+)
-            "runtime_short",    # предпочтение ≤ ~50–60 мин (+)
-            "non_english_ok",   # ок с не-англоязычным (+)
-            "crime_pref",       # тянет к криминалу/детективу (+)
-            "scifi_pref",       # тянет к фантастике (+)
-            "romcom_pref",      # тянет к романтической комедии (+)
-            "doc_pref",         # ок с документалистикой (+)
-        ]
-        q = []
-        def add(qid: str, text: str, w: Dict[str, float]):
-            q.append(Question(qid, text, w))
-
-        add("q1", "Сейчас хочется чего-то лёгкого и тёплого?", {"valence": +0.8, "darkness": -0.6, "humor": +0.3})
-        add("q2", "Готовы к медленному, атмосферному повествованию?", {"tempo": -0.9, "arousal": -0.3, "darkness": +0.2})
-        add("q3", "Юмор — must-have сегодня?", {"humor": +0.9, "valence": +0.3})
-        add("q4", "Окей ли тёмные/мрачные темы?", {"darkness": +0.9, "valence": -0.4, "violence_ok": +0.4})
-        add("q5", "Хотите уложиться в ≤ 50 минут?", {"runtime_short": +0.9})
-        add("q6", "Готовы к необычному/экспериментальному?", {"novelty": +0.9})
-        add("q7", "Комфортно с жёсткими сценами?", {"violence_ok": +0.9, "darkness": +0.3})
-        add("q8", "Скорее криминал/детектив, чем фантастика?", {"crime_pref": +0.9, "scifi_pref": -0.6})
-        add("q9", "Новинка вместо классики?", {"novelty": +0.6})
-        add("q10", "Окей не-англоязычное?", {"non_english_ok": +0.9})
-        add("q11", "Романтическая комедия сейчас — это да?", {"romcom_pref": +0.9, "darkness": -0.7, "humor": +0.5})
-        add("q12", "Документальное кино — норм?", {"doc_pref": +0.9})
-
-        return OkkonatorConfig(
-            axes=axes,
-            questions=q,
-            q_max=16,
-            sigma_min=0.15,
-            sigma_max=1.00,
-            base_lr=0.60,
-            entropy_target=0.35,
-            coverage_lambda=0.10,
-        )
-
-# -----------------------------
-# Пример использования
-# -----------------------------
-if __name__ == "__main__":
-    engine = OkkonatorEngine()
-
-    # Стартуем: получаем первый вопрос
-    resp = engine.start()
-    print("START:", resp["next_question"], "confidence:", resp["confidence_pct"], "%")
-
-    # Ответим на 6-8 вопросов (примерно)
-    steps = [
-        ("q1", "Да"),
-        ("q2", "Скорее нет"),
-        ("q3", "Да"),
-        ("q4", "Скорее да"),
-        ("q5", "Скорее да"),
-        ("q6", "Скорее да"),
-        ("q8", "Скорее да"),
-    ]
-
-    for qid, ans in steps:
-        resp = engine.step(qid, ans)
-        print(f"\nANSWER: {qid=} {ans=}")
-        print("confidence:", resp["confidence_pct"], "%")
-        print("next_question:", resp["next_question"])
-        print("complete:", resp["complete"])
-        print("profile_preview:", resp["profile_preview"])
-
-    # Можно продолжать step(...) пока complete не станет True
+st.divider()
+with st.expander("Посмотреть текущий профиль (θ)"):
+    st.json(st.session_state.theta)
