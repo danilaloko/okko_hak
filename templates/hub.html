@@ -14,6 +14,15 @@
 <body>
     <!-- Главный контейнер -->
     <div class="app-container">
+        <!-- Навигационная панель -->
+        <nav class="nav-bar">
+            <h1 class="nav-title">ökko Discovery</h1>
+            <button class="nav-button" id="recommendationsBtn">
+                <i class="fas fa-star"></i>
+                <span>Рекомендации</span>
+            </button>
+        </nav>
+        
         <!-- Основной контент -->
         <main class="main-content">
             <!-- Режимы работы -->
@@ -49,14 +58,23 @@
                         <div class="mode-badge">Гибко</div>
                     </div>
 
-                    <!-- Узнать фильм -->
+                    <!-- Помощь от звезд -->
                     <div class="mode-card" data-mode="identify">
                         <div class="mode-icon">
-                            <i class="fas fa-search"></i>
+                            <i class="fas fa-star"></i>
                         </div>
-                        <div class="mode-title">Узнать фильм</div>
-                        <div class="mode-description">Загрузите ссылку или опишите фильм, который ищете</div>
-                        <div class="mode-badge">Точно</div>
+                        <div class="mode-title">Помощь от звезд</div>
+                        <div class="mode-description">Чат со звездами кино, они помогут выбрать фильм</div>
+                        <div class="mode-badge">Эксклюзивно</div>
+                    </div>
+                </div>
+                
+                <!-- Кнопка для компании -->
+                <div class="company-section">
+                    <div class="mode-card company-card" data-mode="company">
+                        <div class="mode-title">Для компании</div>
+                        <div class="mode-description">Найдите фильм, который понравится всей компании</div>
+                        <div class="mode-badge">Вместе</div>
                     </div>
                 </div>
             </section>
