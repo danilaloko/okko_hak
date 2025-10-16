@@ -9,14 +9,16 @@ let confidence = 0;
 let isProcessing = false;
 let askedQuestions = []; // Массив заданных вопросов
 let userProfile = {}; // Профиль пользователя
-let cachedRecommendations = null; // Кэшированные рекомендации
+let firstRecommendationsShown = false; // Были ли показаны первые рекомендации при 70%
+// Убрано кэширование рекомендаций - всегда запрашиваем свежие данные
 
 // Ключи для localStorage
 const STORAGE_KEYS = {
     PROFILE: 'okkonator_profile',
     ANSWERS: 'okkonator_answers',
     CONFIDENCE: 'okkonator_confidence',
-    ASKED_QUESTIONS: 'okkonator_asked_questions'
+    ASKED_QUESTIONS: 'okkonator_asked_questions',
+    FIRST_RECOMMENDATIONS_SHOWN: 'okkonator_first_recommendations_shown'
 };
 
 // Функции логгирования
@@ -95,7 +97,10 @@ function loadUserData() {
     // Загружаем уверенность
     confidence = loadFromStorage(STORAGE_KEYS.CONFIDENCE, 0);
     
-    log(`Загружены данные: профиль=${Object.keys(userProfile).length} осей, ответов=${askedQuestions.length}, уверенность=${confidence}%`);
+    // Загружаем флаг показа первых рекомендаций
+    firstRecommendationsShown = loadFromStorage(STORAGE_KEYS.FIRST_RECOMMENDATIONS_SHOWN, false);
+    
+    log(`Загружены данные: профиль=${Object.keys(userProfile).length} осей, ответов=${askedQuestions.length}, уверенность=${confidence}%, первые рекомендации показаны=${firstRecommendationsShown}`);
     
     // Обновляем индикатор уверенности
     updateConfidence();
@@ -182,7 +187,7 @@ function setupEventListeners() {
                 // Сохраняем рекомендации в localStorage для передачи на страницу результатов
                 localStorage.setItem('okkonator_recommendations', JSON.stringify(recommendations));
                 localStorage.setItem('okkonator_profile', JSON.stringify(userProfile));
-                window.location.href = '/results';
+            window.location.href = '/results';
             } else {
                 logError('Не удалось получить рекомендации');
                 showErrorMessage('Не удалось получить рекомендации. Попробуйте еще раз.');
@@ -238,15 +243,48 @@ async function loadNextQuestion() {
             questionIndex = data.question.id;
             confidence = data.confidence || 0;
             
+            // Сохраняем уверенность в localStorage
+            saveToStorage(STORAGE_KEYS.CONFIDENCE, confidence);
+            
             log(`Загружен вопрос: ${data.question.text} (ID: ${data.question.id})`);
             log(`Уверенность: ${confidence}%`);
             
+            // Проверяем уверенность после получения данных от сервера
+            if (confidence >= 70 && confidence < 100 && !firstRecommendationsShown) {
+                log('Уверенность достигла 70%, показываем первую подборку');
+                firstRecommendationsShown = true;
+                saveToStorage(STORAGE_KEYS.FIRST_RECOMMENDATIONS_SHOWN, firstRecommendationsShown);
+                hideLoadingScreen();
+                showGuessedCandidate();
+            } else if (confidence >= 100) {
+                log('Уверенность достигла 100%, показываем окончательную подборку');
+                hideLoadingScreen();
+                showFinalRecommendations();
+            } else {
+                log('Продолжаем с вопросами, уверенность:', confidence);
             displayQuestion();
             updateConfidence();
             hideLoadingScreen();
+            }
         } else if (data.message && data.message.includes('закончились')) {
-            log('Вопросы закончились, показываем опции завершения');
-            showCompletionOptions();
+            log('Вопросы закончились, проверяем уверенность для показа рекомендаций');
+            
+            // Проверяем уверенность при завершении вопросов
+            if (confidence >= 70 && confidence < 100 && !firstRecommendationsShown) {
+                log('Уверенность 70-99%, показываем первую подборку');
+                firstRecommendationsShown = true;
+                saveToStorage(STORAGE_KEYS.FIRST_RECOMMENDATIONS_SHOWN, firstRecommendationsShown);
+                hideLoadingScreen();
+                showGuessedCandidate();
+            } else if (confidence >= 100) {
+                log('Уверенность 100%, показываем окончательную подборку');
+                hideLoadingScreen();
+                showFinalRecommendations();
+            } else {
+                log('Уверенность < 70%, показываем результаты на той же странице');
+                hideLoadingScreen();
+                showResultsOnSamePage();
+            }
         } else {
             log('Неожиданный ответ сервера:', data);
             showErrorMessage('Неожиданный ответ сервера');
@@ -292,6 +330,9 @@ async function handleAnswer(answer) {
     isProcessing = true;
     log(`Обрабатываем ответ: ${answer} для вопроса ${questionIndex}`);
     
+    // Показываем загрузочный экран сразу после нажатия
+    showLoadingScreen('Обрабатываем ответ...', 'Анализируем ваши предпочтения');
+    
     try {
         // Отправляем ответ на сервер
         const response = await fetch('/api/okkonator/answer', {
@@ -301,7 +342,9 @@ async function handleAnswer(answer) {
             },
             body: JSON.stringify({
                 answer: answer,
-                question_id: questionIndex
+                question_id: questionIndex,
+                theta: userProfile,
+                asked_ids: askedQuestions
             })
         });
         
@@ -328,30 +371,33 @@ async function handleAnswer(answer) {
             saveToStorage(STORAGE_KEYS.ANSWERS, savedAnswers);
             askedQuestions.push(questionIndex);
             
-            // Обновляем уверенность на основе ответа сервера
-            confidence = Math.min(confidence + 10, 100);
-            saveToStorage(STORAGE_KEYS.CONFIDENCE, confidence);
+            // Получаем уверенность от сервера (если есть)
+            if (data.confidence !== undefined) {
+                confidence = data.confidence;
+                saveToStorage(STORAGE_KEYS.CONFIDENCE, confidence);
+                log(`Уверенность от сервера: ${confidence}%`);
+            } else {
+                // Если уверенность не пришла от сервера, сохраняем текущую
+                saveToStorage(STORAGE_KEYS.CONFIDENCE, confidence);
+            }
+            
             updateConfidence();
             
-            // Проверяем, нужно ли показать угаданного кандидата
-            if (confidence >= 70) {
-                log('Уверенность достигла 70%, показываем угаданного кандидата');
-                showGuessedCandidate();
-            } else {
-                log('Продолжаем с вопросами, уверенность:', confidence);
-                // Сбрасываем флаг обработки и загружаем следующий вопрос
-                isProcessing = false;
+            // Сбрасываем флаг обработки и загружаем следующий вопрос
+            // Проверка уверенности произойдет в loadNextQuestion после получения данных от сервера
+            isProcessing = false;
                 setTimeout(() => {
                     loadNextQuestion();
-                }, 1000);
-            }
+            }, 1000);
         } else {
             logError('Ошибка обработки ответа:', data.error);
+            hideLoadingScreen();
             showErrorMessage(data.error || 'Ошибка обработки ответа');
-            isProcessing = false;
+                    isProcessing = false;
         }
     } catch (error) {
         logError('Ошибка отправки ответа:', error);
+        hideLoadingScreen();
         showErrorMessage('Ошибка подключения к сервису');
         isProcessing = false;
     }
@@ -375,8 +421,8 @@ async function showGuessedCandidate() {
     log('Показываем угаданного кандидата, получаем рекомендации от Окконатора');
     
     try {
-        // Получаем рекомендации от Окконатора (используем кэш)
-        const recommendations = await getOkkonatorRecommendations(true);
+        // Получаем рекомендации от Окконатора
+        const recommendations = await getOkkonatorRecommendations();
         
         if (recommendations.length > 0) {
             // Берем первые 3 рекомендации
@@ -393,8 +439,8 @@ async function showGuessedCandidate() {
                 const header = document.createElement('div');
                 header.className = 'guess-header';
                 header.innerHTML = `
-                    <h3>Мы угадали ваши предпочтения!</h3>
-                    <p>Вот топ-3 фильма, которые идеально подходят вам:</p>
+                    <h3>🎬 Первая подборка готова!</h3>
+                    <p>Мы уже понимаем ваши предпочтения. Вот предварительная подборка:</p>
                 `;
                 guessContainer.appendChild(header);
                 
@@ -497,8 +543,8 @@ async function showGuessedCandidate() {
                         align-items: center;
                         gap: 8px;
                     ">
-                        <i class="fas fa-times"></i>
-                        Нет, не подходит
+                        <i class="fas fa-forward"></i>
+                        Продолжить вопросы
                     </button>
                     <button class="guess-btn restart-btn" id="restartFromGuessBtn" style="
                         background: #f8f9fa;
@@ -546,6 +592,348 @@ async function showGuessedCandidate() {
     }
     
     isProcessing = false;
+}
+
+// Показать окончательные рекомендации (при 100% уверенности)
+async function showFinalRecommendations() {
+    log('Показываем окончательные рекомендации при 100% уверенности');
+    
+    try {
+        // Получаем рекомендации от Окконатора
+        const recommendations = await getOkkonatorRecommendations();
+        
+        if (recommendations.length > 0) {
+            // Берем первые 3 рекомендации
+            const topCandidates = recommendations.slice(0, 3);
+            logSuccess(`Получено ${topCandidates.length} окончательных рекомендаций`);
+            
+            const guessContainer = document.getElementById('guessContainer');
+            
+            if (guessContainer) {
+                // Очищаем контейнер
+                guessContainer.innerHTML = '';
+                
+                // Создаем заголовок для окончательных рекомендаций
+                const header = document.createElement('div');
+                header.className = 'guess-header';
+                header.innerHTML = `
+                    <h3>🎯 Ваша идеальная подборка готова!</h3>
+                    <p>Мы изучили все ваши предпочтения и подобрали идеальные фильмы:</p>
+                `;
+                guessContainer.appendChild(header);
+                
+                // Создаем сетку для 3 фильмов
+                const moviesGrid = document.createElement('div');
+                moviesGrid.className = 'guess-movies-grid';
+                moviesGrid.style.cssText = `
+                    display: grid;
+                    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+                    gap: 20px;
+                    margin: 20px 0;
+                `;
+                
+                topCandidates.forEach((candidate, index) => {
+                    const movieCard = document.createElement('div');
+                    movieCard.className = 'guess-movie-card';
+                    movieCard.style.cssText = `
+                        background: white;
+                        border-radius: 12px;
+                        overflow: hidden;
+                        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+                        transition: transform 0.3s ease;
+                    `;
+                    
+                    movieCard.innerHTML = `
+                        <div class="guess-movie-poster" style="
+                            height: 200px;
+                            background-image: url('${candidate.poster || 'https://images.unsplash.com/photo-1518709268805-4e9042af2176?w=400&h=600&fit=crop'}');
+                            background-size: cover;
+                            background-position: center;
+                            position: relative;
+                        ">
+                            <div style="
+                                position: absolute;
+                                top: 10px;
+                                right: 10px;
+                                background: rgba(0,0,0,0.7);
+                                color: white;
+                                padding: 4px 8px;
+                                border-radius: 4px;
+                                font-size: 12px;
+                            ">${candidate.rating || 'N/A'}</div>
+                        </div>
+                        <div style="padding: 15px;">
+                            <h4 style="margin: 0 0 5px 0; font-size: 16px; color: #333;">${candidate.title}</h4>
+                            <p style="margin: 0 0 5px 0; font-size: 14px; color: #666;">${candidate.year} • ${candidate.duration || 'N/A'} мин</p>
+                            <p style="margin: 0 0 10px 0; font-size: 12px; color: #888;">${candidate.genre || 'Жанр не указан'}</p>
+                            ${candidate.reason ? `<p style="margin: 0; font-size: 11px; color: #999; font-style: italic;">${candidate.reason}</p>` : ''}
+                        </div>
+                    `;
+                    
+                    // Добавляем эффект при наведении
+                    movieCard.addEventListener('mouseenter', () => {
+                        movieCard.style.transform = 'translateY(-5px)';
+                    });
+                    movieCard.addEventListener('mouseleave', () => {
+                        movieCard.style.transform = 'translateY(0)';
+                    });
+                    
+                    moviesGrid.appendChild(movieCard);
+                });
+                
+                guessContainer.appendChild(moviesGrid);
+                
+                // Создаем кнопки действий для окончательных рекомендаций
+                const actionsContainer = document.createElement('div');
+                actionsContainer.className = 'guess-actions';
+                actionsContainer.style.cssText = `
+                    display: flex;
+                    gap: 15px;
+                    justify-content: center;
+                    margin-top: 20px;
+                `;
+                
+                actionsContainer.innerHTML = `
+                    <button class="guess-btn watch-btn" id="finalWatchBtn" style="
+                        background: var(--okko-primary);
+                        color: white;
+                        border: none;
+                        padding: 12px 24px;
+                        border-radius: 8px;
+                        font-weight: 500;
+                        cursor: pointer;
+                        display: flex;
+                        align-items: center;
+                        gap: 8px;
+                    ">
+                        <i class="fas fa-play"></i>
+                        Смотреть рекомендации
+                    </button>
+                    <button class="guess-btn restart-btn" id="finalRestartBtn" style="
+                        background: #f8f9fa;
+                        color: #6c757d;
+                        border: 1px solid #dee2e6;
+                        padding: 12px 24px;
+                        border-radius: 8px;
+                        font-weight: 500;
+                        cursor: pointer;
+                        display: flex;
+                        align-items: center;
+                        gap: 8px;
+                    ">
+                        <i class="fas fa-redo"></i>
+                        Начать сначала
+                    </button>
+                `;
+                
+                guessContainer.appendChild(actionsContainer);
+                
+                // Переподключаем обработчики событий
+                const finalWatchBtn = document.getElementById('finalWatchBtn');
+                const finalRestartBtn = document.getElementById('finalRestartBtn');
+                
+                if (finalWatchBtn) {
+                    finalWatchBtn.addEventListener('click', handleWatchMovie);
+                }
+                if (finalRestartBtn) {
+                    finalRestartBtn.addEventListener('click', restartOkkonator);
+        }
+        
+        guessContainer.style.display = 'block';
+            }
+        } else {
+            logError('Не удалось получить окончательные рекомендации');
+            showErrorMessage('Не удалось получить рекомендации');
+        }
+    } catch (error) {
+        logError('Ошибка при получении окончательных рекомендаций:', error);
+        showErrorMessage('Ошибка получения рекомендаций');
+    }
+    
+    isProcessing = false;
+}
+
+// Показать результаты на той же странице (при уверенности < 70%)
+async function showResultsOnSamePage() {
+    log('Показываем результаты на той же странице');
+    
+    try {
+        // Получаем рекомендации от Окконатора
+        const recommendations = await getOkkonatorRecommendations();
+        
+        if (recommendations.length > 0) {
+            // Скрываем вопрос и варианты ответов
+            const questionContainer = document.querySelector('.question-container');
+            const answerOptions = document.querySelector('.answer-options');
+            
+            if (questionContainer) questionContainer.style.display = 'none';
+            if (answerOptions) answerOptions.style.display = 'none';
+            
+            // Создаем контейнер для результатов
+            const resultsContainer = document.createElement('div');
+            resultsContainer.id = 'resultsContainer';
+            resultsContainer.style.cssText = `
+                background: var(--okko-surface);
+                border-radius: var(--okko-radius-lg);
+                padding: 24px;
+                margin: 20px 0;
+                border: 1px solid var(--okko-border);
+            `;
+            
+            // Заголовок результатов
+            const header = document.createElement('div');
+            header.style.cssText = `
+                text-align: center;
+                margin-bottom: 24px;
+            `;
+            header.innerHTML = `
+                <h3 style="color: var(--okko-text); font-size: 24px; font-weight: 600; margin: 0 0 8px 0;">
+                    🎬 Ваши рекомендации готовы!
+                </h3>
+                <p style="color: var(--okko-text-muted); font-size: 16px; margin: 0;">
+                    Мы подобрали фильмы на основе ваших предпочтений
+                </p>
+            `;
+            resultsContainer.appendChild(header);
+            
+            // Сетка фильмов
+            const moviesGrid = document.createElement('div');
+            moviesGrid.style.cssText = `
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+                gap: 20px;
+                margin: 20px 0;
+            `;
+            
+            // Показываем первые 6 фильмов
+            recommendations.slice(0, 6).forEach((movie, index) => {
+                const movieCard = document.createElement('div');
+                movieCard.style.cssText = `
+                    background: white;
+                    border-radius: 12px;
+                    overflow: hidden;
+                    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+                    transition: transform 0.3s ease;
+                    cursor: pointer;
+                `;
+                
+                movieCard.innerHTML = `
+                    <div style="
+                        height: 200px;
+                        background-image: url('${movie.poster || 'https://images.unsplash.com/photo-1518709268805-4e9042af2176?w=400&h=600&fit=crop'}');
+                        background-size: cover;
+                        background-position: center;
+                        position: relative;
+                    ">
+                        <div style="
+                            position: absolute;
+                            top: 10px;
+                            right: 10px;
+                            background: rgba(0,0,0,0.7);
+                            color: white;
+                            padding: 4px 8px;
+                            border-radius: 4px;
+                            font-size: 12px;
+                        ">${movie.rating || 'N/A'}</div>
+                    </div>
+                    <div style="padding: 15px;">
+                        <h4 style="margin: 0 0 5px 0; font-size: 16px; color: #333;">${movie.title}</h4>
+                        <p style="margin: 0 0 5px 0; font-size: 14px; color: #666;">${movie.year} • ${movie.duration || 'N/A'} мин</p>
+                        <p style="margin: 0 0 10px 0; font-size: 12px; color: #888;">${movie.genre || 'Жанр не указан'}</p>
+                        ${movie.reason ? `<p style="margin: 0; font-size: 11px; color: #999; font-style: italic;">${movie.reason}</p>` : ''}
+                    </div>
+                `;
+                
+                // Эффект при наведении
+                movieCard.addEventListener('mouseenter', () => {
+                    movieCard.style.transform = 'translateY(-5px)';
+                });
+                movieCard.addEventListener('mouseleave', () => {
+                    movieCard.style.transform = 'translateY(0)';
+                });
+                
+                moviesGrid.appendChild(movieCard);
+            });
+            
+            resultsContainer.appendChild(moviesGrid);
+            
+            // Кнопки действий
+            const actionsContainer = document.createElement('div');
+            actionsContainer.style.cssText = `
+                display: flex;
+                gap: 15px;
+                justify-content: center;
+                margin-top: 20px;
+                flex-wrap: wrap;
+            `;
+            
+            actionsContainer.innerHTML = `
+                <button class="action-btn primary-btn" id="viewResultsBtn" style="
+                    background: var(--okko-primary);
+                    color: white;
+                    border: none;
+                    padding: 12px 24px;
+                    border-radius: 8px;
+                    font-weight: 500;
+                    cursor: pointer;
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                ">
+                    <i class="fas fa-star"></i>
+                    Показать все результаты
+                </button>
+                <button class="action-btn secondary-btn" id="restartFromResultsBtn" style="
+                    background: #f8f9fa;
+                    color: #6c757d;
+                    border: 1px solid #dee2e6;
+                    padding: 12px 24px;
+                    border-radius: 8px;
+                    font-weight: 500;
+                    cursor: pointer;
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                ">
+                    <i class="fas fa-redo"></i>
+                    Начать сначала
+                </button>
+            `;
+            
+            resultsContainer.appendChild(actionsContainer);
+            
+            // Добавляем контейнер на страницу
+            const mainContent = document.querySelector('.okkonator-content');
+            if (mainContent) {
+                mainContent.appendChild(resultsContainer);
+            }
+            
+            // Обработчики событий
+            const viewResultsBtn = document.getElementById('viewResultsBtn');
+            const restartFromResultsBtn = document.getElementById('restartFromResultsBtn');
+            
+            if (viewResultsBtn) {
+                viewResultsBtn.addEventListener('click', () => {
+                    // Сохраняем рекомендации и переходим на страницу результатов
+                    localStorage.setItem('okkonator_recommendations', JSON.stringify(recommendations));
+                    localStorage.setItem('okkonator_profile', JSON.stringify(userProfile));
+                    window.location.href = '/results';
+                });
+            }
+            
+            if (restartFromResultsBtn) {
+                restartFromResultsBtn.addEventListener('click', restartOkkonator);
+            }
+            
+            logSuccess(`Показано ${recommendations.length} рекомендаций на той же странице`);
+        } else {
+            logError('Не удалось получить рекомендации');
+            showErrorMessage('Не удалось получить рекомендации');
+        }
+    } catch (error) {
+        logError('Ошибка при получении результатов:', error);
+        showErrorMessage('Ошибка получения рекомендаций');
+    }
 }
 
 // Обработка перехода к просмотру фильма
@@ -608,13 +996,16 @@ async function handleGuessResponse(isCorrect) {
             guessContainer.style.display = 'none';
         }
         
-        // Снижаем уверенность и продолжаем
-        confidence = Math.max(confidence - 20, 0);
-        updateConfidence();
-        
+        // Продолжаем с вопросами (только если уверенность < 100%)
+        if (confidence < 100) {
+            isProcessing = false;
         setTimeout(() => {
             loadNextQuestion();
-        }, 500);
+            }, 1000);
+        } else {
+            log('Уверенность уже 100%, показываем окончательные рекомендации');
+            showFinalRecommendations();
+        }
     }
 }
 
@@ -708,7 +1099,7 @@ function restartOkkonator() {
     isProcessing = false;
     askedQuestions = [];
     userProfile = {};
-    cachedRecommendations = null;
+    firstRecommendationsShown = false;
     
     // Скрываем угаданного кандидата
     const guessContainer = document.getElementById('guessContainer');
@@ -716,8 +1107,9 @@ function restartOkkonator() {
         guessContainer.style.display = 'none';
     }
     
-    // Сбрасываем индикатор уверенности
+    // Сбрасываем индикатор уверенности и сохраняем в localStorage
     updateConfidence();
+    saveToStorage(STORAGE_KEYS.CONFIDENCE, confidence);
     
     // Скрываем кнопки действий
     const continueBtn = document.getElementById('continueBtn');
@@ -739,10 +1131,10 @@ function restartOkkonator() {
     
     logSuccess('Окконатор перезапущен');
     
-    // Загружаем первый вопрос через небольшую задержку
+    // Обновляем страницу для полного сброса состояния
     setTimeout(() => {
-        loadNextQuestion();
-    }, 1500);
+        window.location.reload();
+    }, 1000);
 }
 
 // Показать сообщение об ошибке
@@ -755,13 +1147,7 @@ function showErrorMessage(message) {
 }
 
 // Получить рекомендации от Окконатора
-async function getOkkonatorRecommendations(useCache = true) {
-    // Если у нас есть кэшированные рекомендации, используем их
-    if (useCache && cachedRecommendations) {
-        log('Используем кэшированные рекомендации');
-        return cachedRecommendations;
-    }
-    
+async function getOkkonatorRecommendations() {
     try {
         log('Запрашиваем рекомендации от Окконатора');
         showLoadingScreen('Получаем рекомендации...');
@@ -782,8 +1168,6 @@ async function getOkkonatorRecommendations(useCache = true) {
         
         if (response.ok && data.recommendations) {
             logSuccess(`Получено ${data.recommendations.length} рекомендаций`);
-            // Кэшируем рекомендации
-            cachedRecommendations = data.recommendations;
             hideLoadingScreen();
             return data.recommendations;
         } else {
@@ -801,15 +1185,19 @@ async function getOkkonatorRecommendations(useCache = true) {
 }
 
 // Показать загрузочный экран
-function showLoadingScreen(message) {
+function showLoadingScreen(message, subtitle = null) {
     const loadingScreen = document.getElementById('loadingScreen');
     const loadingTitle = document.querySelector('.loading-title');
+    const loadingText = document.querySelector('.loading-text');
     
     if (loadingScreen) {
         loadingScreen.style.display = 'flex';
     }
     if (loadingTitle && message) {
         loadingTitle.textContent = message;
+    }
+    if (loadingText && subtitle) {
+        loadingText.textContent = subtitle;
     }
 }
 

@@ -351,7 +351,12 @@ def submit_okkonator_answer():
             data = response.json()
             print(f"Обновленный профиль: {data.get('theta', {})}")
             
-            return jsonify({"success": True, "theta": data['theta']})
+            # Возвращаем обновленный профиль и уверенность
+            result = {"success": True, "theta": data['theta']}
+            if 'confidence' in data:
+                result['confidence'] = data['confidence']
+            
+            return jsonify(result)
         else:
             print(f"Ошибка микросервиса: {response.text}")
             return jsonify({"error": "Ошибка обработки ответа"}), 500

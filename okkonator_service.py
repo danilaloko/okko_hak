@@ -102,6 +102,7 @@ def submit_answer():
     theta = data.get('theta', {})
     answer_value = data.get('answer_value')  # -2, -1, 0, 1, 2
     question_id = data.get('question_id')
+    asked_ids = data.get('asked_ids', [])
     
     # Инициализируем theta если пустой
     if not theta:
@@ -121,8 +122,12 @@ def submit_answer():
     if answer_value != 0:
         update_theta(theta, answer_value, question['targets'])
     
+    # Вычисляем уверенность на основе количества заданных вопросов
+    confidence = int(100 * len(asked_ids) / len(QUESTIONS))
+    
     return jsonify({
         "theta": theta,
+        "confidence": confidence,
         "updated": True
     })
 
