@@ -58,6 +58,15 @@ function setupEventListeners() {
         });
     });
     
+    // Кнопка начала опроса участника
+    const startParticipantBtn = document.getElementById('startParticipantBtn');
+    if (startParticipantBtn) {
+        startParticipantBtn.addEventListener('click', () => {
+            hideParticipantModal();
+            startParticipantSurvey();
+        });
+    }
+    
     // Кнопки результатов
     const startWatchingBtn = document.getElementById('startWatchingBtn');
     const newSurveyBtn = document.getElementById('newSurveyBtn');
@@ -106,9 +115,48 @@ function selectParticipantsCount(count) {
 // Начать опрос
 function startSurvey() {
     const participantsStep = document.getElementById('participantsStep');
-    const surveyStep = document.getElementById('surveyStep');
     
     if (participantsStep) participantsStep.style.display = 'none';
+    
+    // Показываем модальное окно для первого участника
+    showParticipantModal();
+}
+
+// Показать модальное окно участника
+function showParticipantModal() {
+    const modal = document.getElementById('participantModal');
+    const callTitle = document.getElementById('participantCallTitle');
+    
+    if (modal) {
+        // Обновляем заголовок в зависимости от номера участника
+        const titles = [
+            "Первому игроку приготовиться!",
+            "Второму игроку приготовиться!",
+            "Третьему игроку приготовиться!",
+            "Четвертому игроку приготовиться!",
+            "Пятому игроку приготовиться!"
+        ];
+        
+        if (callTitle) {
+            callTitle.textContent = titles[currentParticipant - 1] || "Участнику приготовиться!";
+        }
+        
+        modal.classList.add('active');
+    }
+}
+
+// Скрыть модальное окно участника
+function hideParticipantModal() {
+    const modal = document.getElementById('participantModal');
+    if (modal) {
+        modal.classList.remove('active');
+    }
+}
+
+// Начать опрос текущего участника
+function startParticipantSurvey() {
+    const surveyStep = document.getElementById('surveyStep');
+    
     if (surveyStep) surveyStep.style.display = 'block';
     
     updateParticipantProgress();
@@ -184,9 +232,12 @@ function finishCurrentParticipant() {
     currentParticipant++;
     
     if (currentParticipant <= participantsCount) {
-        // Переходим к следующему участнику
-        updateParticipantProgress();
-        loadCurrentQuestion();
+        // Скрываем опрос и показываем модальное окно для следующего участника
+        const surveyStep = document.getElementById('surveyStep');
+        if (surveyStep) surveyStep.style.display = 'none';
+        
+        // Показываем модальное окно для следующего участника
+        showParticipantModal();
     } else {
         // Все участники прошли опрос
         finishSurvey();
@@ -289,6 +340,9 @@ function resetSurvey() {
     currentQuestion = 0;
     participantAnswers = {};
     groupAnswers = {};
+    
+    // Скрыть модальное окно
+    hideParticipantModal();
     
     // Сбросить визуальные состояния
     const selectedBtns = document.querySelectorAll('.participant-btn.selected');

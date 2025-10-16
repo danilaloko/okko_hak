@@ -117,6 +117,24 @@
         </main>
     </div>
 
+    <!-- Модальное окно вызова участника -->
+    <div class="modal" id="participantModal">
+        <div class="modal-content">
+            <div class="participant-call">
+                <div class="participant-image">
+                    <img src="{{ url_for('static', filename='images/example.png') }}" alt="Участник" id="participantImage">
+                </div>
+                <h2 class="participant-call-title" id="participantCallTitle">
+                    Первому игроку приготовиться!
+                </h2>
+                <button class="action-btn primary-btn" id="startParticipantBtn">
+                    <i class="fas fa-play"></i>
+                    Начать опрос
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- Загрузочный экран -->
     <div class="loading-screen" id="loadingScreen">
         <div class="loading-content">

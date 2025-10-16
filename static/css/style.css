@@ -71,6 +71,10 @@ body {
     overflow-x: hidden;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    width: 100%;
+    min-height: 100vh;
+    margin: 0;
+    padding: 0;
 }
 
 /* Главный контейнер */
@@ -83,6 +87,8 @@ body {
     overflow: hidden;
     display: flex;
     flex-direction: column;
+    width: 100%;
+    min-height: 100vh;
 }
 
 /* Навигационная панель */
@@ -786,6 +792,7 @@ body {
     .app-container {
         margin: 0;
         border-radius: 0;
+        max-width: 100%;
     }
     
     .main-content {
@@ -806,6 +813,26 @@ body {
     
     .completion-actions {
         flex-direction: column;
+    }
+}
+
+/* Исправление для больших экранов */
+@media (min-width: 421px) {
+    .app-container {
+        box-shadow: 0 0 0 1px var(--okko-border);
+    }
+}
+
+/* Убираем черные полосы по бокам */
+html, body {
+    background: var(--okko-bg);
+    overflow-x: hidden;
+}
+
+/* Для экранов шире 420px добавляем фон */
+@media (min-width: 421px) {
+    body {
+        background: var(--okko-bg);
     }
 }
 
@@ -3995,6 +4022,55 @@ textarea::-webkit-scrollbar-thumb:hover,
     flex-shrink: 0;
 }
 
+/* Модальное окно участника */
+.participant-call {
+    text-align: center;
+    padding: var(--okko-spacing-xl);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 400px;
+}
+
+.participant-image {
+    margin-bottom: var(--okko-spacing-xl);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.participant-image img {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 4px solid var(--okko-accent);
+    box-shadow: var(--okko-shadow-lg);
+    display: block;
+}
+
+.participant-call-title {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--okko-text);
+    margin-bottom: var(--okko-spacing-xl);
+    background: linear-gradient(135deg, var(--okko-accent) 0%, var(--okko-success) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    text-align: center;
+}
+
+.participant-call .action-btn {
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: auto;
+    min-width: 200px;
+}
+
 /* Адаптивность для группового опроса */
 @media (max-width: 768px) {
     .participant-options {
@@ -4024,5 +4100,23 @@ textarea::-webkit-scrollbar-thumb:hover,
     .results-actions {
         flex-direction: column;
         gap: var(--okko-spacing-sm);
+    }
+    
+    .participant-call {
+        min-height: 300px;
+        padding: var(--okko-spacing-lg);
+    }
+    
+    .participant-call-title {
+        font-size: 1.5rem;
+    }
+    
+    .participant-image img {
+        width: 100px;
+        height: 100px;
+    }
+    
+    .participant-call .action-btn {
+        min-width: 180px;
     }
 }
