@@ -3725,6 +3725,223 @@ textarea::-webkit-scrollbar-thumb:hover,
 }
 
 /* ==============================
+   Помощь от звезд
+   ============================== */
+
+/* Селектор персонажей */
+.character-selector {
+    padding: var(--okko-spacing-lg);
+    background: var(--okko-surface-2);
+    border-bottom: 1px solid var(--okko-border);
+    overflow-y: auto;
+}
+
+.selector-header {
+    text-align: center;
+    margin-bottom: var(--okko-spacing-xl);
+}
+
+.selector-header h3 {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--okko-text);
+    margin-bottom: var(--okko-spacing-sm);
+}
+
+.selector-header p {
+    font-size: 0.9rem;
+    color: var(--okko-text-muted);
+}
+
+.characters-grid {
+    display: grid !important;
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: var(--okko-spacing-md);
+    max-width: 500px;
+    margin: 0 auto;
+    width: 100%;
+}
+
+.character-card {
+    background: var(--okko-surface);
+    border: 2px solid var(--okko-border);
+    border-radius: var(--okko-radius-lg);
+    padding: var(--okko-spacing-lg);
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.character-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, var(--okko-accent-light) 0%, transparent 100%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.character-card:hover::before {
+    opacity: 1;
+}
+
+.character-card:hover {
+    transform: translateY(-4px);
+    border-color: var(--okko-accent);
+    box-shadow: var(--okko-shadow-lg);
+}
+
+.character-avatar {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    margin: 0 auto var(--okko-spacing-md);
+    overflow: hidden;
+    border: 3px solid var(--okko-border);
+    transition: all 0.3s ease;
+}
+
+.character-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.character-card:hover .character-avatar {
+    border-color: var(--okko-accent);
+    transform: scale(1.1);
+}
+
+.character-name {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--okko-text);
+    margin-bottom: var(--okko-spacing-xs);
+}
+
+.character-specialty {
+    font-size: 0.8rem;
+    color: var(--okko-text-muted);
+    font-weight: 500;
+}
+
+/* Информация о выбранном персонаже */
+.selected-character-info {
+    background: var(--okko-surface-2);
+    border-bottom: 1px solid var(--okko-border);
+    padding: var(--okko-spacing-md) var(--okko-spacing-lg);
+}
+
+.character-info-content {
+    display: flex;
+    align-items: center;
+    gap: var(--okko-spacing-md);
+}
+
+.character-avatar-small {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 2px solid var(--okko-accent);
+    flex-shrink: 0;
+}
+
+.character-avatar-small img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.character-details {
+    flex: 1;
+    min-width: 0;
+}
+
+.character-details .character-name {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--okko-text);
+    margin-bottom: var(--okko-spacing-xs);
+}
+
+.character-details .character-specialty {
+    font-size: 0.8rem;
+    color: var(--okko-text-muted);
+    font-weight: 500;
+}
+
+.change-character-btn {
+    width: 40px;
+    height: 40px;
+    border: none;
+    border-radius: 50%;
+    background: var(--okko-surface-3);
+    color: var(--okko-text-muted);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+}
+
+.change-character-btn:hover {
+    background: var(--okko-accent);
+    color: white;
+    transform: scale(1.1);
+}
+
+/* Адаптивность для селектора персонажей */
+@media (max-width: 480px) {
+    .characters-grid {
+        grid-template-columns: 1fr;
+        gap: var(--okko-spacing-sm);
+    }
+    
+    .character-card {
+        padding: var(--okko-spacing-md);
+    }
+    
+    .character-avatar {
+        width: 60px;
+        height: 60px;
+    }
+    
+    .character-name {
+        font-size: 0.9rem;
+    }
+    
+    .character-specialty {
+        font-size: 0.75rem;
+    }
+    
+    .character-info-content {
+        gap: var(--okko-spacing-sm);
+    }
+    
+    .character-avatar-small {
+        width: 40px;
+        height: 40px;
+    }
+    
+    .character-details .character-name {
+        font-size: 0.9rem;
+    }
+    
+    .character-details .character-specialty {
+        font-size: 0.75rem;
+    }
+}
+
+/* ==============================
    Групповой опрос
    ============================== */
 

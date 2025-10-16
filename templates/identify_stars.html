@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Помощь от звезд - ökko Discovery</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <meta name="theme-color" content="#000000">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Навигационная панель -->
+        <nav class="nav-bar">
+            <button class="nav-btn back-btn" id="backBtn">
+                <i class="fas fa-arrow-left"></i>
+            </button>
+            <div class="nav-title">Помощь от звезд</div>
+        </nav>
+
+        <!-- Блок выбора персонажа -->
+        <div class="character-selector" id="characterSelector">
+            <div class="selector-header">
+                <h3>Выберите звезду для общения</h3>
+                <p>Каждая звезда поможет подобрать фильм в своем стиле</p>
+            </div>
+            <div class="characters-grid">
+                <div class="character-card" data-character="leonardo">
+                    <div class="character-avatar">
+                        <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=face" alt="Леонардо ДиКаприо">
+                    </div>
+                    <div class="character-name">Леонардо ДиКаприо</div>
+                    <div class="character-specialty">Драма, Триллер</div>
+                </div>
+                
+                <div class="character-card" data-character="scarlett">
+                    <div class="character-avatar">
+                        <img src="https://images.unsplash.com/photo-1494790108755-2616b612b786?w=100&h=100&fit=crop&crop=face" alt="Скарлетт Йоханссон">
+                    </div>
+                    <div class="character-name">Скарлетт Йоханссон</div>
+                    <div class="character-specialty">Фантастика, Боевик</div>
+                </div>
+                
+                <div class="character-card" data-character="ryan">
+                    <div class="character-avatar">
+                        <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop&crop=face" alt="Райан Гослинг">
+                    </div>
+                    <div class="character-name">Райан Гослинг</div>
+                    <div class="character-specialty">Драма, Романтика</div>
+                </div>
+                
+                <div class="character-card" data-character="emma">
+                    <div class="character-avatar">
+                        <img src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&h=100&fit=crop&crop=face" alt="Эмма Стоун">
+                    </div>
+                    <div class="character-name">Эмма Стоун</div>
+                    <div class="character-specialty">Комедия, Мюзикл</div>
+                </div>
+                
+                <div class="character-card" data-character="tom">
+                    <div class="character-avatar">
+                        <img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&h=100&fit=crop&crop=face" alt="Том Харди">
+                    </div>
+                    <div class="character-name">Том Харди</div>
+                    <div class="character-specialty">Боевик, Криминал</div>
+                </div>
+                
+                <div class="character-card" data-character="natalie">
+                    <div class="character-avatar">
+                        <img src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=100&h=100&fit=crop&crop=face" alt="Натали Портман">
+                    </div>
+                    <div class="character-name">Натали Портман</div>
+                    <div class="character-specialty">Драма, Фантастика</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Основной контент -->
+        <main class="chat-content" id="chatContent" style="display: none;">
+            <!-- Сайд-панель профиля -->
+            <div class="profile-sidebar" id="profileSidebar">
+                <div class="sidebar-header">
+                    <h3>Ваш профиль вкуса</h3>
+                    <button class="sidebar-close" id="sidebarClose">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="profile-content">
+                    <div class="profile-section">
+                        <h4>Любимые жанры</h4>
+                        <div class="profile-tags" id="likedGenres">
+                            <!-- Теги будут добавлены динамически -->
+                        </div>
+                    </div>
+                    <div class="profile-section">
+                        <h4>Нелюбимые жанры</h4>
+                        <div class="profile-tags" id="dislikedGenres">
+                            <!-- Теги будут добавлены динамически -->
+                        </div>
+                    </div>
+                    <div class="profile-section">
+                        <h4>Любимые актёры</h4>
+                        <div class="profile-tags" id="likedActors">
+                            <!-- Теги будут добавлены динамически -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Чат-интерфейс -->
+            <div class="chat-interface">
+                <!-- Информация о выбранной звезде -->
+                <div class="selected-character-info" id="selectedCharacterInfo">
+                    <div class="character-info-content">
+                        <div class="character-avatar-small">
+                            <img id="selectedCharacterAvatar" src="" alt="">
+                        </div>
+                        <div class="character-details">
+                            <div class="character-name" id="selectedCharacterName"></div>
+                            <div class="character-specialty" id="selectedCharacterSpecialty"></div>
+                        </div>
+                        <button class="change-character-btn" id="changeCharacterBtn">
+                            <i class="fas fa-exchange-alt"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- История сообщений -->
+                <div class="chat-messages" id="chatMessages">
+                    <div class="message assistant-message">
+                        <div class="message-avatar">
+                            <img id="assistantAvatar" src="" alt="" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">
+                        </div>
+                        <div class="message-content">
+                            <div class="message-text" id="welcomeMessage">
+                                Привет! Расскажите, что вы хотите посмотреть? Я помогу найти идеальный фильм для вас.
+                            </div>
+                            <div class="message-time">только что</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Быстрые подсказки -->
+                <div class="quick-suggestions" id="quickSuggestions">
+                    <div class="suggestions-title">Попробуйте:</div>
+                    <div class="suggestions-chips">
+                        <button class="suggestion-chip" data-suggestion="что-то лёгкое">Что-то лёгкое</button>
+                        <button class="suggestion-chip" data-suggestion="45-60 мин">45-60 мин</button>
+                        <button class="suggestion-chip" data-suggestion="без насилия">Без насилия</button>
+                        <button class="suggestion-chip" data-suggestion="как True Detective">Как True Detective</button>
+                        <button class="suggestion-chip" data-suggestion="для компании">Для компании</button>
+                        <button class="suggestion-chip" data-suggestion="романтическое">Романтическое</button>
+                    </div>
+                </div>
+
+                <!-- Поле ввода -->
+                <div class="chat-input-container">
+                    <div class="input-wrapper">
+                        <input type="text" id="messageInput" placeholder="Опишите, что хотите посмотреть..." maxlength="500">
+                        <button class="input-btn voice-btn" id="voiceBtn">
+                            <i class="fas fa-microphone"></i>
+                        </button>
+                        <button class="input-btn send-btn" id="sendBtn">
+                            <i class="fas fa-paper-plane"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Загрузочный экран -->
+    <div class="loading-screen" id="loadingScreen">
+        <div class="loading-content">
+            <div class="loading-spinner">
+                <div class="spinner-ring"></div>
+            </div>
+            <h3 class="loading-title">Ищем рекомендации</h3>
+            <p class="loading-text">Анализируем ваши предпочтения...</p>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/identify_stars.js') }}"></script>
+</body>
+</html>
