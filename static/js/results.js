@@ -12,17 +12,35 @@ let currentFilters = {
     novelty: ''
 };
 let diversificationLevel = 0.5;
+let okkonatorRecommendations = [];
+let okkonatorProfile = {};
+
+// Функции логгирования
+function log(message, data = null) {
+    console.log(`[Результаты] ${message}`, data || '');
+}
+
+function logError(message, error = null) {
+    console.error(`[Результаты ОШИБКА] ${message}`, error || '');
+}
+
+function logSuccess(message, data = null) {
+    console.log(`[Результаты УСПЕХ] ${message}`, data || '');
+}
 
 // Инициализация
 document.addEventListener('DOMContentLoaded', function() {
+    log('Инициализация страницы результатов');
     initializeResults();
 });
 
 // Основная инициализация
 function initializeResults() {
+    log('Начинаем инициализацию результатов');
     hideLoadingScreen();
     setupEventListeners();
     loadSelectionHistory();
+    loadOkkonatorRecommendations();
     loadRecommendations();
     setupFilters();
 }
@@ -155,6 +173,158 @@ async function loadSelectionHistory() {
     } catch (error) {
         console.error('Ошибка загрузки истории:', error);
     }
+}
+
+// Загрузка рекомендаций от Окконатора
+function loadOkkonatorRecommendations() {
+    log('Проверяем наличие рекомендаций от Окконатора в localStorage');
+    
+    const storedRecommendations = localStorage.getItem('okkonator_recommendations');
+    const storedProfile = localStorage.getItem('okkonator_profile');
+    
+    if (storedRecommendations) {
+        try {
+            okkonatorRecommendations = JSON.parse(storedRecommendations);
+            logSuccess(`Загружено ${okkonatorRecommendations.length} рекомендаций от Окконатора`);
+            
+            if (storedProfile) {
+                okkonatorProfile = JSON.parse(storedProfile);
+                log('Загружен профиль Окконатора:', okkonatorProfile);
+            }
+            
+            // Показываем рекомендации от Окконатора
+            displayOkkonatorRecommendations();
+            
+            // Очищаем localStorage после использования
+            localStorage.removeItem('okkonator_recommendations');
+            localStorage.removeItem('okkonator_profile');
+            
+        } catch (error) {
+            logError('Ошибка парсинга рекомендаций от Окконатора:', error);
+        }
+    } else {
+        log('Рекомендации от Окконатора не найдены, загружаем обычные рекомендации');
+    }
+}
+
+// Отображение рекомендаций от Окконатора
+function displayOkkonatorRecommendations() {
+    log('Отображаем рекомендации от Окконатора');
+    
+    const recommendationsContainer = document.getElementById('recommendationsContainer');
+    if (!recommendationsContainer) {
+        logError('Контейнер рекомендаций не найден');
+        return;
+    }
+    
+    // Очищаем контейнер
+    recommendationsContainer.innerHTML = '';
+    
+    // Добавляем заголовок
+    const header = document.createElement('div');
+    header.className = 'recommendations-header';
+    header.innerHTML = `
+        <h2>🎯 Рекомендации от Окконатора</h2>
+        <p>На основе ваших ответов мы подобрали идеальные фильмы для вас</p>
+    `;
+    recommendationsContainer.appendChild(header);
+    
+    // Добавляем рекомендации
+    const grid = document.createElement('div');
+    grid.className = 'recommendations-grid';
+    
+    okkonatorRecommendations.forEach((movie, index) => {
+        const card = createMovieCard(movie, index, 'okkonator');
+        grid.appendChild(card);
+    });
+    
+    recommendationsContainer.appendChild(grid);
+    
+    logSuccess(`Отображено ${okkonatorRecommendations.length} рекомендаций от Окконатора`);
+}
+
+// Создание карточки фильма
+function createMovieCard(movie, index, source = 'default') {
+    const card = document.createElement('div');
+    card.className = `movie-card ${source}`;
+    card.innerHTML = `
+        <div class="movie-poster" style="background-image: url('${movie.poster || 'https://images.unsplash.com/photo-1518709268805-4e9042af2176?w=400&h=600&fit=crop'}')">
+            <div class="movie-overlay">
+                <div class="movie-rating">${movie.rating || 'N/A'}</div>
+                <div class="movie-year">${movie.year || 'N/A'}</div>
+            </div>
+        </div>
+        <div class="movie-info">
+            <h3 class="movie-title">${movie.title}</h3>
+            <p class="movie-genre">${movie.genre || 'Жанр не указан'}</p>
+            <p class="movie-duration">${movie.duration || 'N/A'} мин</p>
+            ${movie.reason ? `<p class="movie-reason">${movie.reason}</p>` : ''}
+            ${movie.score ? `<div class="movie-score">Оценка: ${movie.score.toFixed(2)}</div>` : ''}
+        </div>
+        <div class="movie-actions">
+            <button class="action-btn like-btn" onclick="likeMovie(${index}, '${source}')">
+                <i class="fas fa-heart"></i>
+            </button>
+            <button class="action-btn watch-btn" onclick="watchMovie(${index}, '${source}')">
+                <i class="fas fa-play"></i>
+            </button>
+        </div>
+    `;
+    
+    return card;
+}
+
+// Обработка лайка фильма
+function likeMovie(index, source) {
+    log(`Лайк фильма ${index} из источника ${source}`);
+    
+    const movie = source === 'okkonator' ? okkonatorRecommendations[index] : currentRecommendations[index];
+    if (movie) {
+        logSuccess(`Добавлен в избранное: ${movie.title}`);
+        // Здесь можно добавить логику сохранения в избранное
+        showSuccessMessage(`"${movie.title}" добавлен в избранное!`);
+    }
+}
+
+// Обработка просмотра фильма
+function watchMovie(index, source) {
+    log(`Просмотр фильма ${index} из источника ${source}`);
+    
+    const movie = source === 'okkonator' ? okkonatorRecommendations[index] : currentRecommendations[index];
+    if (movie) {
+        logSuccess(`Начинаем просмотр: ${movie.title}`);
+        showSuccessMessage(`Переходим к просмотру "${movie.title}"!`);
+        // Здесь можно добавить логику перехода к просмотру
+    }
+}
+
+// Показать сообщение об успехе
+function showSuccessMessage(message) {
+    // Создаем временное уведомление
+    const notification = document.createElement('div');
+    notification.className = 'success-notification';
+    notification.textContent = message;
+    notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: var(--okko-success);
+        color: white;
+        padding: 15px 20px;
+        border-radius: 8px;
+        z-index: 1000;
+        font-weight: 500;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    `;
+    
+    document.body.appendChild(notification);
+    
+    // Удаляем через 3 секунды
+    setTimeout(() => {
+        if (notification.parentNode) {
+            notification.parentNode.removeChild(notification);
+        }
+    }, 3000);
 }
 
 // Загрузка рекомендаций

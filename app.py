@@ -2,9 +2,13 @@ from flask import Flask, render_template, jsonify, request
 from flask_cors import CORS
 import json
 import random
+import requests
 
 app = Flask(__name__)
 CORS(app)
+
+# URL микросервиса Окконатора
+OKKONATOR_SERVICE_URL = "http://localhost:5001"
 
 # Глобальные переменные для состояния пользователя
 user_profile = {
@@ -21,6 +25,7 @@ user_profile = {
         'disliked_actors': []
     },
     'okkonator_answers': [],
+    'okkonator_theta': {},  # Профиль Окконатора
     'chat_history': [],
     'identified_movies': []
 }
@@ -274,46 +279,112 @@ def swipe_action():
     
     return jsonify({"success": True, "profile": user_profile})
 
-# API для Окконатора
-@app.route('/api/okkonator/question')
+# API для Окконатора - прокси к микросервису
+@app.route('/api/okkonator/question', methods=['POST'])
 def get_okkonator_question():
     """Получить следующий вопрос для Окконатора"""
-    questions = [
-        "Это более современный, чем 2010?",
-        "Действие происходит в США?",
-        "Больше драмы, чем экшена?",
-        "Главный герой - мужчина?",
-        "Есть элементы фантастики?",
-        "Фильм длится больше 2 часов?",
-        "Есть романтическая линия?",
-        "Это комедия?",
-        "Есть насилие?",
-        "Фильм получил Оскар?"
-    ]
-    
-    question_index = len(user_profile['okkonator_answers'])
-    if question_index < len(questions):
-        return jsonify({
-            "question": questions[question_index],
-            "question_id": question_index,
-            "confidence": min(question_index * 10, 90)
-        })
-    else:
-        return jsonify({"message": "Вопросы закончились"})
+    try:
+        # Получаем данные от клиента
+        data = request.get_json()
+        theta = data.get('theta', {})
+        asked_ids = data.get('asked_ids', [])
+        
+        print(f"Запрос вопроса: theta={theta}, asked_ids={asked_ids}")
+        
+        response = requests.post(f"{OKKONATOR_SERVICE_URL}/api/okkonator/next-question", 
+                               json={"theta": theta, "asked_ids": asked_ids})
+        
+        print(f"Ответ микросервиса: {response.status_code}")
+        
+        if response.status_code == 200:
+            data = response.json()
+            print(f"Данные от микросервиса: {data}")
+            return jsonify(data)
+        else:
+            print(f"Ошибка микросервиса: {response.text}")
+            return jsonify({"error": "Сервис Окконатора недоступен"}), 500
+            
+    except requests.exceptions.ConnectionError:
+        print("Ошибка подключения к микросервису")
+        return jsonify({"error": "Микросервис Окконатора не запущен"}), 500
+    except Exception as e:
+        print(f"Общая ошибка: {str(e)}")
+        return jsonify({"error": f"Ошибка: {str(e)}"}), 500
 
 @app.route('/api/okkonator/answer', methods=['POST'])
 def submit_okkonator_answer():
     """Отправить ответ на вопрос Окконатора"""
-    data = request.get_json()
-    answer = data.get('answer')  # 'yes', 'no', 'maybe'
-    question_id = data.get('question_id')
-    
-    user_profile['okkonator_answers'].append({
-        'question_id': question_id,
-        'answer': answer
-    })
-    
-    return jsonify({"success": True})
+    try:
+        data = request.get_json()
+        answer = data.get('answer')  # 'yes', 'no', 'maybe', 'probably_yes', 'probably_no'
+        question_id = data.get('question_id')
+        
+        print(f"Обработка ответа: {answer} для вопроса {question_id}")
+        
+        # Конвертируем ответ в числовое значение
+        answer_mapping = {
+            'no': -2,
+            'probably_no': -1, 
+            'maybe': 0,
+            'probably_yes': 1,
+            'yes': 2
+        }
+        answer_value = answer_mapping.get(answer, 0)
+        
+        # Получаем профиль от клиента
+        theta = data.get('theta', {})
+        
+        print(f"Профиль от клиента: {theta}")
+        print(f"Значение ответа: {answer_value}")
+        
+        # Отправляем в микросервис
+        response = requests.post(f"{OKKONATOR_SERVICE_URL}/api/okkonator/answer",
+                               json={
+                                   "theta": theta,
+                                   "answer_value": answer_value,
+                                   "question_id": question_id
+                               })
+        
+        print(f"Ответ микросервиса на ответ: {response.status_code}")
+        
+        if response.status_code == 200:
+            data = response.json()
+            print(f"Обновленный профиль: {data.get('theta', {})}")
+            
+            return jsonify({"success": True, "theta": data['theta']})
+        else:
+            print(f"Ошибка микросервиса: {response.text}")
+            return jsonify({"error": "Ошибка обработки ответа"}), 500
+            
+    except requests.exceptions.ConnectionError:
+        print("Ошибка подключения к микросервису")
+        return jsonify({"error": "Микросервис Окконатора не запущен"}), 500
+    except Exception as e:
+        print(f"Общая ошибка: {str(e)}")
+        return jsonify({"error": f"Ошибка: {str(e)}"}), 500
+
+@app.route('/api/okkonator/recommendations', methods=['POST'])
+def get_okkonator_recommendations():
+    """Получить рекомендации от Окконатора"""
+    try:
+        data = request.get_json()
+        top_k = data.get('top_k', 6)
+        theta = data.get('theta', {})  # Получаем профиль от клиента
+        
+        print(f"Запрос рекомендаций: theta={theta}, top_k={top_k}")
+        
+        response = requests.post(f"{OKKONATOR_SERVICE_URL}/api/okkonator/recommendations",
+                               json={"theta": theta, "top_k": top_k})
+        
+        if response.status_code == 200:
+            return jsonify(response.json())
+        else:
+            return jsonify({"error": "Ошибка получения рекомендаций"}), 500
+            
+    except requests.exceptions.ConnectionError:
+        return jsonify({"error": "Микросервис Окконатора не запущен"}), 500
+    except Exception as e:
+        return jsonify({"error": f"Ошибка: {str(e)}"}), 500
 
 # API для чата
 @app.route('/api/chat/message', methods=['POST'])
