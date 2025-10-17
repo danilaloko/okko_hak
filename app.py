@@ -3,6 +3,7 @@ from flask_cors import CORS
 import json
 import random
 import requests
+from openrouter_client import OpenRouterClient
 
 app = Flask(__name__)
 CORS(app)
@@ -10,6 +11,14 @@ CORS(app)
 # URL микросервисов
 OKKONATOR_SERVICE_URL = "http://localhost:5001"
 SWIPE_SERVICE_URL = "http://localhost:5002"
+
+# Инициализация OpenRouter клиента
+try:
+    openrouter_client = OpenRouterClient()
+    print("OpenRouter клиент успешно инициализирован")
+except Exception as e:
+    print(f"Ошибка инициализации OpenRouter клиента: {e}")
+    openrouter_client = None
 
 # Глобальные переменные для состояния пользователя
 user_profile = {
