@@ -5,6 +5,8 @@
 // Глобальные переменные
 let chatHistory = [];
 let isTyping = false;
+let selectedCelebrity = null;
+let celebritiesData = null;
 
 // Инициализация
 document.addEventListener('DOMContentLoaded', function() {
@@ -15,6 +17,8 @@ document.addEventListener('DOMContentLoaded', function() {
 function initializeChat() {
     hideLoadingScreen();
     setupEventListeners();
+    loadCelebritiesData();
+    setupCelebritySelection();
     loadUserProfile();
     setupQuickSuggestions();
 }
@@ -52,6 +56,14 @@ function setupEventListeners() {
     if (sidebarClose) {
         sidebarClose.addEventListener('click', () => {
             hideProfileSidebar();
+        });
+    }
+    
+    // Кнопка смены знаменитости
+    const changeCelebrityBtn = document.getElementById('changeCelebrityBtn');
+    if (changeCelebrityBtn) {
+        changeCelebrityBtn.addEventListener('click', () => {
+            showCelebritySelector();
         });
     }
     
@@ -191,6 +203,12 @@ async function sendMessage() {
     
     if (!message || isTyping) return;
     
+    // Проверяем, выбрана ли знаменитость
+    if (!selectedCelebrity) {
+        addMessageToChat('assistant', 'Пожалуйста, сначала выберите собеседника.');
+        return;
+    }
+    
     // Добавляем сообщение пользователя в чат
     addMessageToChat('user', message);
     
@@ -207,7 +225,10 @@ async function sendMessage() {
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ message: message })
+            body: JSON.stringify({ 
+                message: message,
+                celebrity_id: selectedCelebrity.id
+            })
         });
         
         if (response.ok) {
@@ -217,7 +238,7 @@ async function sendMessage() {
             hideTypingIndicator();
             
             // Добавляем ответ ассистента
-            addMessageToChat('assistant', data.response);
+            addMessageToChat('assistant', data.response, selectedCelebrity.id);
             
             // Показываем рекомендации, если есть
             if (data.recommendations && data.recommendations.length > 0) {
@@ -232,16 +253,30 @@ async function sendMessage() {
 }
 
 // Добавление сообщения в чат
-function addMessageToChat(sender, text) {
+function addMessageToChat(sender, text, celebrityId = null) {
     const chatMessages = document.getElementById('chatMessages');
     if (!chatMessages) return;
     
     const messageDiv = document.createElement('div');
     messageDiv.className = `message ${sender}-message`;
     
-    const avatar = sender === 'assistant' ? 
-        '<div class="message-avatar"><i class="fas fa-robot"></i></div>' : 
-        '<div class="message-avatar"><i class="fas fa-user"></i></div>';
+    let avatar = '';
+    if (sender === 'assistant') {
+        if (celebrityId && selectedCelebrity && selectedCelebrity.id === celebrityId) {
+            // Иконка для выбранной знаменитости
+            const iconMap = {
+                'quentin_tarantino': 'fa-film',
+                'steven_spielberg': 'fa-magic',
+                'leonardo_dicaprio': 'fa-star'
+            };
+            const icon = iconMap[celebrityId] || 'fa-robot';
+            avatar = `<div class="message-avatar"><i class="fas ${icon}"></i></div>`;
+        } else {
+            avatar = '<div class="message-avatar"><i class="fas fa-robot"></i></div>';
+        }
+    } else {
+        avatar = '<div class="message-avatar"><i class="fas fa-user"></i></div>';
+    }
     
     messageDiv.innerHTML = `
         ${avatar}
@@ -467,3 +502,161 @@ function animateOnScroll() {
 
 // Инициализация анимаций
 setTimeout(animateOnScroll, 500);
+
+// ==============================
+// Функции для работы с выбором знаменитости
+// ==============================
+
+// Загрузка данных знаменитостей
+async function loadCelebritiesData() {
+    try {
+        const response = await fetch('/api/celebrities');
+        if (response.ok) {
+            celebritiesData = await response.json();
+        } else {
+            // Fallback данные, если API недоступен
+            celebritiesData = {
+                "quentin_tarantino": {
+                    "id": "quentin_tarantino",
+                    "display_name": "Квентин Тарантино",
+                    "tags": ["режиссёр", "жанровое кино", "криминал"],
+                    "communication": {
+                        "intro": "Скажи настроение — соберу острые, стильные картины."
+                    }
+                },
+                "steven_spielberg": {
+                    "id": "steven_spielberg",
+                    "display_name": "Стивен Спилберг",
+                    "tags": ["режиссёр", "приключения", "историческая драма"],
+                    "communication": {
+                        "intro": "Скажи, нужна ли семейность или драматическая глубина — подберу."
+                    }
+                },
+                "leonardo_dicaprio": {
+                    "id": "leonardo_dicaprio",
+                    "display_name": "Леонардо Ди Каприо",
+                    "tags": ["актёр", "драма", "исторические роли"],
+                    "communication": {
+                        "intro": "Расскажи, что тебя интересует — драма, история или что-то особенное?"
+                    }
+                }
+            };
+        }
+    } catch (error) {
+        console.error('Ошибка загрузки данных знаменитостей:', error);
+    }
+}
+
+// Настройка выбора знаменитости
+function setupCelebritySelection() {
+    const celebrityCards = document.querySelectorAll('.celebrity-card');
+    
+    celebrityCards.forEach(card => {
+        card.addEventListener('click', () => {
+            const celebrityId = card.dataset.celebrity;
+            selectCelebrity(celebrityId);
+        });
+    });
+}
+
+// Выбор знаменитости
+function selectCelebrity(celebrityId) {
+    if (!celebritiesData || !celebritiesData[celebrityId]) {
+        console.error('Данные знаменитости не найдены:', celebrityId);
+        return;
+    }
+    
+    selectedCelebrity = celebritiesData[celebrityId];
+    
+    // Обновляем UI
+    updateCelebritySelection(celebrityId);
+    updateChatHeader();
+    showChatInterface();
+    startChatWithCelebrity();
+}
+
+// Обновление визуального выбора знаменитости
+function updateCelebritySelection(celebrityId) {
+    const celebrityCards = document.querySelectorAll('.celebrity-card');
+    
+    celebrityCards.forEach(card => {
+        if (card.dataset.celebrity === celebrityId) {
+            card.classList.add('selected');
+        } else {
+            card.classList.remove('selected');
+        }
+    });
+}
+
+// Обновление заголовка чата
+function updateChatHeader() {
+    if (!selectedCelebrity) return;
+    
+    const nameElement = document.getElementById('selectedCelebrityName');
+    const descriptionElement = document.getElementById('selectedCelebrityDescription');
+    const avatarElement = document.querySelector('.celebrity-avatar-small i');
+    
+    if (nameElement) {
+        nameElement.textContent = selectedCelebrity.display_name;
+    }
+    
+    if (descriptionElement) {
+        descriptionElement.textContent = selectedCelebrity.tags.join(', ');
+    }
+    
+    if (avatarElement) {
+        // Устанавливаем иконку в зависимости от знаменитости
+        const iconMap = {
+            'quentin_tarantino': 'fa-film',
+            'steven_spielberg': 'fa-magic',
+            'leonardo_dicaprio': 'fa-star'
+        };
+        avatarElement.className = `fas ${iconMap[selectedCelebrity.id] || 'fa-robot'}`;
+    }
+}
+
+// Показать интерфейс чата
+function showChatInterface() {
+    const selector = document.getElementById('celebritySelector');
+    const chatInterface = document.getElementById('chatInterface');
+    
+    if (selector && chatInterface) {
+        selector.style.display = 'none';
+        chatInterface.style.display = 'block';
+    }
+}
+
+// Показать селектор знаменитости
+function showCelebritySelector() {
+    const selector = document.getElementById('celebritySelector');
+    const chatInterface = document.getElementById('chatInterface');
+    
+    if (selector && chatInterface) {
+        selector.style.display = 'block';
+        chatInterface.style.display = 'none';
+        
+        // Очищаем чат
+        const chatMessages = document.getElementById('chatMessages');
+        if (chatMessages) {
+            chatMessages.innerHTML = '';
+        }
+        
+        // Сбрасываем выбранную знаменитость
+        selectedCelebrity = null;
+        chatHistory = [];
+    }
+}
+
+// Начать чат с выбранной знаменитостью
+function startChatWithCelebrity() {
+    if (!selectedCelebrity) return;
+    
+    const chatMessages = document.getElementById('chatMessages');
+    if (!chatMessages) return;
+    
+    // Добавляем приветственное сообщение от знаменитости
+    const introMessage = selectedCelebrity.communication?.intro || 
+        `Привет! Я ${selectedCelebrity.display_name}. Расскажите, что вы хотите посмотреть?`;
+    
+    addMessageToChat('assistant', introMessage, selectedCelebrity.id);
+}

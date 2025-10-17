@@ -2097,6 +2097,7 @@ html, body {
 .chat-content {
     display: flex;
     flex: 1;
+    width: 100%;
     overflow: hidden;
 }
 
@@ -2176,19 +2177,23 @@ html, body {
     flex: 1;
     display: flex;
     flex-direction: column;
+    width: 100%;
     max-width: 100%;
     overflow: hidden;
     min-height: 0;
+    position: relative;
 }
 
 .chat-messages {
     flex: 1;
     padding: var(--okko-spacing-lg);
+    padding-bottom: 200px; /* Отступ для зафиксированных элементов внизу */
     overflow-y: auto;
     overflow-x: hidden;
     display: flex;
     flex-direction: column;
     gap: var(--okko-spacing-md);
+    width: 100%;
     max-width: 100%;
     box-sizing: border-box;
 }
@@ -2196,8 +2201,8 @@ html, body {
 .message {
     display: flex;
     gap: var(--okko-spacing-md);
-    max-width: 100%;
     width: 100%;
+    max-width: 100%;
     box-sizing: border-box;
 }
 
@@ -2300,10 +2305,17 @@ html, body {
 }
 
 .quick-suggestions {
+    position: fixed;
+    bottom: 80px; /* Высота поля ввода + отступ */
+    left: 0;
+    right: 0;
     padding: var(--okko-spacing-md) var(--okko-spacing-lg);
     background: var(--okko-surface-2);
     border-top: 1px solid var(--okko-border);
     flex-shrink: 0;
+    width: 100%;
+    z-index: 99;
+    box-sizing: border-box;
 }
 
 .suggestions-title {
@@ -2317,6 +2329,7 @@ html, body {
     display: flex;
     flex-wrap: wrap;
     gap: var(--okko-spacing-xs);
+    width: 100%;
 }
 
 .suggestion-chip {
@@ -2337,10 +2350,17 @@ html, body {
 }
 
 .chat-input-container {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
     padding: var(--okko-spacing-lg);
     background: var(--okko-surface-2);
     border-top: 1px solid var(--okko-border);
     flex-shrink: 0;
+    width: 100%;
+    z-index: 100;
+    box-sizing: border-box;
 }
 
 .input-wrapper {
@@ -2351,6 +2371,7 @@ html, body {
     border: 1px solid var(--okko-border);
     border-radius: var(--okko-radius-md);
     padding: var(--okko-spacing-sm);
+    width: 100%;
 }
 
 #messageInput {
@@ -5156,6 +5177,33 @@ textarea::-webkit-scrollbar-thumb:hover,
     box-shadow: 0 4px 16px rgba(0,0,0,0.4);
 }
 
+/* Сетка рекомендаций */
+.recommendations-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 20px;
+    margin: 20px 0;
+}
+
+/* Заголовок рекомендаций */
+.recommendations-header {
+    text-align: center;
+    margin-bottom: 24px;
+}
+
+.recommendations-header h3 {
+    color: var(--okko-text);
+    font-size: 24px;
+    font-weight: 600;
+    margin: 0 0 8px 0;
+}
+
+.recommendations-header p {
+    color: var(--okko-text-muted);
+    font-size: 16px;
+    margin: 0;
+}
+
 /* Кнопки действий */
 .action-btn {
     background: transparent;
@@ -5170,4 +5218,226 @@ textarea::-webkit-scrollbar-thumb:hover,
 .action-btn:hover {
     opacity: 0.8;
     transform: scale(1.05);
+}
+
+/* ==============================
+   Стили для выбора знаменитости
+   ============================== */
+
+/* Селектор знаменитости */
+.celebrity-selector {
+    padding: 20px;
+    width: 100%;
+    max-width: none;
+    margin: 0;
+}
+
+.selector-header {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.selector-header h3 {
+    color: var(--okko-text-primary);
+    font-size: 24px;
+    font-weight: 700;
+    margin-bottom: 8px;
+}
+
+.selector-header p {
+    color: var(--okko-text-muted);
+    font-size: 16px;
+}
+
+/* Сетка знаменитостей */
+.celebrities-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 20px;
+    margin-top: 20px;
+    max-width: 1200px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* Карточка знаменитости */
+.celebrity-card {
+    background: var(--okko-surface-2);
+    border: 2px solid var(--okko-border);
+    border-radius: 12px;
+    padding: 20px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.celebrity-card:hover {
+    border-color: var(--okko-accent);
+    transform: translateY(-4px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+}
+
+.celebrity-card.selected {
+    border-color: var(--okko-accent);
+    background: var(--okko-accent-alpha);
+}
+
+.celebrity-avatar {
+    width: 60px;
+    height: 60px;
+    background: var(--okko-accent);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 15px;
+    font-size: 24px;
+    color: white;
+}
+
+.celebrity-info h4 {
+    color: var(--okko-text-primary);
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 8px;
+}
+
+.celebrity-info p {
+    color: var(--okko-text-muted);
+    font-size: 14px;
+    margin-bottom: 12px;
+}
+
+.celebrity-tags {
+    display: flex;
+    gap: 6px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.celebrity-tags .tag {
+    background: var(--okko-surface-3);
+    color: var(--okko-text-muted);
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+/* Заголовок чата */
+.chat-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 15px 20px;
+    background: var(--okko-surface-2);
+    border-bottom: 1px solid var(--okko-border);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+.selected-celebrity {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.celebrity-avatar-small {
+    width: 40px;
+    height: 40px;
+    background: var(--okko-accent);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    color: white;
+}
+
+.celebrity-info-small h4 {
+    color: var(--okko-text-primary);
+    font-size: 16px;
+    font-weight: 600;
+    margin: 0;
+}
+
+.celebrity-info-small p {
+    color: var(--okko-text-muted);
+    font-size: 12px;
+    margin: 0;
+}
+
+.change-celebrity-btn {
+    background: var(--okko-surface-3);
+    border: 1px solid var(--okko-border);
+    color: var(--okko-text-muted);
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.change-celebrity-btn:hover {
+    background: var(--okko-accent-alpha);
+    border-color: var(--okko-accent);
+    color: var(--okko-accent);
+}
+
+/* Адаптивность для мобильных устройств */
+@media (max-width: 768px) {
+    .celebrity-selector {
+        padding: 15px;
+    }
+    
+    .celebrities-grid {
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+    
+    .celebrity-card {
+        padding: 15px;
+    }
+    
+    .chat-header {
+        padding: 12px 15px;
+    }
+    
+    .selected-celebrity {
+        gap: 10px;
+    }
+    
+    .celebrity-avatar-small {
+        width: 35px;
+        height: 35px;
+        font-size: 14px;
+    }
+    
+    .celebrity-info-small h4 {
+        font-size: 14px;
+    }
+    
+    .celebrity-info-small p {
+        font-size: 11px;
+    }
+    
+    /* Адаптация зафиксированных элементов для мобильных */
+    .chat-input-container {
+        padding: 12px 15px;
+    }
+    
+    .quick-suggestions {
+        bottom: 70px; /* Меньший отступ для мобильных */
+        padding: 10px 15px;
+    }
+    
+    .chat-messages {
+        padding-bottom: 150px; /* Меньший отступ для мобильных */
+    }
 }

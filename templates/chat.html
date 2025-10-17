@@ -21,6 +21,55 @@
 
         <!-- Основной контент -->
         <main class="chat-content">
+            <!-- Выбор знаменитости -->
+            <div class="celebrity-selector" id="celebritySelector">
+                <div class="selector-header">
+                    <h3>Выберите собеседника</h3>
+                    <p>С кем хотите обсудить фильмы?</p>
+                </div>
+                <div class="celebrities-grid">
+                    <div class="celebrity-card" data-celebrity="quentin_tarantino">
+                        <div class="celebrity-avatar">
+                            <i class="fas fa-film"></i>
+                        </div>
+                        <div class="celebrity-info">
+                            <h4>Квентин Тарантино</h4>
+                            <p>Режиссёр, жанровое кино</p>
+                            <div class="celebrity-tags">
+                                <span class="tag">криминал</span>
+                                <span class="tag">стиль</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="celebrity-card" data-celebrity="steven_spielberg">
+                        <div class="celebrity-avatar">
+                            <i class="fas fa-magic"></i>
+                        </div>
+                        <div class="celebrity-info">
+                            <h4>Стивен Спилберг</h4>
+                            <p>Режиссёр, приключения</p>
+                            <div class="celebrity-tags">
+                                <span class="tag">семья</span>
+                                <span class="tag">чудо</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="celebrity-card" data-celebrity="leonardo_dicaprio">
+                        <div class="celebrity-avatar">
+                            <i class="fas fa-star"></i>
+                        </div>
+                        <div class="celebrity-info">
+                            <h4>Леонардо Ди Каприо</h4>
+                            <p>Актёр, драма</p>
+                            <div class="celebrity-tags">
+                                <span class="tag">характер</span>
+                                <span class="tag">история</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- Сайд-панель профиля -->
             <div class="profile-sidebar" id="profileSidebar">
                 <div class="sidebar-header">
@@ -52,20 +101,27 @@
             </div>
 
             <!-- Чат-интерфейс -->
-            <div class="chat-interface">
-                <!-- История сообщений -->
-                <div class="chat-messages" id="chatMessages">
-                    <div class="message assistant-message">
-                        <div class="message-avatar">
+            <div class="chat-interface" id="chatInterface" style="display: none;">
+                <!-- Заголовок чата с выбранной знаменитостью -->
+                <div class="chat-header" id="chatHeader">
+                    <div class="selected-celebrity" id="selectedCelebrity">
+                        <div class="celebrity-avatar-small">
                             <i class="fas fa-robot"></i>
                         </div>
-                        <div class="message-content">
-                            <div class="message-text">
-                                Привет! Расскажите, что вы хотите посмотреть? Я помогу найти идеальный фильм для вас.
-                            </div>
-                            <div class="message-time">только что</div>
+                        <div class="celebrity-info-small">
+                            <h4 id="selectedCelebrityName">Выберите собеседника</h4>
+                            <p id="selectedCelebrityDescription">С кем хотите обсудить фильмы?</p>
                         </div>
                     </div>
+                    <button class="change-celebrity-btn" id="changeCelebrityBtn">
+                        <i class="fas fa-exchange-alt"></i>
+                        Сменить
+                    </button>
+                </div>
+
+                <!-- История сообщений -->
+                <div class="chat-messages" id="chatMessages">
+                    <!-- Первое сообщение будет добавлено после выбора знаменитости -->
                 </div>
 
                 <!-- Быстрые подсказки -->

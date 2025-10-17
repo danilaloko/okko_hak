@@ -9,6 +9,7 @@ import logging
 import os
 from dotenv import load_dotenv
 import requests
+from celebrities_data import get_celebrity_by_id, get_all_celebrities, get_celebrity_system_prompt
 
 # Загружаем переменные окружения
 load_dotenv()
@@ -28,7 +29,7 @@ OPENROUTER_BASE_URL = "https://openrouter.ai/api/v1"
 user_dialogs = {}
 
 
-def try_fallback_model(message, user_id, original_model):
+def try_fallback_model(message, user_id, original_model, celebrity_id=None):
     """Попробовать fallback модели"""
     fallback_models = [
         "anthropic/claude-haiku-4.5",
@@ -46,11 +47,11 @@ def try_fallback_model(message, user_id, original_model):
             # Получаем историю диалога
             history = user_dialogs.get(user_id, [])
             
-            # Формируем сообщения для OpenRouter
-            messages = [
-                {
-                    "role": "system",
-                    "content": """Ты - помощник для подбора фильмов. Твоя задача - помочь пользователю выбрать фильм для просмотра.
+            # Формируем системный промпт в зависимости от выбранной знаменитости
+            if celebrity_id:
+                system_prompt = get_celebrity_system_prompt(celebrity_id)
+                if not system_prompt:
+                    system_prompt = """Ты - помощник для подбора фильмов. Твоя задача - помочь пользователю выбрать фильм для просмотра.
 
 Правила:
 - Отвечай на русском языке
@@ -63,6 +64,26 @@ def try_fallback_model(message, user_id, original_model):
 - "Отлично! Какой жанр вас интересует? Комедия, драма, боевик?"
 - "Рекомендую посмотреть 'Интерстеллар' - отличная фантастика с глубоким сюжетом"
 - "Для вечернего просмотра подойдет 'Темный рыцарь' - классика жанра"""
+            else:
+                system_prompt = """Ты - помощник для подбора фильмов. Твоя задача - помочь пользователю выбрать фильм для просмотра.
+
+Правила:
+- Отвечай на русском языке
+- Будь дружелюбным и полезным
+- Задавай уточняющие вопросы, если нужно
+- Предлагай конкретные фильмы с объяснением
+- Если не знаешь конкретный фильм, предложи жанр или тип
+
+Примеры ответов:
+- "Отлично! Какой жанр вас интересует? Комедия, драма, боевик?"
+- "Рекомендую посмотреть 'Интерстеллар' - отличная фантастика с глубоким сюжетом"
+- "Для вечернего просмотра подойдет 'Темный рыцарь' - классика жанра"""
+            
+            # Формируем сообщения для OpenRouter
+            messages = [
+                {
+                    "role": "system",
+                    "content": system_prompt
                 }
             ]
             
@@ -148,6 +169,46 @@ def health_check():
     })
 
 
+@app.route('/api/celebrities', methods=['GET'])
+def get_celebrities():
+    """Получить список всех знаменитостей"""
+    try:
+        celebrities = get_all_celebrities()
+        return jsonify({
+            "success": True,
+            "celebrities": celebrities
+        })
+    except Exception as e:
+        logger.error(f"Ошибка получения списка знаменитостей: {str(e)}")
+        return jsonify({
+            "success": False,
+            "error": f"Ошибка получения знаменитостей: {str(e)}"
+        }), 500
+
+
+@app.route('/api/celebrities/<celebrity_id>', methods=['GET'])
+def get_celebrity(celebrity_id):
+    """Получить данные конкретной знаменитости"""
+    try:
+        celebrity = get_celebrity_by_id(celebrity_id)
+        if celebrity:
+            return jsonify({
+                "success": True,
+                "celebrity": celebrity
+            })
+        else:
+            return jsonify({
+                "success": False,
+                "error": "Знаменитость не найдена"
+            }), 404
+    except Exception as e:
+        logger.error(f"Ошибка получения знаменитости {celebrity_id}: {str(e)}")
+        return jsonify({
+            "success": False,
+            "error": f"Ошибка получения знаменитости: {str(e)}"
+        }), 500
+
+
 @app.route('/api/chat/message', methods=['POST'])
 def chat_message():
     """Простой чат с ИИ"""
@@ -156,6 +217,7 @@ def chat_message():
         user_id = data.get('user_id', 'default_user')
         message = data.get('message', '')
         model = data.get('model', 'x-ai/grok-4-fast')
+        celebrity_id = data.get('celebrity_id')
         
         if not message:
             return jsonify({
@@ -169,16 +231,17 @@ def chat_message():
                 "error": "OpenRouter API ключ не настроен"
             }), 500
         
-        logger.info(f"Получен запрос от пользователя {user_id}: {message}")
+        logger.info(f"Получен запрос от пользователя {user_id} с знаменитостью {celebrity_id}: {message}")
         
         # Получаем историю диалога
         history = user_dialogs.get(user_id, [])
         
-        # Формируем сообщения для OpenRouter
-        messages = [
-            {
-                "role": "system",
-                "content": """Ты - помощник для подбора фильмов. Твоя задача - помочь пользователю выбрать фильм для просмотра.
+        # Формируем системный промпт в зависимости от выбранной знаменитости
+        if celebrity_id:
+            system_prompt = get_celebrity_system_prompt(celebrity_id)
+            if not system_prompt:
+                logger.warning(f"Не найден промпт для знаменитости {celebrity_id}, используем стандартный")
+                system_prompt = """Ты - помощник для подбора фильмов. Твоя задача - помочь пользователю выбрать фильм для просмотра.
 
 Правила:
 - Отвечай на русском языке
@@ -191,6 +254,26 @@ def chat_message():
 - "Отлично! Какой жанр вас интересует? Комедия, драма, боевик?"
 - "Рекомендую посмотреть 'Интерстеллар' - отличная фантастика с глубоким сюжетом"
 - "Для вечернего просмотра подойдет 'Темный рыцарь' - классика жанра"""
+        else:
+            system_prompt = """Ты - помощник для подбора фильмов. Твоя задача - помочь пользователю выбрать фильм для просмотра.
+
+Правила:
+- Отвечай на русском языке
+- Будь дружелюбным и полезным
+- Задавай уточняющие вопросы, если нужно
+- Предлагай конкретные фильмы с объяснением
+- Если не знаешь конкретный фильм, предложи жанр или тип
+
+Примеры ответов:
+- "Отлично! Какой жанр вас интересует? Комедия, драма, боевик?"
+- "Рекомендую посмотреть 'Интерстеллар' - отличная фантастика с глубоким сюжетом"
+- "Для вечернего просмотра подойдет 'Темный рыцарь' - классика жанра"""
+        
+        # Формируем сообщения для OpenRouter
+        messages = [
+            {
+                "role": "system",
+                "content": system_prompt
             }
         ]
         
@@ -251,7 +334,7 @@ def chat_message():
         elif response.status_code == 403:
             # Модель недоступна, пробуем fallback
             logger.warning(f"Модель {model} недоступна (403), пробуем fallback")
-            return try_fallback_model(message, user_id, model)
+            return try_fallback_model(message, user_id, model, celebrity_id)
         else:
             logger.error(f"Ошибка OpenRouter API: {response.status_code}")
             return jsonify({

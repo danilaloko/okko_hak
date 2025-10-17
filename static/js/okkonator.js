@@ -473,6 +473,74 @@ function updateConfidence() {
     }
 }
 
+// Создание карточки фильма в стиле результатов
+function createIntermediateMovieCard(movie, index) {
+    // Функция для очистки данных от квадратных скобок
+    function cleanData(data) {
+        if (!data) return '';
+        return data.toString().replace(/[\[\]']/g, '').replace(/'/g, '');
+    }
+    
+    const card = document.createElement('div');
+    card.className = 'movie-card intermediate';
+    card.style.cursor = movie.url ? 'pointer' : 'default';
+    
+    card.innerHTML = `
+        <div style="padding: 12px;">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
+                <h3 style="margin: 0; font-size: 16px; color: var(--okko-text); font-weight: 600; flex: 1;">${movie.title}</h3>
+                <div style="display: flex; gap: 6px; margin-left: 10px;">
+                    <span style="background: rgba(239, 68, 68, 0.9); color: white; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: 600;">${movie.age_rating || 'N/A'}</span>
+                    <span style="background: rgba(123, 97, 255, 0.9); color: white; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: 600;">${movie.content_type || 'Контент'}</span>
+                </div>
+            </div>
+            <p style="margin: 0 0 4px 0; font-size: 13px; color: var(--okko-text-muted);">${cleanData(movie.country) || 'Страна не указана'}</p>
+            <p style="margin: 0 0 6px 0; font-size: 12px; color: var(--okko-text-muted-2);">${cleanData(movie.genres) || 'Жанры не указаны'}</p>
+            ${movie.reason ? `<p style="margin: 0 0 6px 0; font-size: 11px; color: var(--okko-accent); font-style: italic;">${movie.reason}</p>` : ''}
+            ${movie.description ? `<p style="margin: 0 0 8px 0; font-size: 11px; color: var(--okko-text-muted-2); line-height: 1.3; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">${movie.description}</p>` : ''}
+            <div style="display: flex; gap: 8px; margin-top: 8px;">
+                <button class="action-btn like-btn" onclick="event.stopPropagation(); likeIntermediateMovie(${index})" style="background: rgba(239, 68, 68, 0.2); border: 1px solid rgba(239, 68, 68, 0.5); color: #EF4444; padding: 6px 12px; border-radius: 6px; font-size: 12px; cursor: pointer; transition: all 0.3s ease;">
+                    <i class="fas fa-heart"></i> Лайк
+                </button>
+                <button class="action-btn watch-btn" onclick="event.stopPropagation(); watchIntermediateMovie(${index})" style="background: rgba(123, 97, 255, 0.2); border: 1px solid rgba(123, 97, 255, 0.5); color: #7B61FF; padding: 6px 12px; border-radius: 6px; font-size: 12px; cursor: pointer; transition: all 0.3s ease;">
+                    <i class="fas fa-play"></i> Смотреть
+                </button>
+            </div>
+        </div>
+    `;
+    
+    // Добавляем клик для открытия ссылки
+    if (movie.url) {
+        card.addEventListener('click', () => {
+            window.open(movie.url, '_blank');
+        });
+    }
+    
+    // Эффект при наведении
+    card.addEventListener('mouseenter', () => {
+        card.style.transform = 'translateY(-2px)';
+        card.style.boxShadow = '0 4px 12px rgba(0,0,0,0.15)';
+    });
+    card.addEventListener('mouseleave', () => {
+        card.style.transform = 'translateY(0)';
+        card.style.boxShadow = '0 2px 8px rgba(0,0,0,0.1)';
+    });
+    
+    return card;
+}
+
+// Обработка лайка промежуточного фильма
+function likeIntermediateMovie(index) {
+    log(`Лайк промежуточного фильма ${index}`);
+    showSuccessMessage(`Фильм добавлен в избранное!`);
+}
+
+// Обработка просмотра промежуточного фильма
+function watchIntermediateMovie(index) {
+    log(`Просмотр промежуточного фильма ${index}`);
+    showSuccessMessage(`Переходим к просмотру фильма!`);
+}
+
 // Показать угаданного кандидата
 async function showGuessedCandidate() {
     log('Показываем угаданного кандидата, получаем рекомендации от Окконатора');
@@ -494,7 +562,7 @@ async function showGuessedCandidate() {
                 
                 // Создаем заголовок
                 const header = document.createElement('div');
-                header.className = 'guess-header';
+                header.className = 'recommendations-header';
                 header.innerHTML = `
                     <h3>🎬 Первая подборка готова!</h3>
                     <p>Мы уже понимаем ваши предпочтения. Вот предварительная подборка:</p>
@@ -503,60 +571,16 @@ async function showGuessedCandidate() {
                 
                 // Создаем сетку для 3 фильмов
                 const moviesGrid = document.createElement('div');
-                moviesGrid.className = 'guess-movies-grid';
+                moviesGrid.className = 'recommendations-grid';
                 moviesGrid.style.cssText = `
                     display: grid;
-                    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+                    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
                     gap: 20px;
                     margin: 20px 0;
                 `;
                 
                 topCandidates.forEach((candidate, index) => {
-                    const movieCard = document.createElement('div');
-                    movieCard.className = 'guess-movie-card';
-                    movieCard.style.cssText = `
-                        background: white;
-                        border-radius: 12px;
-                        overflow: hidden;
-                        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-                        transition: transform 0.3s ease;
-                    `;
-                    
-                    movieCard.innerHTML = `
-                        <div class="guess-movie-poster" style="
-                            height: 200px;
-                            background-image: url('${candidate.poster || 'https://images.unsplash.com/photo-1518709268805-4e9042af2176?w=400&h=600&fit=crop'}');
-                            background-size: cover;
-                            background-position: center;
-                            position: relative;
-                        ">
-                            <div style="
-                                position: absolute;
-                                top: 10px;
-                                right: 10px;
-                                background: rgba(0,0,0,0.7);
-                                color: white;
-                                padding: 4px 8px;
-                                border-radius: 4px;
-                                font-size: 12px;
-                            ">${candidate.rating || 'N/A'}</div>
-                        </div>
-                        <div style="padding: 15px;">
-                            <h4 style="margin: 0 0 5px 0; font-size: 16px; color: #333;">${candidate.title}</h4>
-                            <p style="margin: 0 0 5px 0; font-size: 14px; color: #666;">${candidate.year} • ${candidate.duration || 'N/A'} мин</p>
-                            <p style="margin: 0 0 10px 0; font-size: 12px; color: #888;">${candidate.genre || 'Жанр не указан'}</p>
-                            ${candidate.reason ? `<p style="margin: 0; font-size: 11px; color: #999; font-style: italic;">${candidate.reason}</p>` : ''}
-                        </div>
-                    `;
-                    
-                    // Добавляем эффект при наведении
-                    movieCard.addEventListener('mouseenter', () => {
-                        movieCard.style.transform = 'translateY(-5px)';
-                    });
-                    movieCard.addEventListener('mouseleave', () => {
-                        movieCard.style.transform = 'translateY(0)';
-                    });
-                    
+                    const movieCard = createIntermediateMovieCard(candidate, index);
                     moviesGrid.appendChild(movieCard);
                 });
                 
@@ -672,7 +696,7 @@ async function showFinalRecommendations() {
                 
                 // Создаем заголовок для окончательных рекомендаций
                 const header = document.createElement('div');
-                header.className = 'guess-header';
+                header.className = 'recommendations-header';
                 header.innerHTML = `
                     <h3>🎯 Ваша идеальная подборка готова!</h3>
                     <p>Мы изучили все ваши предпочтения и подобрали идеальные фильмы:</p>
@@ -681,60 +705,16 @@ async function showFinalRecommendations() {
                 
                 // Создаем сетку для 3 фильмов
                 const moviesGrid = document.createElement('div');
-                moviesGrid.className = 'guess-movies-grid';
+                moviesGrid.className = 'recommendations-grid';
                 moviesGrid.style.cssText = `
                     display: grid;
-                    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+                    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
                     gap: 20px;
                     margin: 20px 0;
                 `;
                 
                 topCandidates.forEach((candidate, index) => {
-                    const movieCard = document.createElement('div');
-                    movieCard.className = 'guess-movie-card';
-                    movieCard.style.cssText = `
-                        background: white;
-                        border-radius: 12px;
-                        overflow: hidden;
-                        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-                        transition: transform 0.3s ease;
-                    `;
-                    
-                    movieCard.innerHTML = `
-                        <div class="guess-movie-poster" style="
-                            height: 200px;
-                            background-image: url('${candidate.poster || 'https://images.unsplash.com/photo-1518709268805-4e9042af2176?w=400&h=600&fit=crop'}');
-                            background-size: cover;
-                            background-position: center;
-                            position: relative;
-                        ">
-                            <div style="
-                                position: absolute;
-                                top: 10px;
-                                right: 10px;
-                                background: rgba(0,0,0,0.7);
-                                color: white;
-                                padding: 4px 8px;
-                                border-radius: 4px;
-                                font-size: 12px;
-                            ">${candidate.rating || 'N/A'}</div>
-                        </div>
-                        <div style="padding: 15px;">
-                            <h4 style="margin: 0 0 5px 0; font-size: 16px; color: #333;">${candidate.title}</h4>
-                            <p style="margin: 0 0 5px 0; font-size: 14px; color: #666;">${candidate.year} • ${candidate.duration || 'N/A'} мин</p>
-                            <p style="margin: 0 0 10px 0; font-size: 12px; color: #888;">${candidate.genre || 'Жанр не указан'}</p>
-                            ${candidate.reason ? `<p style="margin: 0; font-size: 11px; color: #999; font-style: italic;">${candidate.reason}</p>` : ''}
-                        </div>
-                    `;
-                    
-                    // Добавляем эффект при наведении
-                    movieCard.addEventListener('mouseenter', () => {
-                        movieCard.style.transform = 'translateY(-5px)';
-                    });
-                    movieCard.addEventListener('mouseleave', () => {
-                        movieCard.style.transform = 'translateY(0)';
-                    });
-                    
+                    const movieCard = createIntermediateMovieCard(candidate, index);
                     moviesGrid.appendChild(movieCard);
                 });
                 
