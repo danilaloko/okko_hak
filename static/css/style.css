@@ -136,6 +136,48 @@ body {
     flex-shrink: 0;
 }
 
+/* Центрированный навбар для страниц с кнопкой "Назад" */
+.nav-bar.centered {
+    justify-content: space-between;
+    position: relative;
+}
+
+.nav-bar.centered .nav-title {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1;
+}
+
+.nav-bar.centered .back-btn {
+    position: relative;
+    z-index: 2;
+}
+
+/* Навбар с кнопками справа (results, demo) */
+.nav-bar.with-right-btn {
+    justify-content: space-between;
+    position: relative;
+}
+
+.nav-bar.with-right-btn .nav-title {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1;
+}
+
+.nav-bar.with-right-btn .back-btn {
+    position: relative;
+    z-index: 2;
+}
+
+.nav-bar.with-right-btn .share-btn,
+.nav-bar.with-right-btn .exit-btn {
+    position: relative;
+    z-index: 2;
+}
+
 .nav-title {
     font-size: 1.2rem;
     font-weight: 700;
@@ -1857,7 +1899,6 @@ html, body {
     margin-bottom: var(--okko-spacing-sm);
     display: -webkit-box;
     -webkit-line-clamp: 3;
-    line-clamp: 3;
     -webkit-box-orient: vertical;
     overflow: hidden;
 }

@@ -218,6 +218,10 @@ def get_swipe_results():
 def demo():
     return render_template('demo.html')
 
+@app.route('/movie-layouts')
+def movie_layouts():
+    return render_template('movie_layouts.html')
+
 @app.route('/group-survey')
 def group_survey():
     return render_template('group_survey.html')
