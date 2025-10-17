@@ -116,6 +116,54 @@ function hideLoadingScreen() {
     }, 1000);
 }
 
+// Скрыть вопрос и варианты ответов
+function hideQuestionAndAnswers() {
+    const questionContainer = document.querySelector('.question-container');
+    const answerOptions = document.querySelector('.answer-options');
+    
+    if (questionContainer) {
+        questionContainer.style.display = 'none';
+        log('Скрыт контейнер вопроса');
+    }
+    if (answerOptions) {
+        answerOptions.style.display = 'none';
+        log('Скрыты варианты ответов');
+    }
+}
+
+// Показать вопрос и варианты ответов
+function showQuestionAndAnswers() {
+    const questionContainer = document.querySelector('.question-container');
+    const answerOptions = document.querySelector('.answer-options');
+    
+    if (questionContainer) {
+        questionContainer.style.display = 'block';
+        log('Показан контейнер вопроса');
+    }
+    if (answerOptions) {
+        answerOptions.style.display = 'flex';
+        log('Показаны варианты ответов');
+    }
+}
+
+// Скрыть индикатор уверенности
+function hideConfidenceIndicator() {
+    const confidenceIndicator = document.querySelector('.confidence-indicator');
+    if (confidenceIndicator) {
+        confidenceIndicator.style.display = 'none';
+        log('Скрыт индикатор уверенности');
+    }
+}
+
+// Показать индикатор уверенности
+function showConfidenceIndicator() {
+    const confidenceIndicator = document.querySelector('.confidence-indicator');
+    if (confidenceIndicator) {
+        confidenceIndicator.style.display = 'block';
+        log('Показан индикатор уверенности');
+    }
+}
+
 // Настройка обработчиков событий
 function setupEventListeners() {
     // Кнопка назад
@@ -255,16 +303,20 @@ async function loadNextQuestion() {
                 firstRecommendationsShown = true;
                 saveToStorage(STORAGE_KEYS.FIRST_RECOMMENDATIONS_SHOWN, firstRecommendationsShown);
                 hideLoadingScreen();
+                hideQuestionAndAnswers();
+                hideConfidenceIndicator();
                 showGuessedCandidate();
             } else if (confidence >= 100) {
                 log('Уверенность достигла 100%, показываем окончательную подборку');
                 hideLoadingScreen();
+                hideQuestionAndAnswers();
+                hideConfidenceIndicator();
                 showFinalRecommendations();
             } else {
                 log('Продолжаем с вопросами, уверенность:', confidence);
-            displayQuestion();
-            updateConfidence();
-            hideLoadingScreen();
+                displayQuestion();
+                updateConfidence();
+                hideLoadingScreen();
             }
         } else if (data.message && data.message.includes('закончились')) {
             log('Вопросы закончились, проверяем уверенность для показа рекомендаций');
@@ -275,14 +327,19 @@ async function loadNextQuestion() {
                 firstRecommendationsShown = true;
                 saveToStorage(STORAGE_KEYS.FIRST_RECOMMENDATIONS_SHOWN, firstRecommendationsShown);
                 hideLoadingScreen();
+                hideQuestionAndAnswers();
+                hideConfidenceIndicator();
                 showGuessedCandidate();
             } else if (confidence >= 100) {
                 log('Уверенность 100%, показываем окончательную подборку');
                 hideLoadingScreen();
+                hideQuestionAndAnswers();
+                hideConfidenceIndicator();
                 showFinalRecommendations();
             } else {
                 log('Уверенность < 70%, показываем результаты на той же странице');
                 hideLoadingScreen();
+                hideConfidenceIndicator();
                 showResultsOnSamePage();
             }
         } else {
@@ -999,8 +1056,11 @@ async function handleGuessResponse(isCorrect) {
         // Продолжаем с вопросами (только если уверенность < 100%)
         if (confidence < 100) {
             isProcessing = false;
-        setTimeout(() => {
-            loadNextQuestion();
+            // Показываем вопрос и ответы для продолжения
+            showQuestionAndAnswers();
+            showConfidenceIndicator();
+            setTimeout(() => {
+                loadNextQuestion();
             }, 1000);
         } else {
             log('Уверенность уже 100%, показываем окончательные рекомендации');
