@@ -20,7 +20,7 @@ from back.okkonator import (
     load_vector_db, load_movies_fallback, try_load_model, 
     build_item_embeddings, embed_text, cosine_sim, profile_keywords,
     filter_and_rank, init_theta, update_theta, pick_next_question,
-    QUESTIONS, LIKERT, AXES, explain
+    QUESTIONS, LIKERT, AXES, QUESTIONS_MAX, explain
 )
 
 app = Flask(__name__)
@@ -86,8 +86,8 @@ def get_next_question():
     if question is None:
         return jsonify({"message": "Вопросы закончились"})
     
-    # Вычисляем уверенность профиля
-    confidence = int(100 * len(asked_ids) / len(QUESTIONS))
+    # Вычисляем уверенность профиля (максимум 15 вопросов)
+    confidence = int(100 * len(asked_ids) / QUESTIONS_MAX)
     
     return jsonify({
         "question": question,
@@ -122,8 +122,8 @@ def submit_answer():
     if answer_value != 0:
         update_theta(theta, answer_value, question['targets'])
     
-    # Вычисляем уверенность на основе количества заданных вопросов
-    confidence = int(100 * len(asked_ids) / len(QUESTIONS))
+    # Вычисляем уверенность на основе количества заданных вопросов (максимум 15)
+    confidence = int(100 * len(asked_ids) / QUESTIONS_MAX)
     
     return jsonify({
         "theta": theta,

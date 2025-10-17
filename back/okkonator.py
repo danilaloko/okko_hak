@@ -290,6 +290,10 @@ def update_theta(theta, answer_value, targets):
         theta[ax] = float(np.clip(theta[ax] + ETA * weight * s, -1.0, 1.0))
 
 def pick_next_question(theta, asked_ids):
+    # Проверяем лимит вопросов
+    if len(asked_ids) >= QUESTIONS_MAX:
+        return None
+    
     remaining = [q for q in QUESTIONS if q["id"] not in asked_ids]
     if not remaining:
         return None
