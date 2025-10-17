@@ -314,31 +314,46 @@ function displaySwipeRecommendations() {
 
 // Создание карточки фильма
 function createMovieCard(movie, index, source = 'default') {
+    // Функция для очистки данных от квадратных скобок
+    function cleanData(data) {
+        if (!data) return '';
+        return data.toString().replace(/[\[\]']/g, '').replace(/'/g, '');
+    }
+    
     const card = document.createElement('div');
     card.className = `movie-card ${source}`;
+    card.style.cursor = movie.url ? 'pointer' : 'default';
+    
     card.innerHTML = `
         <div class="movie-poster" style="background-image: url('${movie.poster || 'https://images.unsplash.com/photo-1518709268805-4e9042af2176?w=400&h=600&fit=crop'}')">
             <div class="movie-overlay">
-                <div class="movie-rating">${movie.rating || 'N/A'}</div>
-                <div class="movie-year">${movie.year || 'N/A'}</div>
+                <div class="movie-age-rating">${movie.age_rating || 'N/A'}</div>
+                <div class="movie-content-type">${movie.content_type || 'Контент'}</div>
             </div>
         </div>
         <div class="movie-info">
             <h3 class="movie-title">${movie.title}</h3>
-            <p class="movie-genre">${movie.genre || 'Жанр не указан'}</p>
-            <p class="movie-duration">${movie.duration || 'N/A'} мин</p>
+            <p class="movie-country">${cleanData(movie.country) || 'Страна не указана'}</p>
+            <p class="movie-genres">${cleanData(movie.genres) || 'Жанры не указаны'}</p>
             ${movie.reason ? `<p class="movie-reason">${movie.reason}</p>` : ''}
-            ${movie.score ? `<div class="movie-score">Оценка: ${movie.score.toFixed(2)}</div>` : ''}
+            ${movie.description ? `<p class="movie-description">${movie.description}</p>` : ''}
         </div>
         <div class="movie-actions">
-            <button class="action-btn like-btn" onclick="likeMovie(${index}, '${source}')">
+            <button class="action-btn like-btn" onclick="event.stopPropagation(); likeMovie(${index}, '${source}')">
                 <i class="fas fa-heart"></i>
             </button>
-            <button class="action-btn watch-btn" onclick="watchMovie(${index}, '${source}')">
+            <button class="action-btn watch-btn" onclick="event.stopPropagation(); watchMovie(${index}, '${source}')">
                 <i class="fas fa-play"></i>
             </button>
         </div>
     `;
+    
+    // Добавляем клик для открытия ссылки
+    if (movie.url) {
+        card.addEventListener('click', () => {
+            window.open(movie.url, '_blank');
+        });
+    }
     
     return card;
 }
@@ -423,24 +438,35 @@ function displayRecommendations(recommendations) {
     const recommendationsList = document.getElementById('recommendationsList');
     if (!recommendationsList) return;
     
+    // Функция для очистки данных от квадратных скобок
+    function cleanData(data) {
+        if (!data) return '';
+        return data.toString().replace(/[\[\]']/g, '').replace(/'/g, '');
+    }
+    
     recommendationsList.innerHTML = recommendations
         .map(rec => `
-            <div class="recommendation-card" data-movie-id="${rec.id}">
-                <div class="recommendation-poster" style="background-image: url('${rec.poster}')"></div>
+            <div class="recommendation-card" data-movie-id="${rec.id}" style="cursor: ${rec.url ? 'pointer' : 'default'};">
+                <div class="recommendation-poster" style="background-image: url('${rec.poster}')">
+                    <div class="poster-overlay">
+                        <div class="age-rating">${rec.age_rating || 'N/A'}</div>
+                        <div class="content-type">${rec.content_type || 'Контент'}</div>
+                    </div>
+                </div>
                 <div class="recommendation-info">
                     <div class="recommendation-title">${rec.title}</div>
                     <div class="recommendation-meta">
-                        <span class="recommendation-year">${rec.year}</span>
-                        <span class="recommendation-genre">${rec.genre}</span>
-                        <span class="recommendation-rating">${rec.rating}</span>
+                        <span class="recommendation-country">${cleanData(rec.country) || 'Страна не указана'}</span>
+                        <span class="recommendation-genres">${cleanData(rec.genres) || 'Жанры не указаны'}</span>
                     </div>
                     <div class="recommendation-reason">${rec.reason}</div>
+                    ${rec.description ? `<div class="recommendation-description">${rec.description}</div>` : ''}
                     <div class="recommendation-actions">
-                        <button class="action-btn primary-btn" onclick="showMovieDetails(${rec.id})">
+                        <button class="action-btn primary-btn" onclick="event.stopPropagation(); showMovieDetails(${rec.id})">
                             <i class="fas fa-info-circle"></i>
                             Подробнее
                         </button>
-                        <button class="action-btn secondary-btn" onclick="addToWatchlist(${rec.id})">
+                        <button class="action-btn secondary-btn" onclick="event.stopPropagation(); addToWatchlist(${rec.id})">
                             <i class="fas fa-plus"></i>
                             В список
                         </button>
@@ -449,6 +475,18 @@ function displayRecommendations(recommendations) {
             </div>
         `)
         .join('');
+    
+    // Добавляем обработчики кликов для карточек
+    recommendations.forEach((rec, index) => {
+        if (rec.url) {
+            const card = recommendationsList.children[index];
+            if (card) {
+                card.addEventListener('click', () => {
+                    window.open(rec.url, '_blank');
+                });
+            }
+        }
+    });
 }
 
 // Отображение истории подборок

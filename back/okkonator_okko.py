@@ -251,44 +251,44 @@ def profile_keywords(theta):
     tokens = []
     
     # Основные характеристики
-    if theta["tempo_slow"] > 0.2: 
+    if theta.get("tempo_slow", 0) > 0.2: 
         tokens += ["медленный темп", "атмосферный", "размеренный"]
-    if theta["darkness"] > 0.2: 
+    if theta.get("darkness", 0) > 0.2: 
         tokens += ["мрачный", "тёмный", "серьёзный"]
-    if theta["darkness"] < -0.2: 
+    if theta.get("darkness", 0) < -0.2: 
         tokens += ["светлый", "позитивный", "добрый"]
-    if theta["humor"] > 0.2: 
+    if theta.get("humor", 0) > 0.2: 
         tokens += ["смешной", "комедия", "юмор"]
-    if theta["novelty"] > 0.2: 
+    if theta.get("novelty", 0) > 0.2: 
         tokens += ["необычный", "экспериментальный", "свежий"]
     
     # Жанры
-    if theta["genre_action"] > 0.2: tokens += ["боевик", "экшн", "приключения"]
-    if theta["genre_comedy"] > 0.2: tokens += ["комедия", "смешной", "юмористический"]
-    if theta["genre_drama"] > 0.2: tokens += ["драма", "эмоциональный", "серьёзный"]
-    if theta["genre_crime"] > 0.2: tokens += ["криминал", "детектив", "расследование"]
-    if theta["genre_scifi"] > 0.2: tokens += ["фантастика", "научная фантастика", "будущее"]
-    if theta["genre_horror"] > 0.2: tokens += ["ужасы", "страшный", "мистика"]
-    if theta["genre_thriller"] > 0.2: tokens += ["триллер", "напряжение", "саспенс"]
-    if theta["genre_romance"] > 0.2: tokens += ["романтика", "любовь", "отношения"]
-    if theta["genre_fantasy"] > 0.2: tokens += ["фэнтези", "магия", "сказка"]
-    if theta["genre_animation"] > 0.2: tokens += ["анимация", "мультфильм", "анимационный"]
-    if theta["genre_documentary"] > 0.2: tokens += ["документальный", "реальные события"]
-    if theta["genre_family"] > 0.2: tokens += ["семейный", "для всей семьи"]
+    if theta.get("genre_action", 0) > 0.2: tokens += ["боевик", "экшн", "приключения"]
+    if theta.get("genre_comedy", 0) > 0.2: tokens += ["комедия", "смешной", "юмористический"]
+    if theta.get("genre_drama", 0) > 0.2: tokens += ["драма", "эмоциональный", "серьёзный"]
+    if theta.get("genre_crime", 0) > 0.2: tokens += ["криминал", "детектив", "расследование"]
+    if theta.get("genre_scifi", 0) > 0.2: tokens += ["фантастика", "научная фантастика", "будущее"]
+    if theta.get("genre_horror", 0) > 0.2: tokens += ["ужасы", "страшный", "мистика"]
+    if theta.get("genre_thriller", 0) > 0.2: tokens += ["триллер", "напряжение", "саспенс"]
+    if theta.get("genre_romance", 0) > 0.2: tokens += ["романтика", "любовь", "отношения"]
+    if theta.get("genre_fantasy", 0) > 0.2: tokens += ["фэнтези", "магия", "сказка"]
+    if theta.get("genre_animation", 0) > 0.2: tokens += ["анимация", "мультфильм", "анимационный"]
+    if theta.get("genre_documentary", 0) > 0.2: tokens += ["документальный", "реальные события"]
+    if theta.get("genre_family", 0) > 0.2: tokens += ["семейный", "для всей семьи"]
     
     # Тип контента
-    if theta["prefer_movies"] > 0.2: tokens += ["фильм", "кино"]
-    if theta["prefer_series"] > 0.2: tokens += ["сериал", "многосерийный"]
+    if theta.get("prefer_movies", 0) > 0.2: tokens += ["фильм", "кино"]
+    if theta.get("prefer_series", 0) > 0.2: tokens += ["сериал", "многосерийный"]
     
     # Страны
-    if theta["prefer_russian"] > 0.2: tokens += ["российский", "русский", "отечественный"]
-    if theta["prefer_foreign"] > 0.2: tokens += ["зарубежный", "иностранный"]
-    if theta["prefer_american"] > 0.2: tokens += ["американский", "голливудский"]
+    if theta.get("prefer_russian", 0) > 0.2: tokens += ["российский", "русский", "отечественный"]
+    if theta.get("prefer_foreign", 0) > 0.2: tokens += ["зарубежный", "иностранный"]
+    if theta.get("prefer_american", 0) > 0.2: tokens += ["американский", "голливудский"]
     
     # Качество
-    if theta["high_quality"] > 0.2: tokens += ["качественный", "хорошо снятый"]
-    if theta["recent_content"] > 0.2: tokens += ["новый", "современный", "свежий"]
-    if theta["classic_content"] > 0.2: tokens += ["классический", "проверенный временем"]
+    if theta.get("high_quality", 0) > 0.2: tokens += ["качественный", "хорошо снятый"]
+    if theta.get("recent_content", 0) > 0.2: tokens += ["новый", "современный", "свежий"]
+    if theta.get("classic_content", 0) > 0.2: tokens += ["классический", "проверенный временем"]
     
     if not tokens:
         tokens = ["интересный", "качественный", "популярный"]
@@ -307,41 +307,41 @@ def explain_recommendation(row, theta, record_meta):
     
     # Жанровые совпадения
     genre_matches = []
-    if theta["genre_action"] > 0.2 and any("боевик" in g.lower() or "экшн" in g.lower() for g in genres):
+    if theta.get("genre_action", 0) > 0.2 and any("боевик" in g.lower() or "экшн" in g.lower() for g in genres):
         genre_matches.append("экшн")
-    if theta["genre_comedy"] > 0.2 and any("комедия" in g.lower() for g in genres):
+    if theta.get("genre_comedy", 0) > 0.2 and any("комедия" in g.lower() for g in genres):
         genre_matches.append("комедия")
-    if theta["genre_drama"] > 0.2 and any("драма" in g.lower() for g in genres):
+    if theta.get("genre_drama", 0) > 0.2 and any("драма" in g.lower() for g in genres):
         genre_matches.append("драма")
-    if theta["genre_crime"] > 0.2 and any("криминал" in g.lower() or "детектив" in g.lower() for g in genres):
+    if theta.get("genre_crime", 0) > 0.2 and any("криминал" in g.lower() or "детектив" in g.lower() for g in genres):
         genre_matches.append("криминал")
-    if theta["genre_horror"] > 0.2 and any("ужас" in g.lower() for g in genres):
+    if theta.get("genre_horror", 0) > 0.2 and any("ужас" in g.lower() for g in genres):
         genre_matches.append("ужасы")
-    if theta["genre_thriller"] > 0.2 and any("триллер" in g.lower() for g in genres):
+    if theta.get("genre_thriller", 0) > 0.2 and any("триллер" in g.lower() for g in genres):
         genre_matches.append("триллер")
-    if theta["genre_romance"] > 0.2 and any("романтик" in g.lower() or "мелодрама" in g.lower() for g in genres):
+    if theta.get("genre_romance", 0) > 0.2 and any("романтик" in g.lower() or "мелодрама" in g.lower() for g in genres):
         genre_matches.append("романтика")
     
     if genre_matches:
         bits.append(f"жанр: {', '.join(genre_matches)}")
     
     # Тип контента
-    if theta["prefer_movies"] > 0.2 and "фильм" in content_type.lower():
+    if theta.get("prefer_movies", 0) > 0.2 and "фильм" in content_type.lower():
         bits.append("фильм")
-    elif theta["prefer_series"] > 0.2 and "сериал" in content_type.lower():
+    elif theta.get("prefer_series", 0) > 0.2 and "сериал" in content_type.lower():
         bits.append("сериал")
     
     # Страна
-    if theta["prefer_russian"] > 0.2 and any(c in country.lower() for c in ["россия", "рф", "советский"]):
+    if theta.get("prefer_russian", 0) > 0.2 and any(c in country.lower() for c in ["россия", "рф", "советский"]):
         bits.append("российский")
-    elif theta["prefer_foreign"] > 0.2 and not any(c in country.lower() for c in ["россия", "рф", "советский"]):
+    elif theta.get("prefer_foreign", 0) > 0.2 and not any(c in country.lower() for c in ["россия", "рф", "советский"]):
         bits.append("зарубежный")
     
     # Возрастной рейтинг
     age_rating = record_meta.get("age_rating")
-    if theta["family_friendly"] > 0.2 and age_rating and age_rating <= 12:
+    if theta.get("family_friendly", 0) > 0.2 and age_rating and age_rating <= 12:
         bits.append("семейный")
-    elif theta["mature_content"] > 0.2 and age_rating and age_rating >= 16:
+    elif theta.get("mature_content", 0) > 0.2 and age_rating and age_rating >= 16:
         bits.append("для взрослых")
     
     return " · ".join(bits[:3]) if bits else "совпадение по общим предпочтениям"
@@ -369,26 +369,26 @@ def filter_and_rank(df, embeddings, records_metadata, theta, model_kind, model, 
         
         # Фильтр по типу контента
         content_type = record_meta.get("content_type", "").lower()
-        if theta["prefer_movies"] > 0.2 and "фильм" in content_type:
+        if theta.get("prefer_movies", 0) > 0.2 and "фильм" in content_type:
             bonus += 0.1
-        elif theta["prefer_series"] > 0.2 and "сериал" in content_type:
+        elif theta.get("prefer_series", 0) > 0.2 and "сериал" in content_type:
             bonus += 0.1
         
         # Фильтр по стране
         country = record_meta.get("country", "").lower()
-        if theta["prefer_russian"] > 0.2 and any(c in country for c in ["россия", "рф"]):
+        if theta.get("prefer_russian", 0) > 0.2 and any(c in country for c in ["россия", "рф"]):
             bonus += 0.15
-        elif theta["prefer_foreign"] > 0.2 and not any(c in country for c in ["россия", "рф"]):
+        elif theta.get("prefer_foreign", 0) > 0.2 and not any(c in country for c in ["россия", "рф"]):
             bonus += 0.1
         
         # Фильтр по возрастному рейтингу
         age_rating = record_meta.get("age_rating")
         if age_rating:
-            if theta["family_friendly"] > 0.2 and age_rating <= 12:
+            if theta.get("family_friendly", 0) > 0.2 and age_rating <= 12:
                 bonus += 0.1
-            elif theta["mature_content"] > 0.2 and age_rating >= 16:
+            elif theta.get("mature_content", 0) > 0.2 and age_rating >= 16:
                 bonus += 0.1
-            elif theta["violence_tol"] < 0 and age_rating >= 18:
+            elif theta.get("violence_tol", 0) < 0 and age_rating >= 18:
                 bonus -= 0.2  # штраф за взрослый контент если не хотят насилие
         
         # Фильтр по жанрам
@@ -396,17 +396,17 @@ def filter_and_rank(df, embeddings, records_metadata, theta, model_kind, model, 
         genre_bonus = 0.0
         for genre in genres:
             genre_lower = genre.lower()
-            if theta["genre_comedy"] > 0.2 and "комедия" in genre_lower:
+            if theta.get("genre_comedy", 0) > 0.2 and "комедия" in genre_lower:
                 genre_bonus += 0.1
-            if theta["genre_drama"] > 0.2 and "драма" in genre_lower:
+            if theta.get("genre_drama", 0) > 0.2 and "драма" in genre_lower:
                 genre_bonus += 0.1
-            if theta["genre_action"] > 0.2 and ("боевик" in genre_lower or "экшн" in genre_lower):
+            if theta.get("genre_action", 0) > 0.2 and ("боевик" in genre_lower or "экшн" in genre_lower):
                 genre_bonus += 0.1
-            if theta["genre_horror"] > 0.2 and "ужас" in genre_lower:
+            if theta.get("genre_horror", 0) > 0.2 and "ужас" in genre_lower:
                 genre_bonus += 0.1
-            if theta["genre_thriller"] > 0.2 and "триллер" in genre_lower:
+            if theta.get("genre_thriller", 0) > 0.2 and "триллер" in genre_lower:
                 genre_bonus += 0.1
-            if theta["genre_romance"] > 0.2 and ("романтик" in genre_lower or "мелодрама" in genre_lower):
+            if theta.get("genre_romance", 0) > 0.2 and ("романтик" in genre_lower or "мелодрама" in genre_lower):
                 genre_bonus += 0.1
         
         bonus += min(genre_bonus, 0.2)  # ограничиваем жанровый бонус
@@ -419,12 +419,18 @@ def filter_and_rank(df, embeddings, records_metadata, theta, model_kind, model, 
 
 def init_theta():
     """Инициализирует профиль пользователя"""
-    return {ax: 0.0 for ax in AXES}
+    theta = {}
+    for ax in AXES:
+        theta[ax] = 0.0
+    return theta
 
 def update_theta(theta, answer_value, targets):
     """Обновляет профиль пользователя на основе ответа"""
     s = answer_value / 2.0  # масштабируем к [-1..+1]
     for ax, weight in targets.items():
+        # Инициализируем ключ если его нет
+        if ax not in theta:
+            theta[ax] = 0.0
         theta[ax] = float(np.clip(theta[ax] + ETA * weight * s, -1.0, 1.0))
 
 def pick_next_question(theta, asked_ids):

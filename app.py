@@ -11,6 +11,7 @@ CORS(app)
 # URL микросервисов
 OKKONATOR_SERVICE_URL = "http://localhost:5001"
 SWIPE_SERVICE_URL = "http://localhost:5002"
+MOVIE_RECOMMENDATION_SERVICE_URL = "http://localhost:5003"
 
 # Инициализация OpenRouter клиента
 try:
@@ -444,54 +445,242 @@ def get_okkonator_recommendations():
 # API для чата
 @app.route('/api/chat/message', methods=['POST'])
 def chat_message():
-    """Отправить сообщение в чат"""
-    data = request.get_json()
-    message = data.get('message')
-    
-    # Простая логика ответа (в реальном приложении здесь будет AI)
-    responses = [
-        "Понял! Рекомендую посмотреть 'Интерстеллар' - отличная фантастика с глубоким сюжетом.",
-        "Учитывая ваши предпочтения, предлагаю 'Дюна' - эпическая фантастическая сага.",
-        "Попробуйте 'Темный рыцарь' - это классика жанра с отличной актерской игрой.",
-        "Рекомендую 'Начало' - сложный, но увлекательный фильм с необычным сюжетом."
-    ]
-    
-    response = random.choice(responses)
-    
-    user_profile['chat_history'].append({
-        'user': message,
-        'assistant': response,
-        'timestamp': 'now'
-    })
-    
-    # Простая логика рекомендаций на основе сообщения
-    recommendations = []
-    message_lower = message.lower()
-    
-    if any(word in message_lower for word in ['короткое', 'короткий', 'быстро', '45', '60', 'минут']):
-        recommendations = [
-            {"id": 1, "title": "Интерстеллар", "reason": "Эпическая фантастика, 169 минут"},
-            {"id": 2, "title": "Дюна", "reason": "Космическая сага, 155 минут"},
-            {"id": 3, "title": "Темный рыцарь", "reason": "Классика жанра, 152 минуты"}
-        ]
-    elif any(word in message_lower for word in ['легкое', 'лёгкое', 'комедия', 'веселое']):
-        recommendations = [
-            {"id": 4, "title": "Барби", "reason": "Яркая комедия с глубоким смыслом"},
-            {"id": 5, "title": "Топ Ган: Мэверик", "reason": "Захватывающий боевик с юмором"},
-            {"id": 6, "title": "Начало", "reason": "Умная фантастика с необычным сюжетом"}
-        ]
-    else:
-        recommendations = [
-            {"id": 1, "title": "Интерстеллар", "reason": "Соответствует вашим предпочтениям"},
-            {"id": 2, "title": "Дюна", "reason": "Эпическая фантастика"},
-            {"id": 3, "title": "Темный рыцарь", "reason": "Классика жанра"}
-        ]
-    
-    return jsonify({
-        "success": True,
-        "response": response,
-        "recommendations": recommendations
-    })
+    """Отправить сообщение в чат с системой подбора фильмов"""
+    try:
+        data = request.get_json()
+        message = data.get('message')
+        user_id = data.get('user_id', 'default_user')
+        model = data.get('model', 'qwen/qwen3-vl-8b-thinking')
+        
+        if not message:
+            return jsonify({
+                "success": False,
+                "error": "Сообщение не может быть пустым"
+            }), 400
+        
+        # Отправляем запрос в микросервис подбора фильмов
+        try:
+            response = requests.post(
+                f"{MOVIE_RECOMMENDATION_SERVICE_URL}/api/movie-recommendation/chat",
+                json={
+                    'user_id': user_id,
+                    'message': message,
+                    'model': model
+                },
+                timeout=30
+            )
+            
+            if response.status_code == 200:
+                service_data = response.json()
+                
+                if service_data.get('success'):
+                    # Формируем ответ в старом формате для совместимости
+                    recommendations = []
+                    if service_data.get('recommended_movie_ids'):
+                        # Здесь можно добавить логику получения деталей фильмов по ID
+                        for movie_id in service_data['recommended_movie_ids']:
+                            recommendations.append({
+                                "id": movie_id,
+                                "title": f"Фильм ID {movie_id}",
+                                "reason": "Рекомендован системой подбора"
+                            })
+                    
+                    # Сохраняем в историю чата
+                    user_profile['chat_history'].append({
+                        'user': message,
+                        'assistant': service_data.get('message', ''),
+                        'timestamp': 'now',
+                        'movie_data': service_data
+                    })
+                    
+                    return jsonify({
+                        "success": True,
+                        "response": service_data.get('message', ''),
+                        "recommendations": recommendations,
+                        "clarification_questions": service_data.get('clarification_questions', []),
+                        "status": service_data.get('status'),
+                        "confidence": service_data.get('confidence', 0.0),
+                        "movie_data": service_data
+                    })
+                else:
+                    return jsonify({
+                        "success": False,
+                        "error": service_data.get('error', 'Ошибка микросервиса'),
+                        "response": service_data.get('message', 'Ошибка при подборе фильмов')
+                    }), 500
+            else:
+                return jsonify({
+                    "success": False,
+                    "error": f"Микросервис подбора фильмов недоступен (код {response.status_code})"
+                }), 500
+                
+        except requests.exceptions.RequestException as e:
+            # Fallback к простой логике, если микросервис недоступен
+            print(f"Микросервис недоступен, используем fallback: {e}")
+            
+            # Простая логика ответа (fallback)
+            responses = [
+                "Понял! Рекомендую посмотреть 'Интерстеллар' - отличная фантастика с глубоким сюжетом.",
+                "Учитывая ваши предпочтения, предлагаю 'Дюна' - эпическая фантастическая сага.",
+                "Попробуйте 'Темный рыцарь' - это классика жанра с отличной актерской игрой.",
+                "Рекомендую 'Начало' - сложный, но увлекательный фильм с необычным сюжетом."
+            ]
+            
+            response_text = random.choice(responses)
+            
+            user_profile['chat_history'].append({
+                'user': message,
+                'assistant': response_text,
+                'timestamp': 'now'
+            })
+            
+            # Простая логика рекомендаций на основе сообщения
+            recommendations = []
+            message_lower = message.lower()
+            
+            if any(word in message_lower for word in ['короткое', 'короткий', 'быстро', '45', '60', 'минут']):
+                recommendations = [
+                    {"id": 1, "title": "Интерстеллар", "reason": "Эпическая фантастика, 169 минут"},
+                    {"id": 2, "title": "Дюна", "reason": "Космическая сага, 155 минут"},
+                    {"id": 3, "title": "Темный рыцарь", "reason": "Классика жанра, 152 минуты"}
+                ]
+            elif any(word in message_lower for word in ['легкое', 'лёгкое', 'комедия', 'веселое']):
+                recommendations = [
+                    {"id": 4, "title": "Барби", "reason": "Яркая комедия с глубоким смыслом"},
+                    {"id": 5, "title": "Топ Ган: Мэверик", "reason": "Захватывающий боевик с юмором"},
+                    {"id": 6, "title": "Начало", "reason": "Умная фантастика с необычным сюжетом"}
+                ]
+            else:
+                recommendations = [
+                    {"id": 1, "title": "Интерстеллар", "reason": "Соответствует вашим предпочтениям"},
+                    {"id": 2, "title": "Дюна", "reason": "Эпическая фантастика"},
+                    {"id": 3, "title": "Темный рыцарь", "reason": "Классика жанра"}
+                ]
+            
+            return jsonify({
+                "success": True,
+                "response": response_text,
+                "recommendations": recommendations,
+                "fallback": True,
+                "message": "Используется fallback режим (микросервис недоступен)"
+            })
+            
+    except Exception as e:
+        print(f"Ошибка в chat_message: {e}")
+        return jsonify({
+            "success": False,
+            "error": f"Внутренняя ошибка: {str(e)}"
+        }), 500
+
+
+@app.route('/api/chat/history/<user_id>', methods=['GET'])
+def get_chat_history(user_id):
+    """Получить историю диалога пользователя"""
+    try:
+        response = requests.get(
+            f"{MOVIE_RECOMMENDATION_SERVICE_URL}/api/movie-recommendation/history/{user_id}",
+            timeout=10
+        )
+        
+        if response.status_code == 200:
+            return jsonify(response.json())
+        else:
+            return jsonify({
+                "success": False,
+                "error": "Микросервис недоступен"
+            }), 500
+            
+    except requests.exceptions.RequestException:
+        # Fallback к локальной истории
+        history = user_profile.get('chat_history', [])
+        return jsonify({
+            "success": True,
+            "user_id": user_id,
+            "history": history
+        })
+
+
+@app.route('/api/chat/clear-history/<user_id>', methods=['POST'])
+def clear_chat_history(user_id):
+    """Очистить историю диалога пользователя"""
+    try:
+        response = requests.post(
+            f"{MOVIE_RECOMMENDATION_SERVICE_URL}/api/movie-recommendation/clear-history/{user_id}",
+            timeout=10
+        )
+        
+        if response.status_code == 200:
+            return jsonify(response.json())
+        else:
+            return jsonify({
+                "success": False,
+                "error": "Микросервис недоступен"
+            }), 500
+            
+    except requests.exceptions.RequestException:
+        # Fallback - очищаем локальную историю
+        user_profile['chat_history'] = []
+        return jsonify({
+            "success": True,
+            "message": f"История диалога для пользователя {user_id} очищена"
+        })
+
+
+@app.route('/api/chat/models', methods=['GET'])
+def get_available_models():
+    """Получить список доступных моделей"""
+    try:
+        response = requests.get(
+            f"{MOVIE_RECOMMENDATION_SERVICE_URL}/api/movie-recommendation/models",
+            timeout=10
+        )
+        
+        if response.status_code == 200:
+            return jsonify(response.json())
+        else:
+            return jsonify({
+                "success": False,
+                "error": "Микросервис недоступен"
+            }), 500
+            
+    except requests.exceptions.RequestException:
+        # Fallback - возвращаем список моделей
+        return jsonify({
+            "success": True,
+            "models": [
+                "qwen/qwen3-vl-8b-thinking",
+                "anthropic/claude-haiku-4.5",
+                "openai/gpt-4o",
+                "openai/gpt-4o-mini"
+            ],
+            "default_model": "qwen/qwen3-vl-8b-thinking"
+        })
+
+
+@app.route('/api/chat/health', methods=['GET'])
+def chat_service_health():
+    """Проверить состояние микросервиса подбора фильмов"""
+    try:
+        response = requests.get(
+            f"{MOVIE_RECOMMENDATION_SERVICE_URL}/health",
+            timeout=5
+        )
+        
+        if response.status_code == 200:
+            return jsonify(response.json())
+        else:
+            return jsonify({
+                "status": "unhealthy",
+                "service": "movie_recommendation",
+                "error": f"HTTP {response.status_code}"
+            }), 500
+            
+    except requests.exceptions.RequestException as e:
+        return jsonify({
+            "status": "unhealthy",
+            "service": "movie_recommendation",
+            "error": f"Connection error: {str(e)}"
+        }), 500
 
 # API для чата со звездами
 @app.route('/api/chat/stars', methods=['POST'])

@@ -874,6 +874,12 @@ async function showResultsOnSamePage() {
                     cursor: pointer;
                 `;
                 
+                // Функция для очистки данных от квадратных скобок
+                function cleanData(data) {
+                    if (!data) return '';
+                    return data.toString().replace(/[\[\]']/g, '').replace(/'/g, '');
+                }
+                
                 movieCard.innerHTML = `
                     <div style="
                         height: 200px;
@@ -891,15 +897,33 @@ async function showResultsOnSamePage() {
                             padding: 4px 8px;
                             border-radius: 4px;
                             font-size: 12px;
-                        ">${movie.rating || 'N/A'}</div>
+                        ">${movie.age_rating || 'N/A'}</div>
+                        <div style="
+                            position: absolute;
+                            bottom: 10px;
+                            left: 10px;
+                            background: rgba(0,0,0,0.7);
+                            color: white;
+                            padding: 4px 8px;
+                            border-radius: 4px;
+                            font-size: 12px;
+                        ">${movie.content_type || 'Контент'}</div>
                     </div>
                     <div style="padding: 15px;">
                         <h4 style="margin: 0 0 5px 0; font-size: 16px; color: #333;">${movie.title}</h4>
-                        <p style="margin: 0 0 5px 0; font-size: 14px; color: #666;">${movie.year} • ${movie.duration || 'N/A'} мин</p>
-                        <p style="margin: 0 0 10px 0; font-size: 12px; color: #888;">${movie.genre || 'Жанр не указан'}</p>
-                        ${movie.reason ? `<p style="margin: 0; font-size: 11px; color: #999; font-style: italic;">${movie.reason}</p>` : ''}
+                        <p style="margin: 0 0 5px 0; font-size: 14px; color: #666;">${cleanData(movie.country) || 'Страна не указана'}</p>
+                        <p style="margin: 0 0 5px 0; font-size: 12px; color: #888;">${cleanData(movie.genres) || 'Жанры не указаны'}</p>
+                        ${movie.reason ? `<p style="margin: 0 0 5px 0; font-size: 11px; color: #999; font-style: italic;">${movie.reason}</p>` : ''}
+                        ${movie.description ? `<p style="margin: 0; font-size: 11px; color: #aaa; line-height: 1.3; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">${movie.description}</p>` : ''}
                     </div>
                 `;
+                
+                // Добавляем клик для открытия ссылки
+                if (movie.url) {
+                    movieCard.addEventListener('click', () => {
+                        window.open(movie.url, '_blank');
+                    });
+                }
                 
                 // Эффект при наведении
                 movieCard.addEventListener('mouseenter', () => {

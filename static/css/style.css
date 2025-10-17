@@ -33,6 +33,83 @@
     padding-bottom: 100px; /* Отступ снизу для кнопок */
 }
 
+/* Стили для новых элементов карточек */
+.movie-age-rating, .age-rating {
+    background: rgba(239, 68, 68, 0.9);
+    color: white;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.movie-content-type, .content-type {
+    background: rgba(123, 97, 255, 0.9);
+    color: white;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.movie-country, .recommendation-country {
+    color: var(--okko-text-muted);
+    font-size: 14px;
+    margin-bottom: 4px;
+}
+
+.movie-genres, .recommendation-genres {
+    color: var(--okko-text-muted-2);
+    font-size: 12px;
+    margin-bottom: 4px;
+}
+
+/* Убрали стили для рейтинга */
+
+.movie-description, .recommendation-description {
+    color: var(--okko-text-muted-2);
+    font-size: 11px;
+    line-height: 1.4;
+    margin-top: 8px;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.poster-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding: 10px;
+}
+
+.poster-overlay .age-rating {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+}
+
+.poster-overlay .content-type {
+    position: absolute;
+    bottom: 10px;
+    left: 10px;
+}
+
+.action-btn.link-btn {
+    background: var(--okko-accent);
+    color: white;
+}
+
+.action-btn.link-btn:hover {
+    background: var(--okko-accent-hover);
+}
+
 /* CSS Variables - Okko Identity */
 :root {
     /* Основные цвета Okko */

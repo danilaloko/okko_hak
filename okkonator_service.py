@@ -141,7 +141,7 @@ def get_recommendations():
     theta = data.get('theta', {})
     top_k = data.get('top_k', 6)
     
-    if df is None or ITEM_EMB is None:
+    if df is None or embeddings is None:
         return jsonify({"error": "Сервис не инициализирован"}), 500
     
     # Инициализируем theta если пустой
@@ -150,25 +150,41 @@ def get_recommendations():
     
     try:
         # Получаем рекомендации
-        recommendations = filter_and_rank(df, ITEM_EMB, theta, model_kind, model, top_k)
+        recommendations = filter_and_rank(df, embeddings, records_metadata, theta, model_kind, model, top_k)
         
         # Форматируем результат
         result = []
-        for i, (_, row) in enumerate(recommendations.iterrows()):
-            why = explain(row, theta)
-            votes_str = f"{int(row['votes']):,}" if 'votes' in row else "N/A"
+        for i, (idx, row) in enumerate(recommendations.iterrows()):
+            record_meta = records_metadata[idx] if idx < len(records_metadata) else {}
+            why = explain_recommendation(row, theta, record_meta)
+            
+            # Безопасное получение данных
+            def safe_get(value, default=""):
+                if pd.isna(value):
+                    return default
+                if isinstance(value, (list, tuple, np.ndarray)):
+                    return str(value) if len(value) > 0 else default
+                return str(value)
+            
+            title = safe_get(row["serial_name"], "Неизвестно")
+            genres = ", ".join(record_meta.get("genres", []))
+            content_type = record_meta.get("content_type", "")
+            country = record_meta.get("country", "")
+            age_rating = record_meta.get("age_rating")
+            url = record_meta.get("url", "")
+            description = safe_get(row.get("description", ""))
             
             movie_data = {
-                "id": int(row.get('id', i)),
-                "title": str(row['title']),
-                "year": int(row['year']),
-                "genre": str(row['genre']),
-                "rating": float(row['rating']),
-                "duration": int(row['duration']),
-                "votes": votes_str,
-                "description": str(row.get('description', '')),
+                "id": record_meta.get("id", i),
+                "title": title,
+                "content_type": content_type,
+                "genres": genres,
+                "country": country,
+                "age_rating": f"{age_rating}+" if age_rating else "N/A",
+                "description": description[:200] + "..." if len(description) > 200 else description,
                 "score": float(row.get('score', 0)),
                 "reason": why,
+                "url": url,
                 "poster": f"https://images.unsplash.com/photo-1518709268805-4e9042af2176?w=400&h=600&fit=crop"  # Заглушка
             }
             result.append(movie_data)
@@ -197,7 +213,7 @@ def get_profile_keywords():
     })
 
 @app.route('/api/okkonator/explain-recommendation', methods=['POST'])
-def explain_recommendation():
+def explain_specific_recommendation():
     """Объяснить конкретную рекомендацию"""
     data = request.get_json()
     theta = data.get('theta', {})
@@ -206,26 +222,33 @@ def explain_recommendation():
     if df is None:
         return jsonify({"error": "Сервис не инициализирован"}), 500
     
-    # Находим фильм
-    movie = df[df.get('id', df.index) == movie_id]
-    if movie.empty:
-        return jsonify({"error": "Фильм не найден"}), 404
-    
-    row = movie.iloc[0]
-    explanation = explain(row, theta)
-    
-    return jsonify({
-        "explanation": explanation,
-        "movie": {
-            "title": str(row['title']),
-            "genre": str(row['genre']),
-            "year": int(row['year']),
-            "rating": float(row['rating'])
-        }
-    })
+    # Находим фильм по ID
+    try:
+        if movie_id < len(df) and movie_id < len(records_metadata):
+            row = df.iloc[movie_id]
+            record_meta = records_metadata[movie_id]
+            explanation = explain_recommendation(row, theta, record_meta)
+            
+            return jsonify({
+                "explanation": explanation,
+                "movie": {
+                    "title": str(row['serial_name']),
+                    "genres": ", ".join(record_meta.get("genres", [])),
+                    "content_type": record_meta.get("content_type", ""),
+                    "country": record_meta.get("country", "")
+                }
+            })
+        else:
+            return jsonify({"error": "Фильм не найден"}), 404
+    except Exception as e:
+        return jsonify({"error": f"Ошибка: {str(e)}"}), 500
 
 if __name__ == '__main__':
-    print("Запуск микросервиса Окконатора...")
-    initialize_okkonator()
-    print("Микросервис Окконатора запущен на порту 5001")
-    app.run(debug=True, host='0.0.0.0', port=5001)
+    print("Запуск микросервиса Окконатора для Okko...")
+    success = initialize_okkonator()
+    if success:
+        print("✅ Микросервис Окконатора запущен на порту 5001")
+        app.run(debug=True, host='0.0.0.0', port=5001)
+    else:
+        print("❌ Не удалось инициализировать сервис")
+        sys.exit(1)

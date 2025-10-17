@@ -85,7 +85,7 @@ class MovieRecommendationTool:
     def recommend_movies(
         self,
         user_request: str,
-        model: str = "qwen/qwen3-vl-8b-thinking",
+        model: str = "anthropic/claude-haiku-4.5",
         max_iterations: int = 5
     ) -> Dict[str, Any]:
         """
@@ -379,15 +379,18 @@ class MovieRecommendationTool:
             
             # Парсим JSON ответ
             content = response_data["choices"][0]["message"]["content"]
+            logger.info(f"Получен ответ от модели: {content[:200]}...")
+            
+            if not content or content.strip() == "":
+                logger.error("Получен пустой ответ от модели, переключаемся на fallback")
+                return self._send_regular_request_with_json_instruction(messages, model, temperature)
+            
             try:
                 return json.loads(content)
             except json.JSONDecodeError as e:
-                logger.error(f"Ошибка парсинга JSON: {e}")
-                return {
-                    "status": "error",
-                    "message": "Ошибка обработки ответа",
-                    "error": str(e)
-                }
+                logger.error(f"Ошибка парсинга JSON, переключаемся на fallback: {e}")
+                logger.error(f"Содержимое ответа: {content}")
+                return self._send_regular_request_with_json_instruction(messages, model, temperature)
                 
         except requests.exceptions.HTTPError as e:
             if e.response.status_code == 400:
@@ -405,10 +408,12 @@ class MovieRecommendationTool:
         """Отправка обычного запроса с инструкцией вернуть JSON"""
         
         # Добавляем инструкцию по JSON формату
-        json_instruction = """Верни ответ в следующем JSON формате:
+        json_instruction = """ВАЖНО: Верни ответ ТОЛЬКО в формате JSON без дополнительного текста.
+
+Обязательный формат:
 {
   "status": "found|need_more_info|searching|not_found",
-  "message": "текст сообщения на русском",
+  "message": "текст сообщения на русском языке",
   "clarification_questions": ["вопрос1", "вопрос2"],
   "recommended_movie_ids": [123, 456],
   "search_criteria": {
@@ -422,7 +427,14 @@ class MovieRecommendationTool:
   "confidence": 0.85
 }
 
-Отвечай ТОЛЬКО валидным JSON, без дополнительного текста."""
+Правила:
+- Отвечай ТОЛЬКО валидным JSON
+- НЕ добавляй объяснения или дополнительный текст
+- НЕ используй markdown блоки (```json)
+- Все поля обязательны
+- status должен быть одним из: found, need_more_info, searching, not_found
+- message должен быть на русском языке
+- confidence от 0.0 до 1.0"""
         
         # Добавляем инструкцию к последнему сообщению пользователя
         messages_with_instruction = messages.copy()
@@ -450,23 +462,66 @@ class MovieRecommendationTool:
         
         # Парсим JSON ответ
         content = response_data["choices"][0]["message"]["content"]
+        logger.info(f"Получен fallback ответ от модели: {content[:200]}...")
+        
+        if not content or content.strip() == "":
+            logger.error("Получен пустой ответ от модели в fallback режиме")
+            # Возвращаем базовый ответ, если модель не отвечает
+            return {
+                "status": "need_more_info",
+                "message": "Извините, я не понял ваш запрос. Можете уточнить, какой фильм вы хотели бы посмотреть?",
+                "clarification_questions": [
+                    "Какой жанр фильма вас интересует?",
+                    "Есть ли любимые актеры или режиссеры?",
+                    "Какой период времени вас интересует?"
+                ],
+                "recommended_movie_ids": [],
+                "search_criteria": {},
+                "confidence": 0.0
+            }
         
         # Очищаем ответ от возможных markdown блоков
+        original_content = content
         if "```json" in content:
             content = content.split("```json")[1].split("```")[0].strip()
         elif "```" in content:
             content = content.split("```")[1].split("```")[0].strip()
         
+        # Убираем возможные префиксы
+        content = content.strip()
+        if content.startswith("```"):
+            content = content[3:]
+        if content.endswith("```"):
+            content = content[:-3]
+        content = content.strip()
+        
         try:
-            return json.loads(content)
+            result = json.loads(content)
+            logger.info("Успешно распарсили JSON в fallback режиме")
+            return result
         except json.JSONDecodeError as e:
-            logger.error(f"Ошибка парсинга JSON: {e}")
-            logger.error(f"Содержимое ответа: {content}")
+            logger.error(f"Ошибка парсинга JSON в fallback режиме: {e}")
+            logger.error(f"Оригинальное содержимое: {original_content}")
+            logger.error(f"Очищенное содержимое: {content}")
+            
+            # Пытаемся найти JSON в тексте
+            import re
+            json_match = re.search(r'\{.*\}', content, re.DOTALL)
+            if json_match:
+                try:
+                    json_content = json_match.group(0)
+                    result = json.loads(json_content)
+                    logger.info("Найден и распарсен JSON в тексте")
+                    return result
+                except json.JSONDecodeError:
+                    pass
+            
             return {
                 "status": "error",
                 "message": "Ошибка обработки ответа",
                 "error": str(e),
-                "raw_content": content
+                "raw_content": original_content,
+                "cleaned_content": content
             }
     
     def _execute_tool_call(self, tool_call: Dict[str, Any]) -> str:
