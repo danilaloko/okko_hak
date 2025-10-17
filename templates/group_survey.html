@@ -48,6 +48,14 @@
                         </button>
                     </div>
                 </div>
+                
+                <!-- Кнопка измерения настроения -->
+                <div class="mood-measurement-section">
+                    <button class="mood-btn" id="moodMeasurementBtn">
+                        <i class="fas fa-microphone"></i>
+                        <span>Измерить настроение</span>
+                    </button>
+                </div>
             </div>
 
             <!-- Этап 2: Опрос участников -->
@@ -131,6 +139,53 @@
                     <i class="fas fa-play"></i>
                     Начать опрос
                 </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Модальное окно измерения настроения -->
+    <div class="modal" id="moodModal">
+        <div class="modal-content mood-modal-content">
+            <div class="mood-measurement">
+                <h2 class="mood-title">Измерение настроения</h2>
+                <p class="mood-description">Кричите как можно громче в течение 5 секунд!</p>
+                
+                <!-- Визуальный индикатор громкости -->
+                <div class="volume-indicator">
+                    <div class="volume-bar">
+                        <div class="volume-fill" id="volumeFill"></div>
+                    </div>
+                    <div class="volume-labels">
+                        <span>Тихо</span>
+                        <span>Громко</span>
+                    </div>
+                </div>
+                
+                <!-- Таймер -->
+                <div class="mood-timer">
+                    <div class="timer-circle">
+                        <div class="timer-fill" id="timerFill"></div>
+                        <span class="timer-text" id="timerText">5</span>
+                    </div>
+                </div>
+                
+                <!-- Статус -->
+                <div class="mood-status" id="moodStatus">
+                    <i class="fas fa-microphone"></i>
+                    <span>Готовы? Начинаем!</span>
+                </div>
+                
+                <!-- Кнопки управления -->
+                <div class="mood-controls">
+                    <button class="action-btn secondary-btn" id="cancelMoodBtn">
+                        <i class="fas fa-times"></i>
+                        Отмена
+                    </button>
+                    <button class="action-btn primary-btn" id="startMoodBtn">
+                        <i class="fas fa-play"></i>
+                        Начать измерение
+                    </button>
+                </div>
             </div>
         </div>
     </div>

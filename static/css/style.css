@@ -4236,6 +4236,251 @@ textarea::-webkit-scrollbar-thumb:hover,
     font-weight: 600;
 }
 
+/* Стили для измерения настроения */
+.mood-measurement-section {
+    margin-top: var(--okko-spacing-2xl);
+    padding: var(--okko-spacing-xl);
+    border-top: 1px solid var(--okko-border);
+}
+
+.mood-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--okko-spacing-md);
+    width: 100%;
+    padding: var(--okko-spacing-lg);
+    background: linear-gradient(135deg, var(--okko-accent), var(--okko-accent-hover));
+    border: none;
+    border-radius: var(--okko-radius-lg);
+    color: white;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: var(--okko-shadow-md);
+}
+
+.mood-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--okko-shadow-lg);
+    background: linear-gradient(135deg, var(--okko-accent-hover), var(--okko-accent));
+}
+
+.mood-btn i {
+    font-size: 1.2rem;
+}
+
+/* Модальное окно измерения настроения */
+.mood-modal-content {
+    max-width: 500px;
+    width: 90%;
+    background: var(--okko-surface);
+    border-radius: var(--okko-radius-xl);
+    padding: var(--okko-spacing-2xl);
+    text-align: center;
+}
+
+.mood-measurement {
+    display: flex;
+    flex-direction: column;
+    gap: var(--okko-spacing-xl);
+}
+
+.mood-title {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--okko-text);
+    margin: 0;
+}
+
+.mood-description {
+    font-size: 1rem;
+    color: var(--okko-text-muted);
+    margin: 0;
+}
+
+/* Индикатор громкости */
+.volume-indicator {
+    display: flex;
+    flex-direction: column;
+    gap: var(--okko-spacing-md);
+}
+
+.volume-bar {
+    width: 100%;
+    height: 20px;
+    background: var(--okko-surface-2);
+    border-radius: var(--okko-radius-sm);
+    overflow: hidden;
+    border: 2px solid var(--okko-border);
+}
+
+.volume-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--okko-success), var(--okko-warning), var(--okko-danger));
+    width: 0%;
+    transition: width 0.1s ease;
+    border-radius: var(--okko-radius-sm);
+}
+
+.volume-labels {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.9rem;
+    color: var(--okko-text-muted);
+}
+
+/* Таймер */
+.mood-timer {
+    display: flex;
+    justify-content: center;
+}
+
+.timer-circle {
+    position: relative;
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    background: var(--okko-surface-2);
+    border: 4px solid var(--okko-border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+.timer-fill {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: conic-gradient(var(--okko-accent) 0deg, transparent 0deg);
+    border-radius: 50%;
+    transition: background 0.1s ease;
+}
+
+.timer-text {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--okko-text);
+    z-index: 1;
+}
+
+/* Статус */
+.mood-status {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--okko-spacing-md);
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--okko-text);
+}
+
+.mood-status i {
+    font-size: 1.3rem;
+    color: var(--okko-accent);
+}
+
+.mood-status.recording i {
+    color: var(--okko-danger);
+    animation: pulse 1s infinite;
+}
+
+.mood-status.analyzing i {
+    color: var(--okko-warning);
+    animation: spin 1s linear infinite;
+}
+
+/* Кнопки управления */
+.mood-controls {
+    display: flex;
+    gap: var(--okko-spacing-md);
+    justify-content: center;
+    width: 100%;
+}
+
+.mood-controls .action-btn {
+    flex: 1;
+    max-width: 150px;
+}
+
+.mood-controls .action-btn[style*="width: 100%"] {
+    max-width: none;
+    flex: none;
+}
+
+/* Анимации */
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+/* Результат измерения настроения */
+.mood-result {
+    display: flex;
+    flex-direction: column;
+    gap: var(--okko-spacing-lg);
+}
+
+.mood-result h3 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--okko-text);
+    margin: 0;
+}
+
+.mood-stats {
+    display: flex;
+    flex-direction: column;
+    gap: var(--okko-spacing-md);
+    background: var(--okko-surface-2);
+    padding: var(--okko-spacing-lg);
+    border-radius: var(--okko-radius-md);
+    border: 1px solid var(--okko-border);
+}
+
+.mood-stat {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--okko-spacing-sm) 0;
+    border-bottom: 1px solid var(--okko-border);
+}
+
+.mood-stat:last-child {
+    border-bottom: none;
+}
+
+.stat-label {
+    font-size: 1rem;
+    color: var(--okko-text-muted);
+    font-weight: 500;
+}
+
+.stat-value {
+    font-size: 1.1rem;
+    color: var(--okko-text);
+    font-weight: 700;
+}
+
+.mood-result .mood-description {
+    font-size: 1rem;
+    color: var(--okko-text);
+    text-align: center;
+    padding: var(--okko-spacing-md);
+    background: var(--okko-accent-light);
+    border-radius: var(--okko-radius-md);
+    border: 1px solid var(--okko-accent-medium);
+}
+
 .participant-progress {
     margin-bottom: var(--okko-spacing-xl);
     flex-shrink: 0;

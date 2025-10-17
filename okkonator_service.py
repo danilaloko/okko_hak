@@ -15,12 +15,11 @@ import pandas as pd
 # Добавляем путь к модулям
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
-# Импортируем логику из okkonator.py
-from back.okkonator import (
-    load_vector_db, load_movies_fallback, try_load_model, 
-    build_item_embeddings, embed_text, cosine_sim, profile_keywords,
+# Импортируем логику из okkonator_okko.py
+from back.okkonator_okko import (
+    load_okko_vector_db, load_model, embed_text, cosine_sim, profile_keywords,
     filter_and_rank, init_theta, update_theta, pick_next_question,
-    QUESTIONS, LIKERT, AXES, QUESTIONS_MAX, explain
+    QUESTIONS, LIKERT, AXES, QUESTIONS_MAX, explain_recommendation
 )
 
 app = Flask(__name__)
@@ -28,30 +27,34 @@ CORS(app)
 
 # Глобальные переменные для кэширования
 df = None
-ITEM_EMB = None
+embeddings = None
 model_kind = None
 model = None
 metadata = None
+records_metadata = None
 
 def initialize_okkonator():
     """Инициализация Окконатора при запуске сервиса"""
-    global df, ITEM_EMB, model_kind, model, metadata
+    global df, embeddings, model_kind, model, metadata, records_metadata
     
-    print("Инициализация Окконатора...")
+    print("Инициализация Окконатора для Okko...")
     
-    # Попытка загрузить векторную БД
-    df, ITEM_EMB, metadata = load_vector_db("data")
+    # Загружаем векторную БД Okko
+    df, embeddings, metadata, records_metadata = load_okko_vector_db("data")
     
     if df is None:
-        print("Загружаем данные напрямую из CSV...")
-        df = load_movies_fallback("data/IMBD.csv")
-        model_kind, model = try_load_model()
-        ITEM_EMB = build_item_embeddings(df, model_kind, model)
-    else:
-        print("Используем предварительно созданную векторную БД")
-        model_kind, model = try_load_model()
+        print("❌ Не удалось загрузить данные Okko. Убедитесь, что векторная БД создана.")
+        return False
     
-    print(f"Окконатор готов! Загружено {len(df)} фильмов")
+    # Загружаем модель
+    model_kind, model = load_model()
+    
+    if model is None:
+        print("❌ Не удалось загрузить модель для эмбеддингов.")
+        return False
+    
+    print(f"✅ Окконатор готов! Загружено {len(df)} фильмов/сериалов с Okko")
+    return True
 
 @app.route('/health')
 def health_check():

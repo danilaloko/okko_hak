@@ -47,49 +47,67 @@ def create_enhanced_text(row: pd.Series) -> str:
     """Создает улучшенный текст для эмбеддингов с контекстом"""
     parts = []
     
+    # Функция для безопасного получения строки
+    def safe_str(value):
+        if isinstance(value, (list, tuple, np.ndarray)):
+            if len(value) == 0:
+                return ""
+            return str(value)
+        if pd.isna(value):
+            return ""
+        return str(value)
+    
     # Основная информация
-    if pd.notna(row["serial_name"]) and row["serial_name"].strip():
-        parts.append(f"Название: {clean_text(row['serial_name'])}")
+    serial_name = safe_str(row["serial_name"])
+    if serial_name and serial_name.strip():
+        parts.append(f"Название: {clean_text(serial_name)}")
     
     # Описание (самое важное для RAG)
-    if pd.notna(row["description"]) and row["description"].strip():
-        desc = clean_text(row["description"])
+    description = safe_str(row["description"])
+    if description and description.strip():
+        desc = clean_text(description)
         # Ограничиваем длину описания для лучшего качества эмбеддингов
         if len(desc) > 500:
             desc = desc[:500] + "..."
         parts.append(f"Описание: {desc}")
     
     # Жанры с контекстом
-    if pd.notna(row["genres"]) and row["genres"].strip():
-        genres = clean_text(row["genres"])
-        parts.append(f"Жанры: {genres}")
+    genres = safe_str(row["genres"])
+    if genres and genres.strip():
+        genres_clean = clean_text(genres)
+        parts.append(f"Жанры: {genres_clean}")
     
     # Актеры (первые 5 для экономии места)
-    if pd.notna(row["actors"]) and row["actors"].strip():
-        actors = clean_text(row["actors"])
+    actors = safe_str(row["actors"])
+    if actors and actors.strip():
+        actors_clean = clean_text(actors)
         # Берем только первых 5 актеров
-        actors_list = [actor.strip() for actor in actors.split(",") if actor.strip()][:5]
+        actors_list = [actor.strip() for actor in actors_clean.split(",") if actor.strip()][:5]
         if actors_list:
             parts.append(f"В ролях: {', '.join(actors_list)}")
     
     # Режиссер
-    if pd.notna(row["director"]) and row["director"].strip():
-        director = clean_text(row["director"])
-        parts.append(f"Режиссер: {director}")
+    director = safe_str(row["director"])
+    if director and director.strip():
+        director_clean = clean_text(director)
+        parts.append(f"Режиссер: {director_clean}")
     
     # Страна и студия
-    if pd.notna(row["country"]) and row["country"].strip():
-        country = clean_text(row["country"])
-        parts.append(f"Страна: {country}")
+    country = safe_str(row["country"])
+    if country and country.strip():
+        country_clean = clean_text(country)
+        parts.append(f"Страна: {country_clean}")
     
-    if pd.notna(row["studio_name"]) and row["studio_name"].strip():
-        studio = clean_text(row["studio_name"])
-        parts.append(f"Студия: {studio}")
+    studio = safe_str(row["studio_name"])
+    if studio and studio.strip():
+        studio_clean = clean_text(studio)
+        parts.append(f"Студия: {studio_clean}")
     
     # Тип контента
-    if pd.notna(row["content_type"]) and row["content_type"].strip():
-        content_type = clean_text(row["content_type"])
-        parts.append(f"Тип: {content_type}")
+    content_type = safe_str(row["content_type"])
+    if content_type and content_type.strip():
+        content_type_clean = clean_text(content_type)
+        parts.append(f"Тип: {content_type_clean}")
     
     # Возрастной рейтинг
     if pd.notna(row["age_rating"]) and row["age_rating"] > 0:
@@ -99,28 +117,41 @@ def create_enhanced_text(row: pd.Series) -> str:
 
 def create_metadata(row: pd.Series, index: int) -> Dict[str, Any]:
     """Создает структурированные метаданные для фильтрации"""
+    
+    # Функция для безопасного получения строки
+    def safe_str(value):
+        if isinstance(value, (list, tuple, np.ndarray)):
+            if len(value) == 0:
+                return ""
+            return str(value)
+        if pd.isna(value):
+            return ""
+        return str(value)
+    
     metadata = {
         "id": index,
-        "title": clean_text(row["serial_name"]) if pd.notna(row["serial_name"]) else "",
-        "content_type": clean_text(row["content_type"]) if pd.notna(row["content_type"]) else "",
-        "country": clean_text(row["country"]) if pd.notna(row["country"]) else "",
+        "title": clean_text(safe_str(row["serial_name"])),
+        "content_type": clean_text(safe_str(row["content_type"])),
+        "country": clean_text(safe_str(row["country"])),
         "age_rating": float(row["age_rating"]) if pd.notna(row["age_rating"]) else None,
-        "url": row["url"] if pd.notna(row["url"]) else "",
-        "studio": clean_text(row["studio_name"]) if pd.notna(row["studio_name"]) else "",
-        "director": clean_text(row["director"]) if pd.notna(row["director"]) else "",
-        "release_date": row["release_date"] if pd.notna(row["release_date"]) else None
+        "url": safe_str(row["url"]),
+        "studio": clean_text(safe_str(row["studio_name"])),
+        "director": clean_text(safe_str(row["director"])),
+        "release_date": safe_str(row["release_date"]) if pd.notna(row["release_date"]) else None
     }
     
     # Обработка жанров
-    if pd.notna(row["genres"]) and row["genres"].strip():
-        genres_text = clean_text(row["genres"])
+    genres_str = safe_str(row["genres"])
+    if genres_str and genres_str.strip():
+        genres_text = clean_text(genres_str)
         metadata["genres"] = [genre.strip() for genre in genres_text.split(",") if genre.strip()]
     else:
         metadata["genres"] = []
     
     # Обработка актеров
-    if pd.notna(row["actors"]) and row["actors"].strip():
-        actors_text = clean_text(row["actors"])
+    actors_str = safe_str(row["actors"])
+    if actors_str and actors_str.strip():
+        actors_text = clean_text(actors_str)
         metadata["actors"] = [actor.strip() for actor in actors_text.split(",") if actor.strip()]
     else:
         metadata["actors"] = []
