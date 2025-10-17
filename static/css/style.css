@@ -262,6 +262,7 @@ body {
     flex-direction: column;
     justify-content: center;
     align-items: center;
+    min-height: calc(100vh - 80px);
 }
 
 /* Приветственная секция */
@@ -1155,6 +1156,10 @@ html, body {
 .modes-section {
     width: 100%;
     max-width: 400px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
 }
 
 .section-title {
@@ -1171,6 +1176,18 @@ html, body {
     grid-template-columns: repeat(2, 1fr);
     gap: var(--okko-spacing-sm);
     margin-bottom: var(--okko-spacing-md);
+}
+
+.modes-vertical {
+    display: flex;
+    flex-direction: column;
+    gap: var(--okko-spacing-md);
+    width: 100%;
+}
+
+.mode-card-wide {
+    width: 100%;
+    padding: var(--okko-spacing-lg);
 }
 
 .mode-card {
