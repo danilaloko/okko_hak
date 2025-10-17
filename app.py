@@ -7,8 +7,9 @@ import requests
 app = Flask(__name__)
 CORS(app)
 
-# URL микросервиса Окконатора
+# URL микросервисов
 OKKONATOR_SERVICE_URL = "http://localhost:5001"
+SWIPE_SERVICE_URL = "http://localhost:5002"
 
 # Глобальные переменные для состояния пользователя
 user_profile = {
@@ -176,6 +177,42 @@ def identify_stars():
 @app.route('/results')
 def results():
     return render_template('results.html')
+
+@app.route('/api/results/okkonator', methods=['POST'])
+def get_okkonator_results():
+    """Получить результаты от Окконатора"""
+    try:
+        data = request.get_json()
+        theta = data.get('theta', {})
+        
+        response = requests.post(f"{OKKONATOR_SERVICE_URL}/api/okkonator/recommendations", 
+                               json={'theta': theta, 'top_k': 6})
+        
+        if response.status_code == 200:
+            return jsonify(response.json())
+        else:
+            return jsonify({"error": "Ошибка получения рекомендаций от Окконатора"}), 500
+            
+    except Exception as e:
+        return jsonify({"error": f"Ошибка: {str(e)}"}), 500
+
+@app.route('/api/results/swipe', methods=['POST'])
+def get_swipe_results():
+    """Получить результаты от свайпов"""
+    try:
+        data = request.get_json()
+        session_id = data.get('session_id')
+        
+        response = requests.post(f"{SWIPE_SERVICE_URL}/api/swipe/recommendations", 
+                               json={'session_id': session_id, 'top_k': 6})
+        
+        if response.status_code == 200:
+            return jsonify(response.json())
+        else:
+            return jsonify({"error": "Ошибка получения рекомендаций от свайпов"}), 500
+            
+    except Exception as e:
+        return jsonify({"error": f"Ошибка: {str(e)}"}), 500
 
 @app.route('/demo')
 def demo():

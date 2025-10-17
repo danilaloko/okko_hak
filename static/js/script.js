@@ -99,6 +99,22 @@ function setupEventListeners() {
     document.getElementById('likeBtn').addEventListener('click', () => handleInteraction('like'));
     document.getElementById('dislikeBtn').addEventListener('click', () => handleInteraction('dislike'));
     
+    // Кнопки навигации
+    const okkonatorBtn = document.getElementById('okkonatorBtn');
+    const swipeBtn = document.getElementById('swipeBtn');
+    
+    if (okkonatorBtn) {
+        okkonatorBtn.addEventListener('click', () => {
+            window.location.href = '/okkonator';
+        });
+    }
+    
+    if (swipeBtn) {
+        swipeBtn.addEventListener('click', () => {
+            window.location.href = '/swipe';
+        });
+    }
+    
     // Кнопка обновления
     document.getElementById('refreshBtn').addEventListener('click', loadRecommendations);
     

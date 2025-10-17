@@ -14,6 +14,9 @@ let currentFilters = {
 let diversificationLevel = 0.5;
 let okkonatorRecommendations = [];
 let okkonatorProfile = {};
+let swipeRecommendations = [];
+let swipeProfile = {};
+let currentDataSource = 'okkonator'; // 'okkonator' или 'swipe'
 
 // Функции логгирования
 function log(message, data = null) {
@@ -41,6 +44,7 @@ function initializeResults() {
     setupEventListeners();
     loadSelectionHistory();
     loadOkkonatorRecommendations();
+    loadSwipeRecommendations();
     loadRecommendations();
     setupFilters();
 }
@@ -207,6 +211,37 @@ function loadOkkonatorRecommendations() {
     }
 }
 
+function loadSwipeRecommendations() {
+    log('Проверяем наличие рекомендаций от свайпов в localStorage');
+    
+    const storedRecommendations = localStorage.getItem('swipeRecommendations');
+    const storedProfile = localStorage.getItem('userProfile');
+    
+    if (storedRecommendations) {
+        try {
+            swipeRecommendations = JSON.parse(storedRecommendations);
+            logSuccess(`Загружено ${swipeRecommendations.length} рекомендаций от свайпов`);
+            
+            if (storedProfile) {
+                swipeProfile = JSON.parse(storedProfile);
+                log('Загружен профиль свайпов:', swipeProfile);
+            }
+            
+            // Показываем рекомендации от свайпов
+            displaySwipeRecommendations();
+            
+            // Очищаем localStorage после использования
+            localStorage.removeItem('swipeRecommendations');
+            localStorage.removeItem('userProfile');
+            
+        } catch (error) {
+            logError('Ошибка парсинга рекомендаций от свайпов:', error);
+        }
+    } else {
+        log('Рекомендации от свайпов не найдены');
+    }
+}
+
 // Отображение рекомендаций от Окконатора
 function displayOkkonatorRecommendations() {
     log('Отображаем рекомендации от Окконатора');
@@ -239,8 +274,42 @@ function displayOkkonatorRecommendations() {
     });
     
     recommendationsContainer.appendChild(grid);
+}
+
+// Отображение рекомендаций от свайпов
+function displaySwipeRecommendations() {
+    log('Отображаем рекомендации от свайпов');
     
-    logSuccess(`Отображено ${okkonatorRecommendations.length} рекомендаций от Окконатора`);
+    const recommendationsContainer = document.getElementById('recommendationsContainer');
+    if (!recommendationsContainer) {
+        logError('Контейнер рекомендаций не найден');
+        return;
+    }
+    
+    // Очищаем контейнер
+    recommendationsContainer.innerHTML = '';
+    
+    // Добавляем заголовок
+    const header = document.createElement('div');
+    header.className = 'recommendations-header';
+    header.innerHTML = `
+        <h2>💫 Рекомендации на основе свайпов</h2>
+        <p>Мы изучили ваши предпочтения и подобрали идеальные фильмы</p>
+    `;
+    recommendationsContainer.appendChild(header);
+    
+    // Добавляем рекомендации
+    const grid = document.createElement('div');
+    grid.className = 'recommendations-grid';
+    
+    swipeRecommendations.forEach((movie, index) => {
+        const card = createMovieCard(movie, index, 'swipe');
+        grid.appendChild(card);
+    });
+    
+    recommendationsContainer.appendChild(grid);
+    
+    logSuccess(`Отображено ${swipeRecommendations.length} рекомендаций от свайпов`);
 }
 
 // Создание карточки фильма

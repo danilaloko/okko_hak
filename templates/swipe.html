@@ -32,12 +32,14 @@
         <div class="swipe-controls">
             <button class="control-btn dislike-btn" id="dislikeBtn">
                 <i class="fas fa-times"></i>
+                <span>Нет</span>
             </button>
             <button class="control-btn info-btn" id="cardInfoBtn">
                 <i class="fas fa-info"></i>
             </button>
             <button class="control-btn like-btn" id="likeBtn">
                 <i class="fas fa-heart"></i>
+                <span>Да</span>
             </button>
         </div>
 
@@ -67,26 +69,6 @@
         </div>
     </div>
 
-    <!-- Экран завершения -->
-    <div class="completion-screen" id="completionScreen" style="display: none;">
-        <div class="completion-content">
-            <div class="completion-icon">
-                <i class="fas fa-check-circle"></i>
-            </div>
-            <h2 class="completion-title">Ваш вкус изучен!</h2>
-            <p class="completion-text" id="completionText">Мы поняли ваши предпочтения и готовы предложить персонализированные рекомендации</p>
-            <div class="completion-actions">
-                <button class="action-btn primary-btn" id="showResultsBtn">
-                    <i class="fas fa-star"></i>
-                    Показать рекомендации
-                </button>
-                <button class="action-btn secondary-btn" id="continueSwipingBtn">
-                    <i class="fas fa-redo"></i>
-                    Продолжить свайпы
-                </button>
-            </div>
-        </div>
-    </div>
 
     <script src="{{ url_for('static', filename='js/swipe.js') }}"></script>
 </body>
