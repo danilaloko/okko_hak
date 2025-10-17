@@ -115,7 +115,7 @@
     /* Основные цвета Okko */
     --okko-bg: #000000;
     --okko-surface: #0f0f17;
-    --okko-surface-2: #1a1a1f;
+    --okko-surface-2: #1E1E1E;
     --okko-surface-3: #25252a;
     
     /* Границы и разделители */
@@ -5132,4 +5132,42 @@ textarea::-webkit-scrollbar-thumb:hover,
         max-width: 200px;
         justify-content: center;
     }
+}
+
+/* ==============================
+   Стили для карточек фильмов
+   ============================== */
+
+/* Основные карточки фильмов */
+.movie-card {
+    background: var(--okko-surface-2);
+    border: 1px solid var(--okko-border);
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    cursor: pointer;
+    height: auto;
+    min-height: 120px;
+}
+
+.movie-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+}
+
+/* Кнопки действий */
+.action-btn {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.action-btn:hover {
+    opacity: 0.8;
+    transform: scale(1.05);
 }

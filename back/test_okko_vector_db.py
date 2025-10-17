@@ -17,7 +17,7 @@ import logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
-def load_okko_data_test(parquet_path: str = "data/catalog_okko.parquet", limit: int = 10) -> pd.DataFrame:
+def load_okko_data_test(parquet_path: str = "data/catalog_okko.parquet", limit: int = 5000) -> pd.DataFrame:
     """Загружает первые N записей из каталога Okko для тестирования"""
     logger.info(f"Загружаем первые {limit} записей из {parquet_path}")
     
@@ -302,8 +302,8 @@ def main():
     logger.info("=== ТЕСТОВОЕ СОЗДАНИЕ ВЕКТОРНОЙ БД ИЗ OKKO ДАННЫХ ===")
     
     try:
-        # Загрузка данных (только первые 10 записей)
-        df = load_okko_data_test(limit=10)
+        # Загрузка данных (только первые 1000 записей)
+        df = load_okko_data_test(limit=1000)
         
         # Показываем первые записи
         logger.info("Первые записи:")

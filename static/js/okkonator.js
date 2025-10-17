@@ -866,12 +866,15 @@ async function showResultsOnSamePage() {
             recommendations.slice(0, 6).forEach((movie, index) => {
                 const movieCard = document.createElement('div');
                 movieCard.style.cssText = `
-                    background: white;
-                    border-radius: 12px;
+                    background: var(--okko-surface-2);
+                    border: 1px solid var(--okko-border);
+                    border-radius: 8px;
                     overflow: hidden;
-                    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-                    transition: transform 0.3s ease;
+                    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+                    transition: transform 0.3s ease, box-shadow 0.3s ease;
                     cursor: pointer;
+                    height: auto;
+                    min-height: 120px;
                 `;
                 
                 // Функция для очистки данных от квадратных скобок
@@ -881,40 +884,18 @@ async function showResultsOnSamePage() {
                 }
                 
                 movieCard.innerHTML = `
-                    <div style="
-                        height: 200px;
-                        background-image: url('${movie.poster || 'https://images.unsplash.com/photo-1518709268805-4e9042af2176?w=400&h=600&fit=crop'}');
-                        background-size: cover;
-                        background-position: center;
-                        position: relative;
-                    ">
-                        <div style="
-                            position: absolute;
-                            top: 10px;
-                            right: 10px;
-                            background: rgba(0,0,0,0.7);
-                            color: white;
-                            padding: 4px 8px;
-                            border-radius: 4px;
-                            font-size: 12px;
-                        ">${movie.age_rating || 'N/A'}</div>
-                        <div style="
-                            position: absolute;
-                            bottom: 10px;
-                            left: 10px;
-                            background: rgba(0,0,0,0.7);
-                            color: white;
-                            padding: 4px 8px;
-                            border-radius: 4px;
-                            font-size: 12px;
-                        ">${movie.content_type || 'Контент'}</div>
-                    </div>
-                    <div style="padding: 15px;">
-                        <h4 style="margin: 0 0 5px 0; font-size: 16px; color: #333;">${movie.title}</h4>
-                        <p style="margin: 0 0 5px 0; font-size: 14px; color: #666;">${cleanData(movie.country) || 'Страна не указана'}</p>
-                        <p style="margin: 0 0 5px 0; font-size: 12px; color: #888;">${cleanData(movie.genres) || 'Жанры не указаны'}</p>
-                        ${movie.reason ? `<p style="margin: 0 0 5px 0; font-size: 11px; color: #999; font-style: italic;">${movie.reason}</p>` : ''}
-                        ${movie.description ? `<p style="margin: 0; font-size: 11px; color: #aaa; line-height: 1.3; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">${movie.description}</p>` : ''}
+                    <div style="padding: 12px;">
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
+                            <h4 style="margin: 0; font-size: 16px; color: var(--okko-text); font-weight: 600; flex: 1;">${movie.title}</h4>
+                            <div style="display: flex; gap: 6px; margin-left: 10px;">
+                                <span style="background: rgba(239, 68, 68, 0.9); color: white; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: 600;">${movie.age_rating || 'N/A'}</span>
+                                <span style="background: rgba(123, 97, 255, 0.9); color: white; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: 600;">${movie.content_type || 'Контент'}</span>
+                            </div>
+                        </div>
+                        <p style="margin: 0 0 4px 0; font-size: 13px; color: var(--okko-text-muted);">${cleanData(movie.country) || 'Страна не указана'}</p>
+                        <p style="margin: 0 0 6px 0; font-size: 12px; color: var(--okko-text-muted-2);">${cleanData(movie.genres) || 'Жанры не указаны'}</p>
+                        ${movie.reason ? `<p style="margin: 0 0 6px 0; font-size: 11px; color: var(--okko-accent); font-style: italic;">${movie.reason}</p>` : ''}
+                        ${movie.description ? `<p style="margin: 0; font-size: 11px; color: var(--okko-text-muted-2); line-height: 1.3; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">${movie.description}</p>` : ''}
                     </div>
                 `;
                 

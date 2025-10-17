@@ -17,11 +17,11 @@ def test_with_different_models():
     # Модели для тестирования (от более надежных к менее)
     models_to_try = [
         "anthropic/claude-haiku-4.5",
-        "qwen/qwen3-vl-8b-thinking",
-        "openai/gpt-4o",
         "openai/gpt-4o-mini",
-        "anthropic/claude-3.5-sonnet",
+        "qwen/qwen3-vl-8b-thinking",
         "google/gemini-2.0-flash-001",
+        "anthropic/claude-3.5-sonnet",
+        "openai/gpt-4o",
         "meta-llama/llama-3.1-8b-instruct"
     ]
     

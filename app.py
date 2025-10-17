@@ -12,6 +12,7 @@ CORS(app)
 OKKONATOR_SERVICE_URL = "http://localhost:5001"
 SWIPE_SERVICE_URL = "http://localhost:5002"
 MOVIE_RECOMMENDATION_SERVICE_URL = "http://localhost:5003"
+SIMPLE_CHAT_SERVICE_URL = "http://localhost:5004"
 
 # Инициализация OpenRouter клиента
 try:
@@ -450,7 +451,7 @@ def chat_message():
         data = request.get_json()
         message = data.get('message')
         user_id = data.get('user_id', 'default_user')
-        model = data.get('model', 'qwen/qwen3-vl-8b-thinking')
+        model = data.get('model', 'x-ai/grok-4-fast')
         
         if not message:
             return jsonify({
@@ -458,10 +459,10 @@ def chat_message():
                 "error": "Сообщение не может быть пустым"
             }), 400
         
-        # Отправляем запрос в микросервис подбора фильмов
+        # Отправляем запрос в простой чат сервис
         try:
             response = requests.post(
-                f"{MOVIE_RECOMMENDATION_SERVICE_URL}/api/movie-recommendation/chat",
+                f"{SIMPLE_CHAT_SERVICE_URL}/api/chat/message",
                 json={
                     'user_id': user_id,
                     'message': message,
@@ -474,33 +475,30 @@ def chat_message():
                 service_data = response.json()
                 
                 if service_data.get('success'):
-                    # Формируем ответ в старом формате для совместимости
-                    recommendations = []
-                    if service_data.get('recommended_movie_ids'):
-                        # Здесь можно добавить логику получения деталей фильмов по ID
-                        for movie_id in service_data['recommended_movie_ids']:
-                            recommendations.append({
-                                "id": movie_id,
-                                "title": f"Фильм ID {movie_id}",
-                                "reason": "Рекомендован системой подбора"
-                            })
+                    # Простой ответ от чат сервиса
+                    ai_response = service_data.get('response', '')
                     
                     # Сохраняем в историю чата
                     user_profile['chat_history'].append({
                         'user': message,
-                        'assistant': service_data.get('message', ''),
-                        'timestamp': 'now',
-                        'movie_data': service_data
+                        'assistant': ai_response,
+                        'timestamp': 'now'
                     })
+                    
+                    # Простые рекомендации на основе ответа
+                    recommendations = []
+                    if any(word in ai_response.lower() for word in ['интерстеллар', 'дюна', 'темный рыцарь', 'начало']):
+                        recommendations = [
+                            {"id": 1, "title": "Интерстеллар", "reason": "Эпическая фантастика"},
+                            {"id": 2, "title": "Дюна", "reason": "Космическая сага"},
+                            {"id": 3, "title": "Темный рыцарь", "reason": "Классика жанра"}
+                        ]
                     
                     return jsonify({
                         "success": True,
-                        "response": service_data.get('message', ''),
+                        "response": ai_response,
                         "recommendations": recommendations,
-                        "clarification_questions": service_data.get('clarification_questions', []),
-                        "status": service_data.get('status'),
-                        "confidence": service_data.get('confidence', 0.0),
-                        "movie_data": service_data
+                        "model": service_data.get('model', model)
                     })
                 else:
                     return jsonify({
@@ -511,7 +509,7 @@ def chat_message():
             else:
                 return jsonify({
                     "success": False,
-                    "error": f"Микросервис подбора фильмов недоступен (код {response.status_code})"
+                    "error": f"Чат сервис недоступен (код {response.status_code})"
                 }), 500
                 
         except requests.exceptions.RequestException as e:
@@ -648,12 +646,12 @@ def get_available_models():
         return jsonify({
             "success": True,
             "models": [
+                "x-ai/grok-4-fast",
+                "openai/gpt-4o-mini",
                 "qwen/qwen3-vl-8b-thinking",
-                "anthropic/claude-haiku-4.5",
-                "openai/gpt-4o",
-                "openai/gpt-4o-mini"
+                "google/gemini-2.0-flash-001"
             ],
-            "default_model": "qwen/qwen3-vl-8b-thinking"
+            "default_model": "x-ai/grok-4-fast"
         })
 
 

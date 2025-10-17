@@ -325,26 +325,26 @@ function createMovieCard(movie, index, source = 'default') {
     card.style.cursor = movie.url ? 'pointer' : 'default';
     
     card.innerHTML = `
-        <div class="movie-poster" style="background-image: url('${movie.poster || 'https://images.unsplash.com/photo-1518709268805-4e9042af2176?w=400&h=600&fit=crop'}')">
-            <div class="movie-overlay">
-                <div class="movie-age-rating">${movie.age_rating || 'N/A'}</div>
-                <div class="movie-content-type">${movie.content_type || 'Контент'}</div>
+        <div style="padding: 12px;">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
+                <h3 style="margin: 0; font-size: 16px; color: var(--okko-text); font-weight: 600; flex: 1;">${movie.title}</h3>
+                <div style="display: flex; gap: 6px; margin-left: 10px;">
+                    <span style="background: rgba(239, 68, 68, 0.9); color: white; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: 600;">${movie.age_rating || 'N/A'}</span>
+                    <span style="background: rgba(123, 97, 255, 0.9); color: white; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: 600;">${movie.content_type || 'Контент'}</span>
+                </div>
             </div>
-        </div>
-        <div class="movie-info">
-            <h3 class="movie-title">${movie.title}</h3>
-            <p class="movie-country">${cleanData(movie.country) || 'Страна не указана'}</p>
-            <p class="movie-genres">${cleanData(movie.genres) || 'Жанры не указаны'}</p>
-            ${movie.reason ? `<p class="movie-reason">${movie.reason}</p>` : ''}
-            ${movie.description ? `<p class="movie-description">${movie.description}</p>` : ''}
-        </div>
-        <div class="movie-actions">
-            <button class="action-btn like-btn" onclick="event.stopPropagation(); likeMovie(${index}, '${source}')">
-                <i class="fas fa-heart"></i>
-            </button>
-            <button class="action-btn watch-btn" onclick="event.stopPropagation(); watchMovie(${index}, '${source}')">
-                <i class="fas fa-play"></i>
-            </button>
+            <p style="margin: 0 0 4px 0; font-size: 13px; color: var(--okko-text-muted);">${cleanData(movie.country) || 'Страна не указана'}</p>
+            <p style="margin: 0 0 6px 0; font-size: 12px; color: var(--okko-text-muted-2);">${cleanData(movie.genres) || 'Жанры не указаны'}</p>
+            ${movie.reason ? `<p style="margin: 0 0 6px 0; font-size: 11px; color: var(--okko-accent); font-style: italic;">${movie.reason}</p>` : ''}
+            ${movie.description ? `<p style="margin: 0 0 8px 0; font-size: 11px; color: var(--okko-text-muted-2); line-height: 1.3; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">${movie.description}</p>` : ''}
+            <div style="display: flex; gap: 8px; margin-top: 8px;">
+                <button class="action-btn like-btn" onclick="event.stopPropagation(); likeMovie(${index}, '${source}')" style="background: rgba(239, 68, 68, 0.2); border: 1px solid rgba(239, 68, 68, 0.5); color: #EF4444; padding: 6px 12px; border-radius: 6px; font-size: 12px; cursor: pointer; transition: all 0.3s ease;">
+                    <i class="fas fa-heart"></i> Лайк
+                </button>
+                <button class="action-btn watch-btn" onclick="event.stopPropagation(); watchMovie(${index}, '${source}')" style="background: rgba(123, 97, 255, 0.2); border: 1px solid rgba(123, 97, 255, 0.5); color: #7B61FF; padding: 6px 12px; border-radius: 6px; font-size: 12px; cursor: pointer; transition: all 0.3s ease;">
+                    <i class="fas fa-play"></i> Смотреть
+                </button>
+            </div>
         </div>
     `;
     
